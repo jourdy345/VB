@@ -1,0 +1,197 @@
+\documentclass[11pt]{article}
+
+% This first part of the file is called the PREAMBLE. It includes
+% customizations and command definitions. The preamble is everything
+% between \documentclass and \begin{document}.
+
+\usepackage[margin=1in]{geometry} % set the margins to 1in on all sides
+\usepackage{graphicx} % to include figures
+\usepackage{amsmath} % great math stuff
+\usepackage{amsfonts} % for blackboard bold, etc
+\usepackage{amsthm} % better theorem environments
+% various theorems, numbered by section
+\usepackage{amssymb}
+\usepackage[utf8]{inputenc}
+\usepackage{booktabs}
+\usepackage{array}
+\usepackage{courier}
+\usepackage[usenames, dvipsnames]{color}
+\usepackage{titlesec}
+
+\newtheorem{thm}{Theorem}[section]
+\newtheorem{lem}[thm]{Lemma}
+\newtheorem{prop}[thm]{Proposition}
+\newtheorem{cor}[thm]{Corollary}
+\newtheorem{conj}[thm]{Conjecture}
+
+\setcounter{secnumdepth}{4}
+
+\titleformat{\paragraph}
+{\normalfont\normalsize\bfseries}{\theparagraph}{1em}{}
+\titlespacing*{\paragraph}
+{0pt}{3.25ex plus 1ex minus .2ex}{1.5ex plus .2ex}
+
+\definecolor{myblue}{RGB}{72, 165, 226}
+\definecolor{myorange}{RGB}{222, 141, 8}
+
+\setlength{\heavyrulewidth}{1.5pt}
+\setlength{\abovetopsep}{4pt}
+
+
+\DeclareMathOperator{\id}{id}
+\DeclareMathOperator{\argmin}{\arg\!\min}
+\DeclareMathOperator{\Tr}{Tr}
+
+\newcommand{\bd}[1]{\mathbf{#1}} % for bolding symbols
+\newcommand{\RR}{\mathbb{R}} % for Real numbers
+\newcommand{\ZZ}{\mathbb{Z}} % for Integers
+\newcommand{\col}[1]{\left[\begin{matrix} #1 \end{matrix} \right]}
+\newcommand{\comb}[2]{\binom{#1^2 + #2^2}{#1+#2}}
+\newcommand{\bs}{\boldsymbol}
+\newcommand{\opn}{\operatorname}
+\begin{document}
+\nocite{*}
+
+\title{Variational Inference for Gaussian Process Regression}
+
+\author{Daeyoung Lim\thanks{Prof. Taeryon Choi} \\
+Department of Statistics \\
+Korea University}
+
+\maketitle
+
+\section{Gaussian Process}
+Gaussian process is a stochastic process specified by a mean function and a covariance function. It could simply be thought of as an infinite-dimensional version of multivariate Gaussian distribution. The multivariate Gaussian random vector consists of infinitely many Gaussian variables. This makes impossible the formation of a mean vector and a covariance matrix since the dimension of the vector and matrix is infinite. We now need sort of a \emph{formula} to consistently compute the elements of the infinite-dimensional mean vector and covariance vector, which are both achieved by constructing functions. A random process that follows Gaussian process is denoted as follows:
+$$
+  X\left(\omega, t\right) \sim \mathcal{GP}\left(m\left(\cdot \right), \kappa \left(\cdot \right) \right).
+$$
+Without loss of generality, we assume the mean of the process is zero. Then the whole process is completely defined by the covariance function. To construct a covariance matrix of any set of indices, we use the covariance function, $K_{ij}$:
+$$
+  K_{ij} = \opn{E}\left[X_{i}X_{j} \right]=\kappa \left(x_{i}, x_{j}\right).
+$$
+The covariance function is called ``\emph{isotropic}'' if it only depends on $\left|x_{i}-x_{j}\right|$.
+\section{Mercer's Theorem}
+The kernel(covariance function), $\kappa \left(x_{i}, x_{j}\right)$, is a symmetric continuous function
+$$
+  \kappa: [a, b] \times [a,b] \rightarrow \mathbb{R}
+$$
+where symmetric implies $\kappa \left(x_{i}, x_{j}\right) = \kappa \left(x_{j}, x_{i}\right)$. $\kappa$ is ``\emph{positive semidefinite}'' as in linear algebra if and only if
+$$
+  \sum_{i=1}^{n}\sum_{j=1}^{n} \kappa \left(x_{i}, x_{j}\right)c_{i}c_{j} \ge 0
+$$
+for all $\left\{\left(x_{i}, x_{j}\right): x_{i} \in [a,b] \text{ and } x_{j} \in [a,b] \right\}$ and all choices of $\left\{\left(c_{i}, c_{j}\right): c_{i}\in \mathbb{R} \text{ and } c_{j}\in \mathbb{R} \right\}$. For $\kappa$, we can assign a linear operator $T_{\kappa}$ on functions defined as follows:
+$$
+  \left[T_{\kappa}\varphi \right]\left(x\right) = \int_{a}^{b} \kappa \left(x, s\right) \varphi\left(s\right) \, ds
+$$
+where $\varphi$ is square-integrable, real-valued functions. (i.e. $\varphi \in L^{2}[a,b]$) Since $T_{\kappa}$ is a linear operator, it falls within the scope of functional analysis that discusses eigenvalues and eigenfunctions of $T_{\kappa}$. Mercer's theorem states that for a positive semidefinite kernel, there exists an orthonormal basis $e_{k}$ of $L^{2}[a,b]$ which consists of the eigenfunctions of $T_{\kappa}$ whose corresponding eigenvalues $\lambda_{k}$ are nonnegative. The spectral decomposition of the kernel is as follows:
+$$
+  \kappa \left(s, t\right) = \sum_{j=1}^{\infty}\lambda_{j} e_{j}\left(s\right)e_{j}\left(t\right)
+$$
+whose convergence is absolute and uniform. A more formal statement is given as follows:
+\begin{thm}{(Mercer's theorem)}. Let $\left(\mathcal{X},\mu\right)$ be a finite measure space and $\kappa \in L_{\infty} \left(\mathcal{X}^{2}, \mu^{2}\right)$ be a kernel such that $T_{\kappa}:L_{2}\left(\mathcal{X}, \mu\right) \rightarrow L_{2}\left(\mathcal{X},\mu \right)$ is positive definite. Let $e_{i} \in L_{2}\left(\mathcal{X},\mu \right)$ be the normalized eigenfunctions of $T_{\kappa}$ associated with the eigenvalues $\lambda_{i} > 0$. Then:
+\begin{enumerate}
+  \item the eigenvalues $\left\{\lambda_{i} \right\}_{i=1}^{\infty}$ are absolutely summable
+  \item $$
+  \kappa \left(x, x'\right) = \sum_{i=1}^{\infty} \lambda_{i}e_{i}\left(x\right)e_{i}^{*}\left(x'\right)
+  $$
+  holds $\mu^{2}$ almost everywhere, where the series converges absolutely and uniformly $\mu^{2}$ almost everywhere.
+\end{enumerate}
+\end{thm}
+Replacing the finite measure $\mu$ with Lebesgue measure for a stationary covariance function, we obtain
+$$
+  \kappa \left(x-x'\right) = \int_{\RR^{d}} e^{2\pi i s^{T} \left(x-x'\right)} \, d\mu \left(s\right) = \int_{\RR^{d}} e^{2\pi i s^{T} x}\left(e^{2\pi i s^{T} x'}\right)^{*}\, d\mu\left(s\right).
+$$
+\section{Karhunen-Loève Theorem}
+Karhunen-Loève(KL) expansion is a version of Fourier series for stochastic processes which differ from each other in that the Fourier series uses sinusoidal basis functions whereas the KL expansion depends on the eigenfunctions of the covariance function. This theorem follows from the Mercer's theorem and the statement goes like this. Let $X_{t}$ be a zero-mean square-integrable stochastic process indexed over a closed interval $[a,b]$ with a continuous covariance function$\kappa_{X}\left(s,t \right).$ Then, the covariance function is a Mercer kernel with eigenfunctions $e_{k}$ being an orthonormal basis of $L^{2}[a,b]$. It allows the following representation:
+$$
+  X_{t} = \sum_{k=1}^{\infty} Z_{k}e_{k}\left(t\right)
+$$
+where $Z_{k} = \int_{a}^{b}X_{t}e_{k}\left(t\right)\, dt$ are uncorrelated random variables. Especially when $X_{t}$ is a Gaussian process, $Z_{k}$ are independent Gaussian random variables with mean $0$.
+\section{GP regression}
+Gaussian process is considered to be a dense set of functions. This lends itself directly to the nonparametric setting of Bayesian regression because we do not need to specify any parametric form of the regression function. The paper considers the stationary squared exponential covariance function,
+$$
+  \kappa \left(h\right) = \sigma^{2}\exp \left(-\frac{1}{2}h^{T}\Lambda h\right)
+$$
+where $\Lambda$ is a diagonal matrix whose diagonal entries are $ \begin{bmatrix}\lambda_{1}^{2} & \ldots & \lambda_{d}^{2} \end{bmatrix}$. Now if we consider a random sample $\left\{s_{1}, \ldots , s_{m} \right\}$ from $\mathcal{N}\left(0,I_{d}\right)$, then $\left\{\frac{1}{2\pi}\Lambda^{1/2} s_{1}, \ldots , \frac{1}{2\pi}\Lambda^{1/2}s_{m} \right\}$ is a random sample from $p_{k}\left(s\right)$. (i.e. $p_{k}\left(s\right)$ is proportional to the power spectral density $S_{k}\left(s\right)$ which is $S_{k}\left(s\right) = \int_{\RR^{d}} e^{-2\pi i s^{T}h}\kappa \left(h\right)\, dh$ and $S_{k}\left(s\right) = \kappa \left(0\right)p_{k}\left(s\right)$.) The sparse GP approximation is then
+$$
+  f\left(x\right) \approx \sum_{r=1}^{m} \left[a_{r} \cos \left\{\left(s_{r} \circ x \right)^{T}\lambda \right\} +b_{r} \sin \left\{\left(s_{r}\circ x\right)^{T}\lambda \right\} \right]
+$$
+where $\lambda = \begin{bmatrix}\lambda_{1} & \ldots & \lambda_{d}  \end{bmatrix}^{T}$ and $\circ$ denotes the Hadamard product. The author converts the approximation into a matrix form by construction a coefficient vector and a matrix similar to ordinary design matrix. By doing so, the GP regression reduces to a simple Bayesian regression.
+\begin{align*}
+  \alpha &= \begin{bmatrix} a_{1} & \ldots & a_{m} & b_{1} & \ldots & b_{m} \end{bmatrix}^{T} \\
+  y &= \begin{bmatrix} y_{1} & \ldots & y_{n}\end{bmatrix}^{T} \\
+  Z &= \begin{bmatrix} Z_{1} & \ldots & Z_{n} \end{bmatrix}^{T} \\
+  Z_{i} &= \begin{bmatrix} \cos \left\{\left(s_{1} \circ x_{i} \right)^{T}\lambda \right\} & \ldots & \cos \left\{\left(s_{m}\circ x_{i}\right)^{T}\lambda \right\} & \sin \left\{\left(s_{1}\circ x_{i}\right)^{T}\lambda \right\} & \ldots & \sin \left\{\left(s_{m}\circ x_{i}\right)^{T}\lambda \right\} \end{bmatrix}^{T}\\
+  \epsilon &= \begin{bmatrix} \epsilon_{1} & \ldots & \epsilon_{n} \end{bmatrix}^{T}
+\end{align*}
+Now the model formulation converts to
+$$
+  y = Z\alpha + \epsilon, \,\,\, \epsilon \sim \mathcal{N}\left(0, \gamma^{2}I_{n}\right).
+$$
+In other words,
+$$
+  y|Z, \alpha, \gamma , \sigma, \lambda \sim \mathcal{N}\left(Z\alpha, \gamma^{2}I_{n} \right).
+$$
+We assign the following priors:
+\begin{itemize}
+  \item $\alpha \sim \mathcal{N}\left(0, \frac{\sigma^{2}}{m}I_{2m} \right)$
+  \item $\lambda \sim \mathcal{N}\left(\mu_{\lambda}^{0}, \Sigma_{\lambda}^{0} \right) $
+  \item $\sigma \sim \opn{half-Cauchy}\left(A_{\sigma} \right) $
+  \item $\gamma \sim \opn{half-Cauchy}\left(A_{\gamma}\right) $
+\end{itemize}
+For variational approximation, we also assign variational distributions for the unknown parameters:
+\begin{itemize}
+  \item $q\left(\alpha \right) = \mathcal{N}\left(\mu_{\alpha}^{q}, \Sigma_{\alpha}^{q}\right) $
+  \item $q\left(\lambda\right)=\mathcal{N}\left(\mu_{\lambda}^{q}, \Sigma_{\lambda}^{q}\right) $
+  \item $q\left(\sigma \right) = \frac{\exp\left(-C_{\sigma}^{q}/\sigma^{2}\right)}{\mathcal{H}\left(2m-2, C_{\sigma}^{q}, A_{\sigma}^{2}\right)\sigma^{2m}\left(A_{\sigma}^{2}+\sigma^{2}\right)}$
+  \item $q\left(\gamma \right) = \frac{\exp\left(-C_{\gamma}^{q}/\gamma^{2}\right)}{\mathcal{H}\left(2m-2, C_{\gamma}^{q}, A_{\gamma}^{2}\right)\gamma^{2m}\left(A_{\gamma}^{2}+\gamma^{2}\right)}$
+  \item $\mathcal{H}\left(p,q,r\right) = \int_{0}^{\infty} x^{p}\exp \left\{-qx^{2} -\log \left(r + x^{-2}\right) \right\}$ (the normalizing constant)
+\end{itemize}
+Now that we've arrived at a full package for variational approximation, what is left is computing the lower bound and the updating algorithms for the variational parameters. However, the factor here that makes variational approximation difficult is that the priors are not conditionally conjugate. This calls for nonconjugate variational approximation.
+\subsection{A few calculations}
+Before we move on to the next section, there are some points where I had been wondering how to compute things such as the expectation of the variational posterior of $\sigma$ and $\gamma$. So I feel the need to clear up those issues. To do that, we have to take a look at the function $\mathcal{H}\left(p,q,r\right)$.
+$$
+  \mathcal{H}\left(p,q,r\right) = \int_{0}^{\infty}x^{p} \exp \left\{-qx^{2}-\log \left(r +x^{-2}\right) \right\} \, dx, \,\,\, p \ge 0, \,\,r > 0
+$$
+If we reparameterize the integration by plugging in $x = 1/\sigma$, which by symmetry also clears up $x = 1/\gamma$, it becomes
+\begin{align}
+  \mathcal{H}\left(p, q, r \right) &= \int_{\infty}^{0} \left(\frac{1}{\sigma}\right)^{p} \exp \left\{-q/\sigma^{2} \right\}/\left(r+\sigma^{2}\right) \left(-\frac{1}{\sigma}^{2}\right)\, d\sigma\\
+  &= \int_{0}^{\infty} \frac{\exp \left\{-q/\sigma^{2} \right\}}{\sigma^{p+2}\left(r+\sigma^{2}\right)}\, d\sigma
+\end{align}
+Note that the integration bounds are switched in eqn (1) because $\sigma \rightarrow \infty$ as $x \rightarrow 0$ and $\sigma \rightarrow 0$ as $x \rightarrow \infty$. Also $dx = -d\sigma/\sigma^{2}$.
+\subsubsection{$\mathbb{E}_{q}\left[\sigma \right]$}
+\begin{align*}
+  \mathbb{E}_{q}\left[\sigma \right] &= \int_{0}^{\infty} \sigma \frac{\exp \left\{-C_{\sigma}^{q}/\sigma^{2} \right\}}{\mathcal{H}\left(2m-2,C_{\sigma}^{q},A_{\sigma}^{2}\right)\sigma^{2m}\left(A_{\sigma}^{2}+\sigma^{2}\right)}\, d\sigma\\
+  &= \frac{1}{\mathcal{H}\left(2m-2,C_{\sigma}^{q}, A_{\sigma}^{2}\right)} \int_{0}^{\infty} \frac{\exp \left(-C_{q}^{q}/\sigma^{2}\right)}{\sigma^{2m-1}\left(A_{\sigma}^{2}+\sigma^{2}\right)}\, d\sigma \\
+  &= \frac{\mathcal{H}\left(2m-3, C_{\sigma}^{q}, A_{\sigma}^{2}\right)}{\mathcal{H}\left(2m-2, C_{\sigma}^{q}, A_{\sigma}^{2}\right)}
+\end{align*}
+\subsubsection{$\mathbb{E}_{q}\left[\gamma\right]$}
+By symmetry,
+$$
+  \mathbb{E}_{q}\left[\gamma\right] = \frac{\mathcal{H}\left(n-3, C_{\gamma}^{q}, A_{\gamma}^{2}\right)}{\mathcal{H}\left(n-2, C_{\gamma}^{q}, A_{\gamma}^{2}\right)}
+$$
+\subsubsection{$\mathbb{E}\left[\sin \left(s^{T}X\right)\right]$, $\mathbb{E}\left[\cos \left(s^{T}X\right)\right]$}
+Let $X \sim \mathcal{N}\left(\mu, \Sigma \right)$.
+\begin{align}
+  \mathbb{E}\left[e^{is^{T}X}\right] &= \mathbb{E}\left[\cos \left(s^{T}X\right)\right] + i \mathbb{E}\left[\sin \left(s^{T}X\right)\right] \\
+  &= \exp \left\{i\mu^{T}s - \frac{1}{2}s^{T}\Sigma s \right\}  \text{characteristic function}\\
+  &= \exp \left\{i\mu^{T}s \right\} \exp \left\{-\frac{1}{2}s^{T}\Sigma s \right\}\\
+  &= \left(\cos \left(\mu^{T}s\right)+i\sin \left(\mu^{T}s \right)\right)\exp \left\{-\frac{1}{2}s^{T}\Sigma s \right\}
+\end{align}
+Comparing the real part and imaginary part of eqn (3) and (6),
+\begin{align*}
+  \mathbb{E}\left[\cos \left(s^{T}X \right)\right] &= \cos \left(\mu^{T}s\right)\exp \left\{-\frac{1}{2}s^{T}\Sigma s \right\}\\
+  \mathbb{E}\left[\sin \left(s^{T}X\right)\right] &= \sin \left(\mu^{T}s\right)\exp \left\{-\frac{1}{2}s^{T}\Sigma s \right\}
+\end{align*}
+\section{Nonconjugate VB}
+Mean-field approximation basically assumes that the priors are conditionally conjugate. However, for nonconjugate priors, Knowles and Minka, 2011 suggest a variational message passing algorithm by adding another assumption that the nonconjugate priors belong to one of exponential families. So let's say $\theta_{i}$ is a nonconjugate prior.
+$$
+  q_{i}\left(\theta_{i} \right) = \exp \left\{\eta_{i}^{T}T_{i}\left(\theta_{i}\right) - h_{i}\left(\eta_{i}\right) \right\}
+$$
+The author uses factor graph to explain nonconjugate variational message passing algorithm but factor graph in the paper is simply collecting parts that contain $\theta_{i}$ from the full joint density $p\left(y, \theta \right)$. Now we can define the following:
+\begin{align*}
+  \mathcal{V}_{i}\left(\eta_{i}\right) &= \frac{\partial^{2} h_{i}\left(\eta_{i}\right)}{\partial \eta_{i}\partial \eta_{i}^{T}}\\
+  \eta_{i} &\leftarrow \mathcal{V}_{i}\left(\eta_{i}\right)^{-1} \sum_{a \in N\left(\theta_{i}\right)} \frac{\partial S_{a}}{\partial \eta_{i}}
+\end{align*}
+where $S_{a}=\mathbb{E}_{q}\left[\log f_{a}\left(y, \theta \right) \right]$. In summary, collect all the parts that have $\theta_{i}$, take the logarithm and expectation, differentiate with respect to $\eta_{i}$, and multiply it by the inverse of natural gradient.
+\end{document}

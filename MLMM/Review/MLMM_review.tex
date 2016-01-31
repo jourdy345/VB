@@ -1,0 +1,170 @@
+\documentclass[11pt]{article}
+
+% This first part of the file is called the PREAMBLE. It includes
+% customizations and command definitions. The preamble is everything
+% between \documentclass and \begin{document}.
+
+\usepackage[margin=1in]{geometry} % set the margins to 1in on all sides
+\usepackage{graphicx} % to include figures
+\usepackage{amsmath} % great math stuff
+\usepackage{amsfonts} % for blackboard bold, etc
+\usepackage{amsthm} % better theorem environments
+% various theorems, numbered by section
+\usepackage{hyperref}
+\usepackage[utf8]{inputenc}
+\usepackage{booktabs}
+\usepackage{array}
+\usepackage{courier}
+\usepackage[usenames, dvipsnames]{color}
+
+\definecolor{myblue}{RGB}{72, 165, 226}
+\definecolor{myorange}{RGB}{222, 141, 8}
+
+\setlength{\heavyrulewidth}{1.5pt}
+\setlength{\abovetopsep}{4pt}
+
+
+\DeclareMathOperator{\id}{id}
+\DeclareMathOperator{\argmin}{\arg\!\min}
+\DeclareMathOperator{\Tr}{Tr}
+
+\newcommand{\bd}[1]{\mathbf{#1}} % for bolding symbols
+\newcommand{\RR}{\mathbb{R}} % for Real numbers
+\newcommand{\ZZ}{\mathbb{Z}} % for Integers
+\newcommand{\col}[1]{\left[\begin{matrix} #1 \end{matrix} \right]}
+\newcommand{\comb}[2]{\binom{#1^2 + #2^2}{#1+#2}}
+\newcommand{\bs}{\boldsymbol}
+\newcommand{\opn}{\operatorname}
+\begin{document}
+\nocite{*}
+
+\title{Simple Review of Mixtures of Linear Mixed Models}
+
+\author{Daeyoung Lim\thanks{Prof. Taeryon Choi} \\
+Department of Statistics \\
+Korea University}
+
+\maketitle
+
+\section{Mixture models}
+\subsection{Overview}
+By \emph{mixture models}, we refer to a class of statistical models that assume the presence of subpopulations. The data that we observe is a ``\emph{pooled}'' data (or ``grouped data'' if we  follow the terminology of the paper) having multiple subpopulations, or \emph{mixture components}. With the pooled data, we seek to find a way of learning how many mixture components there are alongside obtaining the parameter estimates of each component.
+
+\subsection{Goals of MM}
+\begin{itemize}
+  \item Split the data into components. This problem is similar to classification, or clustering. \\ $\Rightarrow$ \underline{achieved through VGA}
+  \item Each component has a structure of a regression model, whether it be a linear mixed model, or generalized linear model etc. Fit each model with an appropriate regression model.\\ $\Rightarrow$ \underline{achieved through VA}
+\end{itemize}
+
+This paper suggests a method of attaining both goals at the same time through variational approximation and variational greedy algorithm which uses the lower bound (or the \emph{free energy}) value for splitting.
+
+\subsection{Mixtures of Linear Mixed Models}
+A linear mixed model is a regression model that imports random effects as well as the fixed effects that already exist in generalized linear models. (The linear mixed model postulated in this model differs from the one that we considered last time. The current model is an extremely simplified version of the generalized model from last paper.)
+
+The generalized linear model was
+\begin{align*}
+  \bs{y}_{i}|\bs{u}_{i} &\overset{ind.}{\sim} \exp \left\{\bs{y}_{i}^{T}\left(\bs{X}_{i}\bs{\beta}+\bs{Z}_{i}\bs{u}_{i} \right) -\bs{1}_{i}^{T} b\left(\bs{X}_{i}\bs{\beta} + \bs{Z}_{i}\bs{u}_{i} \right)+\bs{1}_{i}^{T}c\left(\bs{y}_{i} \right) \right\}\\
+  \bs{u}_{i} &\overset{ind.}{\sim} \mathcal{N}\left(\bs{0}, \bs{\Sigma} \right)
+\end{align*}
+where $\bs{u}_{i}$ are the random effects vectors. The model that we will be considering is, in one way, much simpler than this one-parameter exponential family linear mixed models but at the same time displays more complexity in that it has a dependency on to which mixture each $\bs{y}_{i}$ belongs. This dependency is modeled hierarchically and efficiently contained within the Bayesian framework. Thus, the model becomes
+\begin{align*}
+  \bs{y}_{i}|z_{i}=j, \theta =\bs{X}_{i}\bs{\beta}_{j} + \bs{W}_{i}\bs{a}_{i} + \bs{V}_{i}\bs{b}_{j} + \bs{\varepsilon}_{i}
+\end{align*}
+where $z_{i}=j$ indicates that the $i^{\text{th}}$ cluster corresponds to $j^{\text{th}}$ mixture component. \par
+Before starting the splitting procedure, we initially have only 1 cluster. We will, as in every statistical classification model, divide cluster(s) according to a properly assigned probability. In this paper, the ``\emph{properly assigned}'' probability is calculated through softmax function:
+$$
+  \opn{softmax}\left(j, z_{1}, z_{2}, \ldots , z_{N}\right) = \frac{e^{z_{j}}}{\sum_{i=1}^{N}e^{z_{i}}}.
+$$
+
+\section{Paper Review}
+\subsection{Variational approximation for MLMM}
+\begin{table}[!htbp]
+\centering
+  \begin{tabular}{*2c}
+    \toprule
+    \multicolumn{2}{c}{\textbf{Model Specifications}}\\
+    \toprule
+    \multicolumn{2}{c}{\textbf{Likelihood}}\\
+    \midrule
+    $y_{i}|\theta $ & $\mathcal{N}\left(\bs{0}, X_{i}\Sigma_{\beta_{i}}X_{i}^{T} + \sigma_{a_{j}}^{2}W_{i}W_{i}^{T} + \sigma_{b_{j}}^{2}V_{i}V_{i}^{T}+\Sigma_{ij} \right)$\\
+    \toprule
+    \multicolumn{2}{c}{\textbf{Priors}}\\
+    \midrule
+    $\beta_{j}$ & $\mathcal{N}\left(\bs{0}, \Sigma_{\beta_{j}} \right)$\\
+    \midrule
+    $a_{i}|\sigma_{a_{j}}^{2} $ & $\mathcal{N}\left(\bs{0}, \sigma_{a_{j}}^{2}\bs{I}_{s_{1}} \right)$\\
+    \midrule
+    $b_{j}|\sigma_{b_{j}}^{2} $ & $\mathcal{N}\left(\bs{0}, \sigma_{b_{j}}^{2}\bs{I}_{s_{2}} \right)$\\
+    \midrule
+    $z_{i}=j|\delta_{j}$ & $\opn{softmax}\left(j, u_{i}^{T}\delta_{1}, u_{i}^{T}\delta_{2}, \ldots, u_{i}^{T}\delta_{k} \right) $\\
+    \toprule
+    \multicolumn{2}{c}{\textbf{Hyperpriors}}\\
+    \midrule
+    $\sigma_{a_{j}}^{2}$ & $\opn{IG}\left(\alpha_{a_{j}}, \lambda_{a_{j}} \right)$\\
+    \midrule
+    $\sigma_{b_{j}}^{2}$ & $\opn{IG}\left(\alpha_{b_{j}}, \lambda_{b_{j}} \right)$\\
+    \midrule
+    $\sigma_{jl}^{2}$ & $\opn{IG}\left(\alpha_{jl}, \lambda_{jl} \right)$\\
+    \midrule
+    $\delta$ & $\mathcal{N}\left(\bs{0}, \Sigma_{\delta} \right) $\\
+    \bottomrule
+  \end{tabular}
+\end{table}
+\begin{itemize}
+  \item $\theta = \begin{bmatrix}\beta^{T} & a^{T} & b^{T} & {\sigma_{a}^{2}}^{T} & {\sigma_{b}^{2}}^{T} & {\sigma^{2}}^{T} & \delta^{T} & z^{T}   \end{bmatrix}^{T}$.
+  \item $\beta = \begin{bmatrix} \beta_{1}^{T} & \cdots & \beta_{k}^{T}  \end{bmatrix}^{T}$.
+  \item $a = \begin{bmatrix}a_{1}^{T} & \cdots & a_{n}^{T}  \end{bmatrix}^{T} $.
+  \item $\sigma_{a}^{2}= \begin{bmatrix} \sigma_{a_{1}}^{2} & \cdots & \sigma_{a_{k}}^{2}  \end{bmatrix}^{T} $.
+  \item $\sigma_{b}^{2} = \begin{bmatrix}\sigma_{b_{1}}^{2} & \cdots & \sigma_{b_{k}}^{2}  \end{bmatrix}^{T} $.
+  \item $\sigma_{j}^{2} = \begin{bmatrix} \sigma_{j1}^{2} & \cdots & \sigma_{jg}^{2}   \end{bmatrix}^{T} $.
+  \item $\delta = \begin{bmatrix} \delta_{2}^{T} & \cdots & \delta_{k}^{T}  \end{bmatrix}^{T} $.
+  \item $z = \begin{bmatrix}z_{1} & \cdots & z_{n}  \end{bmatrix}^{T} $.
+  \item $\opn{softmax}\left(j, u_{i}^{T}\delta_{1}, u_{i}^{T}\delta_{2}, \ldots, u_{i}^{T}\delta_{k} \right) = \frac{\exp \left(u_{i}^{T}\delta_{j} \right)}{\sum_{\ell=1}^{k} \exp\left(u_{i}^{T}\delta_{\ell} \right)}$.
+  \item $\Sigma_{ij} = \opn{blockdiag}\left(\sigma_{j1}^{2}\bs{I}_{\kappa_{i1}}, \ldots , \sigma_{jg}^{2}\bs{I}_{\kappa_{ig}} \right)$ where $\sum_{\ell=1}^{g}\kappa_{i\ell} = n_{i} $.
+\end{itemize}
+Under \emph{mean-field} assumption, the lower bound should be obtained through $\opn{E}\left\{\log p(y, \theta) \right\}- \opn{E}\left(\log q(\theta) \right) $.
+\begin{align*}
+  p(y, \theta) &= \prod_{i=1}^{n}\prod_{j=1}^{k} \left\{p\left(y_{i}|z_{i}=j, \beta_{j}, a_{i}, b_{j}, \Sigma_{ij} \right) \cdot p\left(a_{i}| \sigma_{a_{j}}^{2} \right) p\left(z_{i}=j \right) \right\}^{\zeta_{ij}} \\
+  & \quad \times p(\delta) \prod_{j=1}^{k}\left\{p(\beta_{j})p\left(b_{j}|\sigma_{b_{j}}^{2} \right) p\left(\sigma_{a_{j}}^{2} \right)p\left(\sigma_{b_{j}}^{2} \right) \prod_{\ell=1}^{g} p \left(\sigma_{j\ell}^{2} \right) \right\}
+\end{align*}
+where $\zeta_{ij} = I\left(z_{i}=j \right)$. Therefore, the log-likelihood is
+\begin{align*}
+  \log p(y, \theta) &= \sum_{i=1}^{n}\sum_{j=1}^{k} \zeta_{ij} \left\{\log p\left(y_{i}|z_{i}=j, \beta_{j}, a_{i}, b_{j}, \Sigma_{ij}\right) + \log p \left(a_{i}|\sigma_{a_{j}}^{2} \right)+\log p\left(z_{i}=j \right) \right\} + \log p \left(\delta \right) \\
+  & \quad + \sum_{j=1}^{k} \left\{\log p \left(\beta_{j} \right) + \log p \left(b_{j}|\sigma_{b_{j}}^{2} \right) + \log p\left(\sigma_{a_{j}}^{2} \right)+ \log p\left(\sigma_{b_{j}}^{2} \right)+ \sum_{\ell=1}^{g} \log p \left(\sigma_{j\ell}^{2} \right) \right\}
+\end{align*}
+Deterministically assigning parametric family for each variational parameter, it is not as hard to compute the lower bound. In fact, the paper considers 3 different models, one of which considers no hierarchical centering whereas the others consider either single layer of hierarchical centering or double.
+
+\subsection{Variational Greedy Algorithm}
+  VGA incorporates the VA addressed in the previous section into a framework of splitting the data and optimizing the parameters simultaneously. The summary of VGA would be
+  \begin{enumerate}
+    \item \textcolor{myorange}{Fit} 1-component model.
+    \item For each component, \textcolor{myorange}{randomly cluster} the member observations and set the variational posterior parameters according to the given rule.
+    \item Perform VA \textcolor{myorange}{only} updating the new partitioned sets.
+    \item For each component, perform the steps $2 \sim 3$ \textcolor{myorange}{M times} (since we randomly partition the cluster, we get different lower bound each time) and choose a partition that yields the highest lower bound.
+    \item A ``\textcolor{myorange}{successful}'' split is checked via the increase in log-marginal likelihood:
+    $$
+      \log \left\{\frac{\exp \left(u_{i}^{T}\mu_{\delta_{j}} \right)}{\sum_{\ell} \exp \left(u_{i}^{T}\mu_{\delta_{\ell}} \right)} \right\}.
+    $$
+    (Refer to p.575)
+    \item Reverse the parameter estimates if the split is \textcolor{myorange}{unsuccessful}.
+    \item After looping through all the mixture components performing from step 2 to 6, apply \textcolor{myblue}{full VA}(in comparison to \textcolor{myorange}{partial VA} in step 3.). In other words, update \textcolor{myorange}{all} parameter estimates.
+    \item \textcolor{myorange}{Stop} splitting if all splits are \textcolor{myorange}{unsuccessful}. (Stopping rule)
+  \end{enumerate}
+  The original text explaining the variational greedy algorithm LACKS CLARITY in that it does \underline{NOT} give any definition of the term \textcolor{myblue}{log-marginal likelihood} and still uses it. Furthermore, it is sensible to reverse the parameter estimates if the split is unsuccessful but the paper hardly has any description about this. 
+
+\section{Code Review}
+\subsection{Results}
+\begin{itemize}
+  \item The results were different from those given in the paper. For \textbf{algorithm 1}, my R returned 11 components whereas the paper gave 16. For \textbf{algorithm 2}, my result was 5 components whereas the paper's was 6. In fact, the author of the paper carried out the same algorithm multiple times to see if the resulting numbers of components were the same. For algorithm 2, out of 5 in total, 3 resulted in 6 components and 2 in 7 components.
+  \item The inaccuracy of this algorithm rises from estimating the scale parameter of nonstandardized t-distribution. The log-likelihood function of nonstandardized t-distribution is
+  $$
+    \ell\left(\sigma \right) = \log \Gamma \left(\frac{v+1}{2} \right) - \log \Gamma \left(\frac{v}{2} \right) - \frac{1}{2} \log \left(\pi v \right) - \log \sigma - \frac{v+1}{2} \log \left\{1 + \left(\frac{x-\mu}{\sigma} \right)^{2} \right\}
+  $$
+  which is equivalent to the form of $-\log \sigma - \log \left(1 + 1/\sigma^{2} \right)$. The second derivative is
+  $$
+    \frac{d^{2}}{d\sigma^{2}}\ell \left(\sigma \right) = \frac{\sigma^{4} - 4\sigma^{2} -1}{\left(\sigma^{3} + \sigma \right)^{2}}.
+  $$
+  The real roots for $\sigma^{4}-4\sigma^{2}-1=0$ are $\pm \sqrt{2 + \sqrt{5}}$ which indicates that $\ell \left(\sigma \right)$ is not convex. This yields the problem that the optimization is likely to end up reaching its local optimum rather than global.
+  \item The code is terribly slow. R is not a good language to write codes with a lot of loops involved since loops have significantly high overhead in R. This could be easily rectified by rewriting the code in Fortran or C++.
+\end{itemize}
+\end{document}

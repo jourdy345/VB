@@ -1,0 +1,9 @@
+\BOOKMARK [1][-]{section.1}{Mixture models}{}% 1
+\BOOKMARK [2][-]{subsection.1.1}{Overview}{section.1}% 2
+\BOOKMARK [2][-]{subsection.1.2}{Goals of MM}{section.1}% 3
+\BOOKMARK [2][-]{subsection.1.3}{Mixtures of Linear Mixed Models}{section.1}% 4
+\BOOKMARK [1][-]{section.2}{Paper Review}{}% 5
+\BOOKMARK [2][-]{subsection.2.1}{Variational approximation for MLMM}{section.2}% 6
+\BOOKMARK [2][-]{subsection.2.2}{Variational Greedy Algorithm}{section.2}% 7
+\BOOKMARK [1][-]{section.3}{Code Review}{}% 8
+\BOOKMARK [2][-]{subsection.3.1}{Results}{section.3}% 9

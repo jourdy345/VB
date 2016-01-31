@@ -1,0 +1,341 @@
+\documentclass[11pt]{article}
+
+% This first part of the file is called the PREAMBLE. It includes
+% customizations and command definitions. The preamble is everything
+% between \documentclass and \begin{document}.
+
+\usepackage[margin=1in]{geometry} % set the margins to 1in on all sides
+\usepackage{graphicx} % to include figures
+\usepackage{amsmath} % great math stuff
+\usepackage{amsfonts} % for blackboard bold, etc
+\usepackage{amsthm} % better theorem environments
+% various theorems, numbered by section
+\usepackage{amssymb}
+\usepackage{hyperref}
+\usepackage[utf8]{inputenc}
+\usepackage{booktabs}
+\usepackage{array}
+\usepackage{courier}
+\usepackage[usenames, dvipsnames]{color}
+\usepackage{titlesec}
+
+\setcounter{secnumdepth}{4}
+
+\titleformat{\paragraph}
+{\normalfont\normalsize\bfseries}{\theparagraph}{1em}{}
+\titlespacing*{\paragraph}
+{0pt}{3.25ex plus 1ex minus .2ex}{1.5ex plus .2ex}
+
+
+\definecolor{myblue}{RGB}{72, 165, 226}
+\definecolor{myorange}{RGB}{222, 141, 8}
+
+\setlength{\heavyrulewidth}{1.5pt}
+\setlength{\abovetopsep}{4pt}
+
+
+\DeclareMathOperator{\id}{id}
+\DeclareMathOperator{\argmin}{\arg\!\min}
+\DeclareMathOperator{\Tr}{Tr}
+
+\newcommand{\bd}[1]{\mathbf{#1}} % for bolding symbols
+\newcommand{\RR}{\mathbb{R}} % for Real numbers
+\newcommand{\ZZ}{\mathbb{Z}} % for Integers
+\newcommand{\col}[1]{\left[\begin{matrix} #1 \end{matrix} \right]}
+\newcommand{\comb}[2]{\binom{#1^2 + #2^2}{#1+#2}}
+\newcommand{\bs}{\boldsymbol}
+\newcommand{\opn}{\operatorname}
+\begin{document}
+\nocite{*}
+
+\title{Variational Approximation with Dirichlet Process}
+
+\author{Daeyoung Lim\thanks{Prof. Taeryon Choi} \\
+Department of Statistics \\
+Korea University}
+
+\maketitle
+
+\section{Dirichlet Process}
+A realization of the Dirichlet distribution is intuitively a pmf generated with parameter $\alpha$. This suggests that the Dirichlet distribution is a probability distribution over pmfs. Put differently, the Dirichlet distribution samples from a bag filled with dice and each time it is sampled, it returns a die, so to speak. However, it also implies that the Dirichlet distribution is no more than a distribution over pmfs with finite sample spaces. We want this to cover infinite sample spaces. \par
+The collection of all probability distributions over an infinite sample space is beyond control. For such a reason, the Dirichlet process restricts itself to a more manageable subset of the collection: discrete probability distributions over the infinite sample space that can be written as an infinite sum of weighted indicator functions.
+\subsection{Stick-breaking process}
+\begin{align*}
+  &v_{k}|\alpha \sim \opn{Beta}\left(1, \alpha \right) \quad \quad \quad \quad\quad \quad\quad \eta_{k}^{*} \sim H \\
+  & \pi_{k} = v_{k}\prod_{\ell=1}^{k-1}\left(1-v_{\ell} \right) \quad \quad \quad \quad\quad \quad \,\,  G = \sum_{k=1}^{\infty} \pi_{k}\delta_{\eta_{k}^{*}}
+\end{align*} 
+where $\delta_{\eta_{k}^{*}}$ is the \emph{Dirac-delta} function centered around $\eta_{k}^{*}$. Then $G \sim \opn{DP}\left(\alpha, H \right)$.
+\section{DP mixture model}
+Using the stick-breaking representation of DP, DP mixture is represented as follows:
+\begin{enumerate}
+  \item Draw $v_{k} \sim \opn{Beta}\left(1, \alpha \right)$.
+  \item Draw $\eta_{k}^{*} \sim H$.
+  \item For the $n^{\text{th}}$ data point:
+    \begin{itemize}
+      \item Draw $Z_{n} \sim \opn{Mult}\left(\pi_{1}, \pi_{2}, \ldots \right)$.
+      \item Draw $X_{n} \sim p\left(x_{n}|\eta_{z_{n}}^{*} \right) $.
+    \end{itemize}
+\end{enumerate}
+Although the paper uses \emph{Multi} to denote Multinoulli distribution, it becomes clearer if we use \emph{Cat} for Categorical distribution as in machine learning literatures since the two are essentially the same with different names.
+
+\section{Gaussian DP mixtures}
+The observations have the following distributional form:
+$$
+  p(x_{n}|z_{n}, \eta_{1}^{*}, \eta_{2}^{*}, \ldots) = \prod_{i=1}^{\infty} \left(h(x_{n})\exp\left\{{\eta_{i}^{*}}'x_{n} - a\left(\eta_{i}^{*} \right) \right\} \right)^{\bs{1}\left[z_{n}=i \right]}
+$$
+It is a known fact that exponential families have the following form (multivariate form):
+$$
+  h(x)\exp \left\{\eta'T(x)-A(\eta) \right\}
+$$
+where $\eta$ is the vector of natural parameters and $T(x)$ is the vector of sufficient statistics. In the case of multivariate Gaussian, we can also transform the pdf into the form of an exponential family.
+$$
+  \begin{align*} p(x) &= \frac{1}{\sqrt{\left|2\pi  \Sigma \right|}} \exp \left\{-\frac{1}{2}\left(x-\mu\right)'\Sigma^{-1}\left(x-\mu \right) \right\}\\ &= \exp \left\{-\frac{1}{2}\log\left|2\pi\Sigma \right| \right\}\exp \left\{-\frac{1}{2}\left(x-\mu\right)'\Sigma^{-1}\left(x-\mu \right) \right\}\\ &= \exp \left\{-\frac{1}{2}\left[\underbrace{x'\Sigma^{-1}x - 2\mu'\Sigma^{-1}x}_{\eta'T\left(x\right)} + \mu'\Sigma^{-1}\mu + \log\left|2\pi\Sigma\right|\right] \right\} \end{align*}
+$$
+Now we use the Frobenius product and vectorize operator to obtain the desired form.
+$$
+  \begin{align*} x'\Sigma^{-1}x &= \Sigma^{-1}:xx'\\ &= \operatorname{vec}\left(\Sigma^{-1}\right)' \,\operatorname{vec}\left(xx' \right)  \\ \mu' \Sigma^{-1} x &= \left(\Sigma^{-1}\mu \right)'x\end{align*}
+$$
+$$
+  \therefore x'\Sigma^{-1}x - 2\mu'\Sigma^{-1}x = \begin{bmatrix}\operatorname{vec}\left(\Sigma^{-1}\right) \\ -2\Sigma^{-1}\mu \end{bmatrix}'\begin{bmatrix}\operatorname{vec}\left(xx'\right) \\ x \end{bmatrix}
+$$
+This yields
+\begin{align*}
+  \eta &= \begin{bmatrix} -\frac{1}{2}\opn{vec}\left(\Sigma^{-1} \right) \\ \Sigma^{-1}\mu       \end{bmatrix}\\
+  T(x) &= \begin{bmatrix} \opn{vec}\left(xx' \right) \\ x   \end{bmatrix}\\
+  A(\eta) &= \frac{1}{2}\mu'\Sigma^{-1}\mu + \frac{1}{2}\log\left|2\pi\Sigma \right|
+\end{align*}
+Since the paper suggests a general form of Dirichlet process for all kinds of exponential families, we should specify on our own what distribution each observation $x_{n}$ follows. The most usual case is Gaussian. Therefore, we will explicitly write the natural parameters and sufficient statistics of a multivariate Gaussian distribution. Then $\eta_{i}^{*}$ becomes $\eta$ and notationally abusive $x_{n}$ becomes $T(x)$. 
+Recall that $\eta_{i}^{*}$ has to be sampled from a base measure $H$, or $\eta_{i}^{*} \sim H$. In this case, we have $\Sigma^{-1}$ and $\mu$ inside $\eta_{i}&{*}$. Usually, we impose a conjugate prior for $\begin{bmatrix} \Sigma^{-1} & \mu \end{bmatrix}$ which is in this case the Normal-Wishart distribution denoted with $\mathcal{NW}\left(\cdot \right)$.
+\subsection{Lower bound}
+\begin{align*}
+  \log p\left(\bs{x}|\alpha, \lambda \right) &\ge \opn{E}\left[\log p\left(\bs{V}|\alpha) \right] + \opn{E}\left[\log p\left(\bs{\eta}^{*}|\lambda \right) \right] \\
+  & \quad + \sum_{n=1}^{N}\left(\opn{E}\left[\log p\left(Z_{n}|\bs{V} \right) \right] + \opn{E}\left[\log p\left(x_{n}|Z_{n} \right) \right] \right)\\
+  &\quad -\opn{E}\left[\log q\left(\bs{V}, \bs{\eta}^{*}, \bs{Z} \right) \right].
+\end{align*}
+As always, the expectations are taken with respect to the variational distributions (optimal distributions). 
+\subsubsection{$\opn{E}\left[\log p\left(\bs{V}|\alpha \right) \right] $}
+According to the setting, $v_{t}$ are sampled from the Beta distribution with parameters $1$ and $\alpha$. Hence, it is reasonable to assume that the variational distribution $q\left(v_{t} \right)$ follows Beta as well.
+$$
+  q\left(v_{i} \right) \sim \opn{Beta} \left(\gamma_{i,1}, \gamma_{i,2} \right)
+$$
+Now we can compute the expectation.
+\begin{align*}
+  p\left(\bs{V}|\alpha \right) &\sim \prod_{i}^{\infty} \opn{Beta}\left(v_{i}|1, \alpha \right)\\
+  &= \prod_{i=1}^{\infty} \alpha \left(1-v_{i} \right)^{\alpha -1}\\
+  &= \prod_{i=1}^{T-1} \alpha \left(1-v_{i} \right)^{\alpha-1}\\
+  \log p\left(\bs{V}|\alpha \right) &= \sum_{i=1}^{T-1} \left(1-\alpha \right)\log \left(1-v_{i} \right) + \log \alpha\\
+  \opn{E}\left[\log p \left(\bs{V}|\alpha \right) \right] &= \log \alpha + \sum_{i=1}^{T-1} \left(1-\alpha \right) \opn{E}\left[\log \left(1-v_{i} \right) \right]
+\end{align*}
+Since $v_{i} \sim \opn{Beta} \left(\gamma_{i,1}, \gamma_{i,2} \right)$, it is easy to show that $1-v_{i} \sim \opn{Beta} \left(\gamma_{i,2}, \gamma_{i,1} \right)$. We prove the expectation of log-Beta as a side note.
+\begin{align*}
+  X &\sim \opn{Beta}\left(\alpha, \beta \right)\\
+  \opn{E}\left[\log X \right] &= \int_{0}^{1} \log x \frac{\Gamma\left(\alpha + \beta \right)}{\Gamma\left(\alpha \right)\Gamma\left(\beta\right)} x^{\alpha-1}\left(1-x\right)^{\beta-1} \, dx\\
+  &= \frac{\Gamma\left(\alpha + \beta \right)}{\Gamma\left(\alpha \right)\Gamma\left(\beta\right)} \int_{0}^{1} \frac{\partial}{\partial \alpha} x^{\alpha-1}\left(1-x\right)^{\beta-1} \, dx \\
+  &= \frac{\Gamma\left(\alpha + \beta \right)}{\Gamma\left(\alpha \right)\Gamma\left(\beta\right)} \frac{\partial}{\partial \alpha}\int_{0}^{1} x^{\alpha-1}\left(1-x\right)^{\beta-1} \, dx \\
+  &= \frac{\Gamma\left(\alpha + \beta \right)}{\Gamma\left(\alpha \right)\Gamma\left(\beta\right)} \frac{\partial}{\partial \alpha} \frac{\Gamma\left(\alpha\right)\Gamma\left(\beta\right)}{\Gamma\left(\alpha+\beta\right)}\\
+  &= \frac{1}{\opn{B}\left(\alpha, \beta \right)} \frac{\partial \opn{B}\left(\alpha, \beta \right)}{\partial \alpha}\\
+  &= \frac{\partial \log \opn{B}\left(\alpha, \beta\right)}{\partial \alpha}\\
+  &= \frac{\partial \log \Gamma\left(\alpha\right){\partial \alpha}} - \frac{\partial \log \Gamma \left(\alpha+\beta \right)}{\partial \alpha}\\
+  &= \varphi \left(\alpha \right) - \varphi \left( \alpha + \beta \right)
+\end{align*}
+where $\varphi$ is the digamma function. Therefore, $\opn{E}\left[\log \left(1-v_{i}\right) \right] = \varphi \left(\gamma_{i,2} \right) - \varphi \left(\gamma_{i,1}+\gamma_{i,2} \right)$. This completes the expectation:
+$$
+  \textcolor{myorange}{\opn{E}\left[\log p \left(\bs{V}|\alpha \right) \right]} = \log \alpha + \sum_{i=1}^{T-1}\left(1-\alpha) \left\{\varphi \left(\gamma_{i,2}) - \varphi \left(\gamma_{i,1}+\gamma_{i,2} \right) \right\}.
+$$
+\subsubsection{$\opn{E}\left[\log p\left(\bs{\eta}^{*}|\lambda) \right] $}
+Since $\bs{\eta}^{*}$ is the vector of natural parameters and we have assumed Gaussian observations, $\bs{\eta}^{*}$ is $\begin{bmatrix}\Sigma^{-1} & \mu  \end{bmatrix}$. Now we will apply the conjugate prior to both $\Sigma^{-1}$ and $\mu$ which is the Normal-Wishart distribution.
+\begin{align*}
+  \Sigma^{-1} &\sim \mathcal{W}_{p}\left(W, n \right)\\
+  \mu|\Sigma &\sim \mathcal{N}\left(\mu_{0}, \rho \Sigma \right)\\
+  p\left(\Sigma^{-1}, \mu \right) &= \mathcal{W}\left(\Sigma^{-1}|W,n \right)\mathcal{N}\left(\mu| \mu_{0}, \rho \Sigma \right)\\
+  &= \frac{\left|\Sigma^{-1} \right|^{\frac{n-p-1}{2}}}{2^{np/2}\left|W\right|^{n/2} \Gamma_{p} \left(\frac{n}{2}\right) } \exp \left(-\frac{1}{2} \Tr \left(W^{-1}\Sigma^{-1} \right) \right) \cdot \frac{1}{\sqrt{\left|2\pi \rho \Sigma \right|}} \exp \left\{-\frac{1}{2}\left(\mu - \mu_{0}\right)'\frac{1}{\rho}\Sigma^{-1}\left(\mu -\mu_{0} \right) \right\}
+\end{align*}
+Note that $p \left(\bs{\eta}^{*} \right) = \prod_{i=1}^{T}p \left(\Sigma_{i}^{-1}, \mu_{i} \right)$. Taking the logarithm,
+\begin{align*}
+  \log p \left(\bs{\eta}^{*}\right) &= \sum_{i=1}^{T}\log p \left(\Sigma_{i}^{-1}, \mu_{i} \right)\\
+  &= \frac{n-p-1}{2}\log \left| \Sigma_{i}^{-1}\right| -\frac{np}{2} \log 2 - \frac{n}{2} \log \left|W\right| -\log \Gamma_{p}\left(\frac{n}{2}\right) - \frac{1}{2}\Tr \left(W^{-1}\Sigma^{-1}\right) \\
+  & \quad - \frac{1}{2} \log \left| 2\pi \rho\Sigma_{i} \right| - \frac{1}{2} \left(\mu_{i} - \mu_{0}\right)'\frac{1}{\rho}\Sigma_{i}^{-1}\left(\mu_{i} - \mu_{0}\right)
+\end{align*}
+We set the variational distribution of $\Sigma^{-1}$ and $\mu$ as follows:
+\begin{align*}
+  q\left(\Sigma_{i}^{-1}\right) &\sim \mathcal{W}_{p}\left(V_{i}, d \right)\\
+  q\left(\mu_{i} \right) &\sim \mathcal{N}\left(m_{i}, S_{i}\right).
+\end{align*}
+Now taking the expectation,
+\begin{align*}
+  \opn{E}\left[\log p \left(\bs{\eta}^{*}) \right] &= \sum_{i=1}^{T}\opn{E}\left[\log p \left(\Sigma_{i}^{-1}, \mu_{i} \right) \right]\\
+  &= \sum_{i=1}^{T}\left(\frac{n-p-1}{2}\opn{E}\left[\log \left|\Sigma_{i}^{-1}\right| \right] - \frac{np}{2}\log 2 - \frac{n}{2}\log \left|W\right| - \log \Gamma_{p}\left(\frac{n}{2}\right) - \frac{1}{2}\Tr \left(W^{-1}\opn{E}\left[\Sigma_{i}^{-1} \right])\right \\
+  & \quad \left- \frac{p}{2}\log \left(2\pi \right) + \frac{1}{2}\opn{E}\left[\log \left| \Sigma_{i}^{-1}\right|\right] - \frac{1}{2}\opn{E}\left[\left(\mu_{i}-\mu_{0}\right)'\frac{1}{\rho}\Sigma_{i}^{-1}\left(\mu_{i}-\mu_{0}\right) \right]\right)
+\end{align*}
+Here we should use the identity that
+$$
+  \opn{E}\left[\log \left| \Sigma_{i}^{-1}\right| \right] = \varphi_{p}\left(\frac{d}{2}\right) + p\log 2 + \log \left|V_{i}\right|.
+$$
+\begin{align*}
+  \opn{E}\left[\left(\mu_{i}-\mu_{0}\right)'\frac{1}{\rho}\Sigma_{i}^{-1}\left(\mu_{i}-\mu_{0}\right) \right] &= \opn{E}\left[\Tr \left(\left(\mu_{i}-\mu_{0}\right)\frac{1}{\rho}\Sigma_{i}^{-1}\left(\mu_{i}-\mu_{0}\right) \right) \right]\\
+  &= \opn{E}\left[\Tr \left(\frac{1}{\rho}\Sigma_{i}^{-1}\left(\mu_{i}-\mu_{0}\right)\left(\mu_{i}-\mu_{0}\right)' \right) \right]\\
+  &= \Tr \left(\frac{1}{\rho}\opn{E}\left[\Sigma_{i}^{-1}\right]\left(S_{i}+ \left(m_{i}-\mu_{0}\right)\left(m_{i}-\mu_{0}\right)'\right) \right)\\
+  &= \Tr \left(\frac{1}{\rho}dV_{i}\left(S_{i}+\left(m_{i}-\mu_{0}\right)\left(m_{i}-\mu_{0}\right)' \right) \right)\\
+  &= \frac{d}{\rho}\Tr \left(V_{i}S_{i}\right) + \frac{d}{\rho} \left(m_{i}-\mu_{0}\right)'V_{i}\left(m_{i}-\mu_{0}\right)
+\end{align*}
+Combining all the results,
+\begin{align*}
+  \textcolor{myorange}{\sum_{i=1}^{T}\opn{E}\left[\log p \left(\Sigma_{i}^{-1}, \mu_{i}\right) \right]} &= \sum_{i=1}^{T} \left(\frac{n-p}{2}\left\{\varphi_{p}\left(\frac{d}{2}\right) + p\log 2 + \log \left|V_{i}\right| \right\} - \frac{np}{2}\log 2 - \frac{n}{2}\log \left|W\right| - \log \Gamma_{p}\left(\frac{n}{2}\right) \\
+  &\quad \left - \frac{1}{2}\Tr \left(dW^{-1}V_{i}\right)\right - \frac{p}{2}\log \left(2\pi \right) -\frac{1}{2} \left[\frac{d}{\rho}\Tr \left(V_{i}S_{i}\right)+ \frac{d}{\rho}\left(m_{i}-\mu_{0}\right)'V_{i}\left(m_{i}-\mu_{0}\right) \right]\right)
+\end{align*}
+Note that upper case $V_{i}$ is the scale matrix of the Wishart distribution whereas the lower case $v_{i}$ is the length of broken sticks sampled from Beta distribution. These notations are kept separate for identifiability.
+\subsubsection{$\opn{E}\left[\log p \left(Z_{n}|\bs{V}) \right]$}
+Recall that $Z_{n}|\bs{V} \sim \opn{Mult}\left(\pi\left(\bs{v}\right)\right)$ and that
+$$
+  \pi_{k} = v_{k}\prod_{\ell=1}^{k-1}\left(1-v_{\ell} \right).
+$$
+Looking carefully, $\pi_{k}$ contains $1-v_{i}$ term if $k>i$. Therefore, the pdf of $Z_{n}|\bs{V}$ is
+$$
+  p \left(Z_{n}|\bs{V}\right) = \prod_{i=1}^{\infty} \left(1-v_{i}\right)^{\bs{1}\left[z_{n}>i\right]}v_{i}^{\bs{1}\left[z_{n}=i\right]}.
+$$
+We should apply the truncation that the original author postulates: $q\left(z_{n}>T\right)=0$. Then,
+\begin{align*}
+  \opn{E}\left[\log p\left(Z_{n}|\bs{V}\right) \right] &= \opn{E}\left[\log \left(\prod_{i=1}^{\infty} \left(1-v_{i}\right)^{\bs{1}\left[z_{n}>i \right]} v_{i}^{\bs{1}\left[z_{n}=i \right]} \right) \right]\\
+  &= \sum_{i=1}^{\infty}q\left(z_{n}>i \right) \opn{E}\left[\log \left(1-v_{i}\right) \right] + q\left(z_{n}=i\right)\opn{E}\left[\log v_{i} \right]\\
+  &= \sum_{i=1}^{T}q\left(z_{n}>i\right)\opn{E}\left[\log \left(1-v_{i}\right) \right] + q\left(z_{n}=i\right)\opn{E}\left[\log v_{i}\right].
+\end{align*}
+Borrowing the notations of the author, the variational distribution of $Z_{n}$ is Categorical or Multinoulli with parameters $\phi_{1}, \phi_{2}, \ldots , \phi_{N}$. By definition, the probability of $Z_{n}=i$ is $q\left(Z_{n}=i \right) = \phi_{n,i}$. Incorporating all the results above,
+\begin{align*}
+  \textcolor{myorange}{\opn{E}\left[\log p \left(Z_{n}|\bs{V}\right) \right]} = \sum_{i=1}^{T}\left\{\left[\sum_{j=i+1}^{T}\phi_{n,j}\right] \left(\varphi\left(\gamma_{i,2} \right)-\varphi\left(\gamma_{i,1}+\gamma_{i,2} \right) \right) + \phi_{n,i}\left(\varphi\left(\gamma_{i,1} \right)-\varphi\left(\gamma_{i,1}+\gamma_{i,2} \right) \right)\right\}
+\end{align*}
+\subsubsection{$\opn{E}\left[\log p \left(x_{n}|Z_{n}\right) \right] $}
+\underline{\textbf{Wrong way}}\par
+
+Now once $Z_{n}$ is determined, it indicates which parameters $\Sigma_{z_{n}}^{-1}, \mu_{z_{n}}$ to use. This immediately defines the density:
+$$
+  p \left(x_{n}|Z_{n}\right) = \frac{1}{\sqrt{\left|2\pi \Sigma_{z_{n}} \right|}} \exp \left\{-\frac{1}{2} \left(x_{n}-\mu_{z_{n}} \right)'\Sigma_{z_{n}}^{-1}\left(x_{n}-\mu_{z_{n}} \right) \right\}
+$$
+\begin{align*}
+  \opn{E}\left[\log p \left(x_{n}|Z_{n}\right) \right] &= -\frac{p}{2}\log \left(2\pi \right) + \frac{1}{2}\opn{E}\left[\log \left|\Sigma_{z_{n}}^{-1}\right| \right]-\frac{1}{2}\opn{E}\left[\left(x_{n}-\mu_{z_{n}}\right)'\Sigma_{z_{n}}^{-1}\left(x_{n}-\mu_{z_{n}} \right) \right]\\
+  \opn{E}\left[\log \left|\Sigma_{z_{n}}^{-1} \right| \right] &= \varphi_{p}\left(\frac{d}{2}\right) + p \log 2 + \log \left|V_{z_{n}} \right| \\
+  \opn{E}\left[\left(x_{n}-\mu_{z_{n}}\right)'\Sigma_{z_{n}}^{-1}\left(x_{n}-\mu_{z_{n}} \right) \right] &= \opn{E}\left[\Tr \left(\left(x_{n}-\mu_{z_{n}} \right)'\Sigma_{z_{n}}^{-1}\left(x_{n} - \mu_{z_{n}} \right) \right) \right] \\
+  &= \opn{E}\left[\Tr \left(\Sigma_{z_{n}}^{-1}\left(x_{n}-\mu_{z_{n}} \right)\left(x_{n}-\mu_{z_{n}} \right)' \right) \right]\\
+  &= \Tr \left(\opn{E}\left[\Sigma_{z_{n}}^{-1} \right]\left(S_{z_{n}} + \left(x_{n}-m_{z_{n}} \right)\left(x_{n}-m_{z_{n}} \right)' \right) \right)\\
+  &= \Tr \left(dV_{z_{n}}S_{z_{n}} + dV_{z_{n}}\left(x_{n}-m_{z_{n}} \right)\left(x_{n}-m_{z_{n}} \right)' \right)\\
+  &= d\Tr \left(V_{z_{n}}S_{z_{n}} \right) + d \left(x_{n}-m_{z_{n}} \right)'V_{z_{n}}\left(x_{n}-m_{z_{n}} \right)
+\end{align*}
+Coming back to the original expectation,
+\begin{align*}
+  \textcolor{myorange}{\opn{E}\left[\log p \left(x_{n}|Z_{n}\right) \right]} &= -\frac{p}{2}\log \left(2\pi \right) + \frac{1}{2}\left(\varphi_{p}\left(\frac{d}{2}\right) + p \log 2 + \log \left|V_{z_{n}} \right| \right)\\
+  & \quad - \frac{1}{2} \left(d\Tr \left(V_{z_{n}}S_{z_{n}} \right) + d \left(x_{n}-m_{z_{n}} \right)'V_{z_{n}}\left(x_{n}-m_{z_{n}} \right) \right)
+\end{align*}
+This is a wrong way to compute this expectation not because it is not a mathematically valid expression, but rather because it is mathematically intractable. Therefore, we propose another form of expression that is.\par
+\underline{\textbf{Correct way}} \par
+When expressing the density $p\left(x_{n}|Z_{n} \right)$, we should avoid using the subscript $z_{n}$ directly. Instead, we loop through the entirety of $\eta_{i}^{*}$ and use the indicator variable that filters the one that is desired:
+$$
+  p\left(x_{n}|z_{n}\right)=\prod_{i=1}^{\infty} \left[\frac{1}{\sqrt{\left|2\pi \Sigma_{i} \right|}}\exp \left\{-\frac{1}{2}\left(x_{n}-\mu_{i}\right)'\Sigma_{i}^{-1}\left(x_{n}-\mu_{i} \right) \right\} \right]^{\bs{1}\left[z_{n}=i \right]}.
+$$
+This way, we can utilize the expectation $\opn{E}\left[\bs{1}\left[z_{n}=i \right] \right]$ which is directly the probability of $z_{n}$ becoming $i$: $q\left(z_{n}=i \right)=\phi_{n,i}$. Furthermore, the loop is truncated because we assumed $q\left(z_{n}>T\right) =0$
+\begin{align*}
+  \log p\left(x_{n}|z_{n}\right)&=\sum_{i=1}^{\infty} \bs{1}\left[z_{n}=i \right]\left\{-\frac{p}{2}\log \left(2\pi\right) + \frac{1}{2}\log \left|\Sigma_{i}^{-1}\right| -\frac{1}{2}\left(x_{n}-\mu_{i}\right)'\Sigma_{i}^{-1}\left(x_{n}-\mu_{i}\right) \right\}\\
+  \textcolor{myorange}{\opn{E}\left[\log p\left(x_{n}|z_{n}\right)\right]} &= \sum_{i=1}^{\infty} q\left(z_{n}=i\right) \left\{-\frac{p}{2}\log \left(2\pi \right) + \frac{1}{2}\left(\varphi_{p}\left(\frac{d}{2}\right)+p\log 2 + \log \left|V_{i}\right| \right)\\ \right
+  &\quad \left-\frac{d}{2}\Tr\left(V_{i}S_{i}\right)-\frac{d}{2}\left(x_{n}-m_{i}\right)'V_{i}\left(x_{n})-m_{i}\right) \right\}\\
+  &=\sum_{i=1}^{T} \phi_{n,i} \left\{-\frac{p}{2}\log \left(2\pi \right) + \frac{1}{2}\left(\varphi_{p}\left(\frac{d}{2}\right)+p\log 2 + \log \left|V_{i}\right| \right)\\ \right
+  &\quad \left-\frac{d}{2}\Tr\left(V_{i}S_{i}\right)-\frac{d}{2}\left(x_{n}-m_{i}\right)'V_{i}\left(x_{n}-m_{i}\right) \right\}
+\end{align*}
+\subsubsection{$\opn{E}\left[\bs{V}, \bs{\eta}^{*}, \bs{Z} \right]$}
+As stated in the paper, the variational distributions of the variational parameters are represented as follows:
+$$
+  q\left(\bs{v}, \bs{\eta}^{*}, \bs{z} \right) = \prod_{t=1}^{T-1} q_{\gamma_{t}}\left(v_{t}\right) \prod_{t=1}^{T}q_{\tau_{t}}\left(\eta_{t}^{*}\right) \prod_{n=1}^{N}q_{\phi_{n}}\left(z_{n}\right).
+$$
+And we already know the following:
+\begin{align*}
+  v_{i} &\sim \opn{Beta}\left(\gamma_{i,1}, \gamma_{i,2} \right)\\
+  \eta_{i}^{*} &\sim \mathcal{NW}\left(\mu_{i}|m_{i}, S_{i};\, \Sigma_{i}^{-1}|n, V_{i} \right)\\
+  z_{n} &\sim \opn{Cat}\left(\phi_{n,i}, \ldots , \phi_{n, T} \right).
+\end{align*}
+Therefore, we can compute the desired expectation.
+\begin{align*}
+  \log q\left(\bs{V}, \bs{\eta}^{*}, \bs{Z}) &= \sum_{i=1}^{T-1} \log \left\{ \frac{\Gamma\left(\gamma_{i,1}+ \gamma_{i,2}\right)}{\Gamma\left(\gamma_{i,1}\right) + \Gamma\left(\gamma_{i,2}\right)} v_{i}^{\gamma_{i,1}-1} \left(1-v_{i}\right)^{\gamma_{i,2}-1}\right\}\\
+  & \quad + \sum_{i=1}^{T}\log \left\{ \frac{1}{\sqrt{\left|2\pi S_{i} \right|}} \exp \left(-\frac{1}{2}\left(\mu_{i}-m_{i}\right)'S_{i}^{-1}\left(\mu_{i}-m_{i}\right) \right)\right\}\\
+  &\quad +\sum_{i=1}^{T}\log \left\{\frac{\left|\Sigma_{i}^{-1} \right|^{\frac{n-p-1}{2}}}{2^{\frac{np}{2}} \left|V_{i} \right|^{\frac{n}{2}} \Gamma_{p}\left(\frac{n}{2}\right)} \exp \left(-\frac{1}{2}\Tr\left(V_{i}^{-1}\Sigma_{i}^{-1} \right) \right)  \right\}\\
+  &\quad + \sum_{n=1}^{N}\log\left\{\prod_{i=1}^{T}\phi_{n,i}^{\bs{1}\left[z_{n}=i \right]} \right\}\\
+  &= \sum_{i=1}^{T-1}\left\{\log \Gamma \left(\gamma_{i,1}+\gamma_{i,2} \right) - \log \Gamma\left(\gamma_{i,1}\right)- \log \Gamma \left(\gamma_{i,2} \right) + \left(\gamma_{i,1}-1 \right)\log v_{i} + \left(\gamma_{i,2}-1 \right)\log \left(1-v_{i} \right) \right\}\\
+  &\quad +\sum_{i=1}^{T}\left\{-\frac{1}{2}\log \left|2\pi S_{i} \right| - \frac{1}{2}\left(\mu_{i}-m_{i} \right)'S_{i}^{-1}\left(\mu_{i}-m_{i} \right) \right\}\\
+  &\quad + \sum_{i=1}^{T}\left\{\frac{n-p-1}{2}\log \left|\Sigma_{i}^{-1} \right|-\frac{np}{2}\log 2 -\frac{n}{2} \log \left|V_{i} \right| - \log \Gamma_{p}\left(\frac{n}{2} \right) - \frac{1}{2}\Tr \left(V_{i}^{-1}\Sigma_{i}^{-1} \right) \right\}\\
+  &\quad + \sum_{n=1}^{N}\sum_{i=1}^{T} \bs{1}\left[z_{n=1} \right] \log \phi_{n,i}
+\end{align*}
+\begin{align*}
+  \textcolor{myorange}{\opn{E}\left[\log q\left(\bs{V}, \bs{\eta}^{*}, \bs{Z} \right) \right]} &= \sum_{i=1}^{T-1} \left\{\log \Gamma \left(\gamma_{i,1} + \gamma_{i,2} \right) - \log \Gamma \left(\gamma_{i,1} \right) - \log \Gamma \left(\gamma_{i,2} \right) + \left(\gamma_{i,1}-1 \right)\left(\varphi \left(\gamma_{i,1} \right) - \varphi \left(\gamma_{i,1} + \gamma_{i,2} \right) \right)\right \\
+  &\quad \left+ \left(\gamma_{i,2}-1\right)\left(\varphi\left(\gamma_{i,2}\right) - \varphi\left(\gamma_{i,1}+\gamma_{i,2}\right) \right) \right\} + \sum_{i=1}^{T}\left\{-\frac{p}{2}\log \left(2\pi\right) - \frac{1}{2}\log \left|S_{i} \right| - \frac{p}{2} \right\}\\
+  &\quad +\sum_{i=1}^{T}\left\{\frac{n-p-1}{2}\left(\varphi_{p}\left(\frac{d}{2}\right) +p\log 2 + \log \left|V_{i}\right| \right)-\frac{np}{2}\log 2 -\frac{n}{2}\log \left|V_{i}\right| - \log \Gamma_{p}\left(\frac{n}{2}\right) - \frac{np}{2} \right\}\\
+  &\quad +\sum_{n=1}^{N}\sum_{i=1}^{T}\phi_{n,i}\log \phi_{n,i}
+\end{align*}
+\subsection{Updating via coordinate ascent}
+Free parameters (or variatioanl parameters) need updating. Mean-field assumption lends itself directly to obtaining the coordinate ascent algorithm. The variational distributions we need to compute are $\bs{v}, \bs{\eta}^{*}, \bs{z}$.
+\subsubsection{$\bs{v}$}
+Recall that mean-field assumption severs the dependencies between parameters so as to gain more degrees of freedom. Those who are not familiar with the methodology are referred to Wand and Omerod(2010). Simply put, mean-field assumption converts function optimization into directly updating the parameters.
+\begin{align*}
+  p\left(\bs{v}|\text{rest} \right) &= p\left(\bs{V}|\alpha \right) \prod_{i=1}^{N}p\left(z_{n}|\bs{V}\right)\\
+  &= \prod_{i=1}^{T-1}\alpha\left(1-v_{i}\right)^{\alpha-1} \prod_{n=1}^{N}\prod_{i=1}^{\infty}\left(1-v_{i}\right)^{\bs{1}\left[z_{n}>i\right]}v_{i}^{\bs{1}\left[z_{n}=i\right]}\\
+  \log p\left(\bs{v}|\text{rest}\right) &= \sum_{i=1}^{T-1} \left\{\log \alpha + \left(\alpha-1\right)\log \left(1-v_{i}\right) \right\} + \sum_{n=1}^{N}\sum_{i=1}^{T-1}\bs{1}\left[z_{n}>i\right]\log \left(1-v_{i}\right) + \bs{1}\left[z_{n}=i\right]\log v_{i}\\
+  \opn{E}_{-\bs{v}}\left[\log p \left(\bs{v}|\text{rest}\right) \right] &= \sum_{i=1}^{T-1}\left\{\left(\alpha + \sum_{n=1}^{N}q\left(z_{n}>i\right)-1\right)\log \left(1-v_{i}\right) + \sum_{n=1}^{N}q\left(z_{n}=i)\log v_{i} \right\}
+\end{align*}
+This is the log-density of Beta distribution. Each $v_{i}$ follow different Beta distribution with different parameters $\left(\gamma_{i,1}, \gamma_{i,2} \right)$. Thus, we will not consider the first summation $\sum_{i=1}^{T-1}$.
+\begin{align*}
+  \gamma_{i,1} &= 1 + \sum_{n=1}^{N}\phi_{n,i}\\
+  \gamma_{i,2} &= \alpha + \sum_{n=1}^{N}\sum_{j=i+1}^{T}\phi_{n,j}
+\end{align*}
+\subsubsection{$\bs{\eta}^{*}$}
+In exponential family notation, the vector of variational parameters is $\bs{\eta}^{*}$. However, in our model, since we assumed the observations follow Gaussian distribution, the variational parameters become $\mu_{i}$ and $\Sigma_{i}^{-1}$. We first go with $\bs{\mu}$.
+\begin{align*}
+  \log p\left(\bs{\mu}|\text{rest}\right) &= \sum_{i=1}^{T}\log \mathcal{N}\left(\mu_{i}|\mu_{0}, \rho\Sigma_{i}\right) +\sum_{n=1}^{N}\sum_{i=1}^{T}\log \left[p\left(x_{n}|z_{n}\right) \right]^{\bs{1}\left[z_{n}=i \right]}\\
+  \opn{E}_{-\bs{\mu}}\left[\log p\left(\bs{\mu}|\text{rest}\right) \right] &= \sum_{i=1}^{T}\left\{-\frac{p}{2}\log \left(2\pi\rho\right) +\frac{1}{2} \left(\varphi_{p}\left(\frac{d}{2}\right) + p\log 2 +\log \left|V_{i}\right| \right)-\frac{d}{2\rho}\left(\mu_{i}-\mu_{0}\right)'V_{i}\left(\mu_{i}-\mu_{0}\right) \right\}\\
+  &\quad + \sum_{i=1}^{T}\sum_{n=1}^{N}\left\{\phi_{n,i}\left[-\frac{p}{2}\log \left(2\pi \right) + \frac{1}{2}\left(\varphi_{p}\left(\frac{d}{2}\right) + p \log 2 + \log \left|V_{i}\right| \right)-\frac{d}{2}\left(x_{n}-\mu_{i}\right)'V_{i}\left(x_{n}-\mu_{i}\right) \right] \right\}\\
+\end{align*}
+Since we are considering $\mu_{i}$ separately, we will not consider the outer summation $\sum_{i=1}^{T}$. Then,
+\begin{align*}
+  \opn{E}_{-\mu_{i}}\left[\log p \left(\mu_{i}|\text{rest}\right) \right] &\propto \sum_{n=1}^{N}\left\{-\frac{d}{2}\phi_{n,i}\left(x_{n}-\mu_{i} \right)'V_{i}\left(x_{n}-\mu_{i} \right)\right\} - \frac{d}{2\rho}\left(\mu_{i}-\mu_{0}\right)'V_{i}\left(\mu_{i}-\mu_{0}\right)\\
+  &\propto -\frac{1}{2}\left\{\left(\frac{d}{\rho}+\sum_{n=1}^{N}d\phi_{n,i} \right)\mu_{i}'V_{i}\mu_{i} - 2\left(\sum_{n=1}^{N}d\phi_{n,i}x_{n} + \frac{d}{\rho}\mu_{0} \right)'V_{i}\mu_{i} \right\}\\
+  &\sim \mathcal{N}\left(\left(\frac{d}{\rho}+\sum_{n=1}^{N}d\phi_{n,i} \right)^{-1}\left(\sum_{n=1}^{N}d\phi_{n,i}x_{n} + \frac{d}{\rho}\mu_{0} \right), \left(\frac{d}{\rho}+\sum_{n=1}^{N}d\phi_{n,i} \right)^{-1}V_{i}^{-1} \right).
+\end{align*}
+Therefore, the updating rule for $m_{i}$ and $S_{i}$ are
+\begin{align*}
+  m_{i} &= \left(\frac{d}{\rho}+\sum_{n=1}^{N}d\phi_{n,i} \right)^{-1}\left(\sum_{n=1}^{N}d\phi_{n,i}x_{n} + \frac{d}{\rho}\mu_{0} \right)\\
+  S_{i} &= \left(\frac{d}{\rho}+\sum_{n=1}^{N}d\phi_{n,i} \right)^{-1}V_{i}^{-1}.
+\end{align*}
+Next is $\Sigma_{i}^{-1}$ which follows Wishart distribution.
+\begin{align*}
+  p \left(\bs{\Sigma}^{-1}|\text{rest} \right) &= \prod_{i=1}^{T}\mathcal{N}\left(\mu_{i}|\mu_{0}, \rho \Sigma_{i} \right)\mathcal{W}\left(\Sigma_{i}^{-1}|W,n \right) \prod_{n=1}^{N}\prod_{i=1}^{\infty} \left[p\left(x_{n}|z_{n}\right) \right]^{\bs{1}\left[z_{n}=i \right]}\\
+  \log p \left(\bs{\Sigma}^{-1}|\text{rest} \right)&= \sum_{i=1}^{T}\left\{-\frac{p}{2}\log \left(2\pi\right) + \frac{1}{2}\log \left|\Sigma_{i}^{-1}\right| -\frac{1}{2}\left(\mu_{i}-\mu_{0}\right)'\frac{1}{\rho}\Sigma_{i}^{-1}\left(\mu_{i}-\mu_{0}\right) \right\\
+  &\quad \left +\frac{n-p-1}{2} \log \left|\Sigma_{i}^{-1}\right| -\frac{1}{2}\Tr \left(W^{-1}\Sigma_{i}^{-1}\right) -\frac{np}{2}\log 2 -\frac{n}{2}\log \left|W \right| -\log \Gamma_{p}\left(\frac{n}{2}\right)\right\} \\
+  &\quad + \sum_{i=1}^{T}\sum_{n=1}^{N}\left[\bs{1} \left[z_{n}=i \right]\left\{-\frac{p}{2}\log \left(2\pi\right) + \frac{1}{2}\log \left|\Sigma_{i}^{-1}\right| -\frac{1}{2}\left(x_{n}-\mu_{i}\right)'\Sigma_{i}^{-1}\left(x_{n}-\mu_{i}\right) \right\} \right]\\
+  \opn{E}\left[\log p\left(\bs{\Sigma}^{-1}|\text{rest} \right) \right] &= \sum_{i=1}^{T}\left\{-\frac{p}{2}\log \left(2\pi\right) -\frac{1}{2\rho}\left(\Tr \left(\Sigma_{i}^{-1}S_{i}\right) + \left(m_{i}-\mu_{0}\right)'\Sigma_{i}^{-1}\left(m_{i}-\mu_{0}\right) \right) \right\\
+  &\quad \left+\frac{n-p}{2}\log \left|\Sigma_{i}^{-1}\right| -\frac{1}{2}\Tr \left(W^{-1}\Sigma_{i}^{-1}\right) - \frac{np}{2}\log 2 -\frac{n}{2}\log \left|W\right| -\log \Gamma_{p}\left(\frac{n}{2}\right) \right\}\\
+  &\quad +\sum_{i=1}^{T}\sum_{n=1}^{N}\left[\phi_{n,i}\left\{-\frac{p}{2}\log \left(2\pi\right) + \frac{1}{2}\log \left|\Sigma_{i}^{-1}\right| -\frac{1}{2}\left(\Tr\left(\Sigma_{i}^{-1}S_{i}\right) + \left(m_{i}-x_{n}\right)'\Sigma_{i}^{-1}\left(m_{i}-x_{n}\right) \right) \right\} \right]\\
+  &\sim \mathcal{W}\left(n+1+\sum_{n=1}^{N}\phi_{n,i}, \left(\left(\frac{1}{\rho} + \sum_{n=1}^{N}\phi_{n,i} \right)S_{i} + W_{i}^{-1} \right)^{-1} \right)
+\end{align*}
+So if we say the variational distribution of $\Sigma_{i}^{-1}$ is
+$$
+  q\left(d, V_{i} \right)
+$$
+then the updating of $d$ and $V_{i}$ are
+\begin{align*}
+  d &= n+1+\sum_{n=1}^{N}\phi_{n,i}\\
+  V_{i} &= \left(\left(\frac{1}{\rho} + \sum_{n=1}^{N}\phi_{n,i} \right)S_{i} + W_{i}^{-1} \right)^{-1}.
+\end{align*}
+\subsection{\bs{Z}}
+  \begin{align*}
+    \log p \left(\bs{z}|\text{rest}\right) &= \sum_{n=1}^{N}\sum_{i=1}^{T}\left\{\bs{1}\left[z_{n}>i \right]\log \left(1-v_{i}\right) + \bs{1}\left[z_{n}=i\right]\log v_{i} \right\} \\
+    &\quad + \sum_{n=1}^{N}\sum_{i=1}^{T}\left[\bs{1}\left[z_{n}=i \right]\left\{-\frac{p}{2}\log\left(2\pi\right)+ \frac{1}{2}\log \left|\Sigma_{i}^{-1}\right| -\frac{1}{2}\left(x_{n}-\mu_{i}\right)'\Sigma_{i}^{-1}\left(x_{n}-\mu_{i}\right) \right\} \right]\\
+    \opn{E}_{-\bs{z}}\left[\log p \left(\bs{z}|\text{rest}\right) \right] &= \sum_{n=1}^{N}\sum_{i=1}^{T} \left\{\bs{1}\left[z_{n}>i\right]\left(\varphi \left(\gamma_{i,2}\right) - \varphi \left(\gamma_{i,1}+\gamma_{i,2}\right) \right) + \bs{1}\left[z_{n}=i\right]\left(\varphi \left(\gamma_{i,1}\right) - \varphi \left(\gamma_{i,1}+\gamma_{i,2}\right) \right) \right\}\\
+    &\quad +\sum_{n=1}^{N}\sum_{i=1}^{T}\left[\bs{1}\left[z_{n}=i\right]\left\{-\frac{p}{2}\log\left(2\pi\right) + \frac{1}{2}\left(\varphi_{p}\left(\frac{d}{2}\right)+p\log 2 +\log \left|V_{i}\right| \right)\right\\
+    &\quad \left\left -\frac{n}{2}\left(\Tr\left(V_{i}S_{i}\right) + \left(m_{i}-x_{n}\right)'V_{n}\left(m_{i}-x_{n}\right) \right) \right\} \right]\\
+    &\propto \bs{1}\left[z_{n}=i \right]\left\{\varphi \left(\gamma_{i,1}\right) - \varphi \left(\gamma_{i,1}+\gamma_{i,2}\right) -\frac{p}{2}\log \left(2\pi\right) + \frac{1}{2}\left(\varphi_{p}\left(\frac{d}{2}\right) + p \log 2 +\log \left|V_{i}\right| \right) \right\\
+    &\quad \left+ \sum_{j=1}^{i-1}\left(\varphi \left(\gamma_{j,2}\right) - \varphi \left(\gamma_{j,1}+\gamma_{j,2}\right) \right) -\frac{n}{2}\left(\Tr \left(V_{i}S_{i}\right) + \left(m_{i}-x_{n}\right)'V_{i}\left(m_{i}-x_{n}\right) \right) \right\}
+  \end{align*}
+  Therefore, 
+  \begin{align*}
+    \phi_{n,i} = \exp \left(\Phi \right)
+  \end{align*}
+  where
+\begin{align*}
+  \Phi &= \varphi \left(\gamma_{i,1}\right) - \varphi \left(\gamma_{i,1}+\gamma_{i,2}\right) -\frac{p}{2}\log \left(2\pi\right) + \frac{1}{2}\left(\varphi_{p}\left(\frac{d}{2}\right) + p \log 2 +\log \left|V_{i}\right| \right) \right\\
+  &\quad \left+ \sum_{j=1}^{i-1}\left(\varphi \left(\gamma_{j,2}\right) - \varphi \left(\gamma_{j,1}+\gamma_{j,2}\right) \right) -\frac{n}{2}\left(\Tr \left(V_{i}S_{i}\right) + \left(m_{i}-x_{n}\right)'V_{i}\left(m_{i}-x_{n}\right) \right).
+\end{align*}
+\end{document}

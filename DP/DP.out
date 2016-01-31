@@ -1,0 +1,14 @@
+\BOOKMARK [1][-]{section.1}{Dirichlet Process}{}% 1
+\BOOKMARK [2][-]{subsection.1.1}{Stick-breaking process}{section.1}% 2
+\BOOKMARK [1][-]{section.2}{DP mixture model}{}% 3
+\BOOKMARK [1][-]{section.3}{Gaussian DP mixtures}{}% 4
+\BOOKMARK [2][-]{subsection.3.1}{Lower bound}{section.3}% 5
+\BOOKMARK [3][-]{subsubsection.3.1.1}{E[logp\(bold0mu mumu VVVVVV|\) ] }{subsection.3.1}% 6
+\BOOKMARK [3][-]{subsubsection.3.1.2}{E[logp\(bold0mu mumu *|\) ] }{subsection.3.1}% 7
+\BOOKMARK [3][-]{subsubsection.3.1.3}{E[logp \(Zn|bold0mu mumu VVVVVV\) ]}{subsection.3.1}% 8
+\BOOKMARK [3][-]{subsubsection.3.1.4}{E[logp \(xn|Zn\) ] }{subsection.3.1}% 9
+\BOOKMARK [3][-]{subsubsection.3.1.5}{E[bold0mu mumu VVVVVV, bold0mu mumu *, bold0mu mumu ZZZZZZ ]}{subsection.3.1}% 10
+\BOOKMARK [2][-]{subsection.3.2}{Updating via coordinate ascent}{section.3}% 11
+\BOOKMARK [3][-]{subsubsection.3.2.1}{bold0mu mumu vvvvvv}{subsection.3.2}% 12
+\BOOKMARK [3][-]{subsubsection.3.2.2}{bold0mu mumu *}{subsection.3.2}% 13
+\BOOKMARK [2][-]{subsection.3.3}{bold0mu mumu ZZZZZZ}{section.3}% 14

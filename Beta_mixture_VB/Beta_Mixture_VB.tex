@@ -1,0 +1,168 @@
+\documentclass[11pt]{article}
+
+% This first part of the file is called the PREAMBLE. It includes
+% customizations and command definitions. The preamble is everything
+% between \documentclass and \begin{document}.
+
+\usepackage[margin=1in]{geometry} % set the margins to 1in on all sides
+\usepackage{graphicx} % to include figures
+\usepackage{amsmath} % great math stuff
+\usepackage{amsfonts} % for blackboard bold, etc
+\usepackage{amsthm} % better theorem environments
+% various theorems, numbered by section
+\usepackage{amssymb}
+\usepackage{hyperref}
+\usepackage[utf8]{inputenc}
+\usepackage{booktabs}
+\usepackage{array}
+\usepackage{courier}
+\usepackage[usenames, dvipsnames]{color}
+\usepackage{titlesec}
+
+\setcounter{secnumdepth}{4}
+
+\titleformat{\paragraph}
+{\normalfont\normalsize\bfseries}{\theparagraph}{1em}{}
+\titlespacing*{\paragraph}
+{0pt}{3.25ex plus 1ex minus .2ex}{1.5ex plus .2ex}
+
+
+\definecolor{myblue}{RGB}{72, 165, 226}
+\definecolor{myorange}{RGB}{222, 141, 8}
+
+\setlength{\heavyrulewidth}{1.5pt}
+\setlength{\abovetopsep}{4pt}
+
+
+\DeclareMathOperator{\id}{id}
+\DeclareMathOperator{\argmin}{\arg\!\min}
+\DeclareMathOperator{\Tr}{Tr}
+
+\newcommand{\bd}[1]{\mathbf{#1}} % for bolding symbols
+\newcommand{\RR}{\mathbb{R}} % for Real numbers
+\newcommand{\ZZ}{\mathbb{Z}} % for Integers
+\newcommand{\col}[1]{\left[\begin{matrix} #1 \end{matrix} \right]}
+\newcommand{\comb}[2]{\binom{#1^2 + #2^2}{#1+#2}}
+\newcommand{\bs}{\boldsymbol}
+\newcommand{\opn}{\operatorname}
+\begin{document}
+\nocite{*}
+
+\title{Variational Approximation for Beta Mixture}
+
+\author{Daeyoung Lim\thanks{Prof. Taeryon Choi} \\
+Department of Statistics \\
+Korea University}
+
+\maketitle
+
+\section{Model Specification}
+For identification, $p_{i}$ has been switched to $y_{i} \in \left(0,1\right)$.
+\begin{align*}
+  f\left(y_{i}|s_{j}, m_{j}\right) &= \frac{\Gamma\left(s_{j}\right)}{\Gamma\left(s_{j}m_{j}\right)\Gamma\left(s_{j}\left(1-m_{j}\right)\right)} y_{i}^{s_{j}m_{j}-1} \left(1-y_{i}\right)^{s_{j}\left(1-m_{j}\right)-1}\\
+  p\left(y|m,s,\lambda,Z\right) &= \prod_{i=1}^{N}\prod_{j=1}^{M}\left\{f\left(y_{i}|s_{j}, m_{j}\right) \right\}^{1\left[Z_{i}=j \right]} \\
+  p\left(m, s, \lambda, Z\right) &\propto \prod_{j=1}^{M} \left[\lambda_{j}^{\sum_{i=1}^{N}1\left[Z_{i}=j\right]} \cdot \lambda_{j}^{\underline{a}-1} \cdot m_{j}^{\underline{n}_{m_{1}}-1} \left(1-m_{j}\right)^{\underline{n}_{m_{0}}-1} \cdot s_{j}^{\underline{a}_{s}-1}\exp \left\{-s_{j}/\underline{b}_{s} \right\} \right]\\
+  \log p\left(y, \theta\right) &\propto \log p \left(y|m,s, \lambda, Z\right) + \log p\left(m, s, \lambda, Z\right)
+\end{align*}
+where $\theta = \left(m, s, \lambda, Z\right)$.
+\section{Coordinate Ascent}
+\subsection{$q\left(m_{i}\right)$}
+\begin{align*}
+  \log q\left(m\right) &\propto \mathbb{E}\left[\sum_{i=1}^{N}\sum_{j=1}^{M}1\left[Z_{i}=j\right] \log f\left(y_{i}|s_{j}, m_{j}\right) +\sum_{j=1}^{M}\left[\left(\underline{n}_{m_{1}}-1\right)\log m_{j} +\left(\underline{n}_{m_{0}}-1\right)\log \left(1-m_{j}\right) \right]\right]\\
+  &\propto \sum_{j=1}^{M}\left[ \sum_{i=1}^{N}q\left(Z_{i}=j\right)\mathbb{E}\left[s_{j}\right] \log \left(\frac{y_{i}}{1-y_{i}}\right)m_{j} + \left(\underline{n}_{m_{1}}-1\right) \log m_{j} +\left(\underline{n}_{m_{0}}-1\right)\log \left(1-m_{j}\right) \right]
+\end{align*}
+Ignoring the summation with respect to $j$,
+\begin{align*}
+  q\left(m_{j}\right) &\propto \exp \left\{\sum_{i=1}^{N}q\left(Z_{i}=j\right)\mathbb{E}\left[s_{j}\right]\log \left(\frac{y_{i}}{1-y_{i}}\right)m_{j}\right\}\cdot m_{j}^{\underline{n}_{m_{1}}-1}\left(1-m_{j}\right)^{\underline{n}_{m_{0}}-1}\\
+  &\propto \exp\left\{-C_{m}^{q}m_{j} \right\} m_{j}^{\underline{n}_{m_{1}}-1}\left(1-m_{j}\right)^{\underline{n}_{m_{0}}-1}, \quad C_{m}^{q}>0
+\end{align*}
+Let $$\mathcal{I}\left(a, \alpha, \beta\right) = \int_{0}^{1}e^{-ax}x^{\alpha-1}\left(1-x\right)^{\beta-1}\, dx. $$
+Therefore,
+\begin{align*}
+  q\left(m_{j}\right) &= \frac{\exp\left\{-C_{m}^{q}m_{j}\right\}m_{j}^{\underline{n}_{m_{1}}-1}\left(1-m_{j}\right)^{\underline{n}_{m_{0}}-1}}{\mathcal{I}\left(C_{m}^{q}, \underline{n}_{m_{1}}, \underline{n}_{m_{0}} \right)}\\
+  C_{m}^{q} &\leftarrow -\sum_{i=1}^{N}\phi_{ij}\mathbb{E}\left[s_{j}\right]\log \left(\frac{y_{i}}{1-y_{i}}\right)\\
+  q\left(Z_{i}=j\right) &= \phi_{ij}.
+\end{align*}
+\subsection{$q\left(s_{j}\right)$}
+\begin{align*}
+  \log q\left(s\right) &\propto \sum_{i=1}^{N}\sum_{j=1}^{M}1\left[Z_{i}=j\right]\log f\left(y_{i}|s_{j}, m_{j}\right) + \sum_{j=1}^{M}\left(\underline{a}_{s}-1\right)\log s_{j} - s_{j}/\underline{b}_{s}\\
+  q\left(s_{j}\right) &\propto \exp \left\{\left(\sum_{i=1}^{N}\phi_{ij}\left(\mathbb{E}\left[m_{j}\right] \log y_{i} + \left(1-\mathbb{E}\left[m_{j}\right]\right)\log \left(1-y_{i}\right) \right)-\frac{1}{\underline{b}_{s}}\right)s_{j} \right\} s_{j}^{\underline{a}_{s}-1}\\
+  &= \opn{Gamma}\left(\underline{a}_{s}, \beta_{s_{j}}\right)\\
+  \beta_{s_{j}} &\leftarrow \left(-\sum_{i=1}^{N}\phi_{ij}\left(\mathbb{E}\left[m_{j}\right]\log y_{i} + \left(1-\mathbb{E}\left[m_{j}\right]\right)\log \left(1-y_{i}\right) \right) +\frac{1}{\underline{b}_{s}} \right)^{-1}
+\end{align*}
+\subsection{$q\left(\lambda\right) $}
+\begin{align*}
+  \log q\left(\lambda\right) &\propto \sum_{j=1}^{M}\left[\left(\sum_{i=1}^{N}\phi_{ij} + \underline{a} -1 \right)\log \lambda_{j} \right]\\
+  q\left(\lambda_{j}\right) &\propto \lambda_{j}^{\sum_{i=1}^{N}\phi_{ij} + \underline{a}-1}
+\end{align*}
+Therefore, $\lambda \sim \opn{Dir}\left(\underline{a}_{q}\right)$ where the $j^{\text{th}}$ element of $\underline{a}_{q}$ is given as $\sum_{i=1}^{N}\phi_{ij} + \underline{a}$.
+\subsection{$q\left(Z\right)$}
+\begin{align*}
+  \log q \left(Z\right) &\propto \mathbb{E}\left[\sum_{i=1}^{N}\sum_{j=1}^{M} 1\left[Z_{i}=j\right] \log f\left(y_{i}|s_{j}, m_{j}\right) + \sum_{j=1}^{M}\left[\left(\sum_{i=1}^{N} 1\left[Z_{i}=j\right]\right)\log \lambda_{j}\right]\right]\\
+  &\propto \mathbb{E}\left[\sum_{i=1}^{N}\sum_{j=1}^{M} 1\left[Z_{i}=j\right] \left(\left(s_{j}m_{j}-1\right)\log y_{i}+\left(s_{j}-s_{j}m_{j}-1\right)\log \left(1-y_{i}\right)\right) + \sum_{j=1}^{M}\sum_{i=1}^{N}1\left[Z_{i}=j\right]\log \lambda_{j}\right]\\
+  &\propto \sum_{i=1}^{N}\sum_{j=1}^{M} 1\left[Z_{i}=j\right]\left[\log \left\{y_{i}^{\left\langle s_{j}\right\rangle \left\langle m_{j}\right\rangle -1} \left(1-y_{i}\right)^{\left\langle s_{j}\right\rangle -\left\langle s_{j}\right\rangle \left\langle m_{j}\right\rangle -1}\left\langle\lambda_{j}\right\rangle \right\}\right]\\
+  &\propto \sum_{i=1}^{N}\sum_{j=1}^{M} \log \left[\left(\frac{y_{i}}{1-y_{i}} \right)^{\left\langle s_{j}\right\rangle \left\langle m_{j}\right\rangle} \cdot \frac{\left(1-y_{i}\right)^{\left\langle s_{j}\right\rangle}\left\langle \lambda_{j}\right\rangle}{y_{i}\left(1-y_{i}\right)} \right]^{1\left[Z_{i}=j\right]}\\
+  q\left(Z\right) &\propto \prod_{i=1}^{N}\prod_{j=1}^{M} \left[\left(\frac{y_{i}}{1-y_{i}} \right)^{\left\langle s_{j}\right\rangle \left\langle m_{j}\right\rangle} \cdot \frac{\left(1-y_{i}\right)^{\left\langle s_{j}\right\rangle}\left\langle\lambda_{j}\right\rangle}{y_{i}\left(1-y_{i}\right)} \right]^{1\left[Z_{i}=j\right]}
+\end{align*}
+Since we chose to denote $q\left(Z_{i}=j\right)$ with $\phi_{ij}$,
+$$
+  \phi_{ij} \leftarrow \left(\frac{y_{i}}{1-y_{i}} \right)^{\left\langle s_{j}\right\rangle \left\langle m_{j}\right\rangle} \cdot \frac{\left(1-y_{i}\right)^{\left\langle s_{j}\right\rangle}\left\langle\lambda_{j}\right\rangle}{y_{i}\left(1-y_{i}\right)} 
+$$
+\section{Lower Bound}
+\begin{align*}
+  \mathcal{L} &= \mathbb{E}\left[\log p \left(y, \theta \right) \right] - \mathbb{E}\left[\log q\left(\theta\right) \right]\\
+  &= \mathbb{E}\left[\log p \left(y|m,s,\lambda, Z\right)\right] + \mathbb{E}\left[\log p \left(m,s, \lambda, Z\right)\right] -\mathbb{E}\left[\log q\left(m, s, \lambda, Z\right)\right]
+\end{align*}
+\subsection{$\mathbb{E}\left[\log p \left(y,\theta\right)\right]$}
+\begin{align*}\mathbb{E}\left[\log p \left(y, \theta \right)\right] &= \sum_{i=1}^{N}\sum_{j=1}^{M}\phi_{ij} \left\langle \log \Gamma\left(s_{j}\right)\right\rangle -\left\langle \log \Gamma\left(s_{j}m_{j}\right)\right\rangle -\left\langle \log \Gamma\left(s_{j}-s_{j}m_{j}-1\right)\right\rangle + \left(\left\langle s_{j}\right\rangle \left\langle m_{j}\right\rangle -1\right)\log y_{i} \\
+&\quad + \left(\left\langle s_{j}\right\rangle \left(1-\left\langle m_{j}\right\rangle\right)-1\right)\log \left(1-y_{i}\right)  \end{align*}
+\begin{itemize}
+  \item The expectation of $\log \Gamma \left(m_{j}\right)$ is not analytically tractable but it certainly is numerically through Monte-Carlo methods and the strong law of large numbers. The sampling of $m_{j}$ is carried out through acceptance-rejection sampling method if we select the instrument density with care bearing $(0, 1)$ as its support.
+  $$
+    \mathbb{E}\left[g\left(X\right)\right] \approx \frac{1}{n}\sum_{i=1}^{n}g\left(X_{i}\right)
+  $$
+  \item The same logic applies for the expectations of $\log \Gamma \left(s_{j}m_{j}\right)$ and $\log \Gamma \left(s_{j}-s_{j}m_{j}-1\right)$.
+  \item The expectation of $m_{j}$ is as follows: 
+  $$
+  \left\langle m_{j}\right\rangle = \frac{\mathcal{I}\left(C_{m}^{q}, \underline{n}_{m_{1}}+1, \underline{n}_{m_{0}}\right)}{\mathcal{I}\left(C_{m}^{q}, \underline{n}_{m_{1}}, \underline{n}_{m_{0}}\right)}
+  $$
+\end{itemize}
+\subsection{$\mathbb{E}\left[\log p \left(m, s, \lambda, Z\right)\right]$}
+For the prior distributions, normalizing constants of these distributions are of no use since they do not change in every iteration which also indicates they do not contribute to the lower bound at all. We will thus only consider the following:
+\begin{align*}
+  \mathbb{E}\left[\log p\left(\theta\right)\right] &\propto \sum_{j=1}^{M}\left[\sum_{i=1}^{N}\phi_{ij}\left\langle \log \lambda_{j}\right\rangle + \left(\underline{a}-1\right)\left\langle \log \lambda_{j}\right\rangle +\left(\underline{n}_{m_{1}}-1\right)\left\langle \log m_{j}\right\rangle + \left(\underline{n}_{m_{0}}-1\right)\left\langle \log \left(1-m_{j}\right)\right\rangle \right.\\
+  &\quad \left.+ \left(\underline{a}_{s}-1\right)\left\langle \log s_{j}\right\rangle -\left\langle s_{j}\right\rangle/\underline{b}_{s} \right]
+\end{align*}
+\begin{itemize}
+  \item The variational distribution of $\lambda$ is dirichlet distribution with the $j^{\text{th}}$ element of its parameter vector $\underline{a}_{q}$ is $\sum_{i=1}^{N}\phi_{ij} + \underline{a}$. We know that the marginal distribution of $\lambda_{j}$ follows beta distribution. We first present a general formulation of the theorem. Let $X = \left(X_{1}, \ldots , X_{K}\right) \sim \opn{Dir}\left(\alpha\right)$ where $\alpha_{0} = \sum_{i=1}^{K} \alpha_{i}$. Then,
+  \begin{align*}
+    \mathbb{E}\left[X_{i}\right] &= \frac{\alpha_{i}}{\alpha_{0}} \\
+    \opn{Var}\left[X_{i}\right] &= \frac{\alpha_{i}\left(\alpha_{0}-\alpha_{i}\right)}{\alpha_{0}^{2}\left(\alpha_{0}+1\right)}\\
+    \opn{Cov}\left[X_{i}, X_{j}\right] &= \frac{-\alpha_{i}\alpha_{j}}{\alpha_{0}^{2}\left(\alpha_{0}+1\right)}, \quad \text{if } i \neq j\\
+    X_{i} &\sim \opn{Beta}\left(\alpha_{i}, \alpha_{0}-\alpha_{i}\right)
+  \end{align*}
+  \item The above item suggests that
+  $$
+  \lambda_{j} \sim \opn{Beta}\left(\sum_{i=1}^{N}\phi_{ij} + \underline{a}, \sum_{j=1}^{M}\sum_{i=1}^{N}\phi_{ij} - \sum_{i=1}^{N}\phi_{ij} + \left(M-1\right)\underline{a}\right).
+  $$
+  \item Let $Y \sim \opn{Beta}\left(\alpha, \beta\right)$.
+  $$
+  \mathbb{E}\left[\log Y\right] = \varphi\left(\alpha\right) - \varphi\left(\alpha + \beta\right)
+  $$
+  where $\varphi$ is the digamma function.
+  \item Thus
+  $$
+  \opn{E}\left[\log \lambda_{j}\right] = \varphi\left(\sum_{i=1}^{N}\phi_{ij} + \underline{a}\right) - \varphi\left(\sum_{j=1}^{M}\sum_{i=1}^{N}\phi_{ij} + M\underline{a}\right).
+  $$
+\end{itemize}
+\subsection{$\mathbb{E}\left[\log q\left(m, s, \lambda, Z\right)\right]$}
+\subsubsection{$\mathbb{E}\left[\log q\left(m\right)\right] $}
+$$
+  q\left(m_{j}\right) = \frac{\exp \left\{-C_{m}^{q}m_{j} \right\}m_{j}^{\underline{n}_{m_{j}}-1}\left(1-m_{j}^{\underline{n}_{m_{0}}-1}\right)}{\mathcal{I}\left(C_{m}^{q}, \underline{n}_{m_{1}}, \underline{n}_{m_{0}}\right)}
+$$
+\begin{align*}
+  \log q\left(m_{j}\right) &= -C_{m}^{q}m_{j} +\left(\underline{n}_{m_{1}}-1\right)\log m_{j} + \left(\underline{n}_{m_{0}}-1\right)\log \left(1-m_{j}\right) - \log \mathcal{I}\left(C_{m}^{q}, \underline{n}_{m_{1}}, \underline{n}_{m_{0}}\right)\\
+  \mathbb{E}\left[\log q\left(m_{j}\right)\right] &= -C_{m}^{q}\left\langle m_{j}\right\rangle + \left(\underline{n}_{m_{1}}-1\right)\left\langle \log m_{j}\right\rangle + \left(\underline{n}_{m_{0}}-1\right)\left\langle \log \left(1-m_{j}\right)\right\rangle - \log \mathcal{I}\left(C_{m}^{q}, \underline{n}_{m_{1}}, \underline{n}_{m_{0}}\right)\\
+  \left\langle m_{j}\right\rangle &= \frac{\mathcal{I}\left(C_{m}^{q}, \underline{n}_{m_{1}}+1, \underline{n}_{m_{0}}\right)}{\mathcal{I}\left(C_{m}^{q}, \underline{n}_{m_{1}}, \underline{n}_{m_{0}}\right)}
+\end{align*}
+\end{document}

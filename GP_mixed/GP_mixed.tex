@@ -1,0 +1,151 @@
+\documentclass[11pt]{article}
+
+% This first part of the file is called the PREAMBLE. It includes
+% customizations and command definitions. The preamble is everything
+% between \documentclass and \begin{document}.
+
+\usepackage[margin=1in]{geometry} % set the margins to 1in on all sides
+\usepackage{graphicx} % to include figures
+\usepackage{amsmath} % great math stuff
+\usepackage{amsfonts} % for blackboard bold, etc
+\usepackage{amsthm} % better theorem environments
+% various theorems, numbered by section
+\usepackage{amssymb}
+\usepackage[utf8]{inputenc}
+\usepackage{booktabs}
+\usepackage{array}
+\usepackage{courier}
+\usepackage[usenames, dvipsnames]{color}
+\usepackage{titlesec}
+
+\newtheorem{thm}{Theorem}[section]
+\newtheorem{lem}[thm]{Lemma}
+\newtheorem{prop}[thm]{Proposition}
+\newtheorem{cor}[thm]{Corollary}
+\newtheorem{conj}[thm]{Conjecture}
+
+\setcounter{secnumdepth}{4}
+
+\titleformat{\paragraph}
+{\normalfont\normalsize\bfseries}{\theparagraph}{1em}{}
+\titlespacing*{\paragraph}
+{0pt}{3.25ex plus 1ex minus .2ex}{1.5ex plus .2ex}
+
+\definecolor{myblue}{RGB}{72, 165, 226}
+\definecolor{myorange}{RGB}{222, 141, 8}
+
+\setlength{\heavyrulewidth}{1.5pt}
+\setlength{\abovetopsep}{4pt}
+
+
+\DeclareMathOperator{\id}{id}
+\DeclareMathOperator{\argmin}{\arg\!\min}
+\DeclareMathOperator{\Tr}{Tr}
+
+\newcommand{\bd}[1]{\mathbf{#1}} % for bolding symbols
+\newcommand{\RR}{\mathbb{R}} % for Real numbers
+\newcommand{\ZZ}{\mathbb{Z}} % for Integers
+\newcommand{\col}[1]{\left[\begin{matrix} #1 \end{matrix} \right]}
+\newcommand{\comb}[2]{\binom{#1^2 + #2^2}{#1+#2}}
+\newcommand{\bs}{\boldsymbol}
+\newcommand{\opn}{\operatorname}
+\begin{document}
+\nocite{*}
+
+\title{Incorporating Random effect into GP Sparse Approximation}
+
+\author{Daeyoung Lim\thanks{Prof. Taeryon Choi} \\
+Department of Statistics \\
+Korea University}
+
+\maketitle
+
+\section{GP linear mixed model}
+\subsection{Model specifications}
+The model specifications remain the same except that the random effect term has been added.
+\begin{align*}
+  y|\theta &\sim \mathcal{N}\left(Z\alpha + A\beta, \gamma^{2}I_{n}\right), (n\times n) \\
+  \alpha|\sigma^{2} &\sim \mathcal{N}\left(0, \frac{\sigma^{2}}{m}I_{2m}\right), (2m\times 1) \\
+  \beta &\sim \mathcal{N}\left(0, \Sigma_{\beta}\right), (s\times 1)  \\
+  \lambda &\sim \mathcal{N}\left(\mu_{\lambda}, \Sigma_{\lambda}\right), (d \times 1)\\
+  \sigma &\sim \opn{half-Cauchy}\left(A_{\sigma}\right)\\
+  \gamma &\sim \opn{half-Cauchy}\left(A_{\gamma}\right)
+\end{align*}
+where $A$ is the design matrix for the random effects and $\beta$ is the parameter vector of the random effects.
+\subsection{Lower bound}
+$$
+  p\left(y, \theta \right) = \mathcal{N}\left(y|Z\alpha + A\beta, \gamma^{2}I_{n}\right) \mathcal{N}\left(\alpha \middle|0, \frac{\sigma^{2}}{m}I_{2m}\right)\mathcal{N}\left(\beta|0,\Sigma_{\beta}\right)\mathcal{N}\left(\lambda,\mu_{\lambda},\Sigma_{\lambda}\right)\operatorname{HC}\left(A_{\sigma}\right)\opn{HC}\left(A_{\gamma}\right)
+$$
+\begin{align*}
+  \textcolor{myorange}{(1)}\;\mathbb{E}\left[\log p\left(y|\theta \right)\right] &= -\frac{n}{2}\log \left(2\pi \right) - \frac{n}{2}\mathbb{E}\left[\log \gamma^{2}\right] \\
+  & \,\quad - \frac{1}{2}\mathbb{E}\left[\frac{1}{\gamma^{2}}\right] \left\{y^{T}y -2 \left(\mathbb{E}\left[Z\right]m_{\alpha}+Am_{\beta} \right)^{T}y + \Tr\left(\mathbb{E}\left[Z^{T}Z\right]S_{\alpha} \right) +m_{\alpha}^{T}\mathbb{E}\left[Z^{T}Z\right]m_{\alpha}\right. \\
+  &\quad\, + 2m_{\beta}^{T}A^{T}\mathbb{E}\left[Z\right]m_{\alpha} + \left. \Tr\left(A^{T}A S_{\beta}\right) + m_{\beta}^{T}A^{T}A m_{\beta} \right\}\\
+  \textcolor{myorange}{(2)}\;\mathbb{E}\left[\log p \left(\alpha|\sigma\right)\right] &= -m \log \left(2\pi \right) -m \mathbb{E}\left[\log \sigma^{2}\right] +m\log m -\frac{m}{2}\mathbb{E}\left[\frac{1}{\sigma^{2}}\right]\Tr \left(S_{\alpha} +m_{\alpha}m_{\alpha}^{T}\right)\\
+  \textcolor{myorange}{(3)}\;\mathbb{E}\left[\log p\left(\beta\right)\right] &= -\frac{s}{2}\log \left(2\pi \right) -\frac{1}{2}\log \left|\Sigma_{\beta}\right| -\frac{1}{2}\left\{\Tr \left(\Sigma_{\beta}^{-1}S_{\beta}\right) +m_{\beta}^{T}\Sigma_{\beta}^{-1}m_{\beta} \right\}\\
+  \textcolor{myorange}{(4)}\;\mathbb{E}\left[\log p\left(\lambda\right)\right] &= -\frac{d}{2}\log  \left(2\pi \right) -\frac{1}{2}\log \left|\Sigma_{\lambda}\right| -\frac{1}{2}\left(m_{\lambda}-\mu_{\lambda}\right)^{T}\Sigma_{\lambda}^{-1}\left(m_{\lambda}-\mu_{\lambda}\right) - \frac{1}{2}\Tr\left(\Sigma_{\lambda}^{-1}S_{\lambda}\right) \\
+  \textcolor{myorange}{(5)}\;\mathbb{E}\left[\log p\left(\sigma\right)\right] &= \log \left(2A_{\sigma}\right) -\log \pi -\mathbb{E}\left[\log \left(A_{\sigma}^{2}+\sigma^{2}\right)\right]\\
+  \textcolor{myorange}{(6)}\;\mathbb{E}\left[\log p \left(\gamma\right)\right] &= \log \left(2A_{\gamma}\right) -\log \pi -\mathbb{E}\left[\log \left(A_{\gamma}^{2}+\gamma^{2}\right)\right] \\
+  \textcolor{myblue}{(1)}\;\mathbb{E}\left[\log q\left(\alpha\right)\right] &= -m\log \left(2\pi \right) -\frac{1}{2}\log \left|S_{\alpha}\right| -m\\
+  \textcolor{myblue}{(2)}\;\mathbb{E}\left[\log q\left(\lambda\right)\right] &= -\frac{d}{2}\log \left(2\pi \right) -\frac{1}{2}\log \left|S_{\lambda}\right| -\frac{d}{2}\\
+  \textcolor{myblue}{(3)}\;\mathbb{E}\left[\log q\left(\beta\right)\right] &= -\frac{s}{2}\log \left(2\pi \right) -\frac{1}{2}\log \left|S_{\beta}\right| -\frac{s}{2}\\
+  \textcolor{myblue}{(4)}\;\mathbb{E}\left[\log q\left(\sigma\right)\right] &= -C_{\sigma}\frac{\mathcal{H}\left(2m, C_{\sigma}, A_{\sigma}^{2}\right)}{\mathcal{H}\left(2m-2, C_{\sigma}, A_{\sigma}^{2}\right)} -\log \mathcal{H}\left(2m-2, C_{\sigma}, A_{\sigma}^{2}\right) -2m \mathbb{E}\left[\log \sigma\right] -\mathbb{E}\left[\log \left(A_{\sigma}^{2}+\sigma^{2}\right)\right]\\
+  \textcolor{myblue}{(5)}\;\mathbb{E}\left[\log q\left(\gamma\right)\right] &= -C_{\gamma}\frac{\mathcal{H}\left(n, C_{\gamma}, A_{\gamma}^{2}\right)}{\mathcal{H}\left(n-2, C_{\gamma}, A_{\gamma}^{2}\right)} -\log \mathcal{H}\left(n-2, C_{\gamma}, A_{\gamma}^{2}\right) -n \mathbb{E}\left[\log \gamma\right] -\mathbb{E}\left[\log \left(A_{\gamma}^{2}+\gamma^{2}\right)\right]
+\end{align*}
+$$
+  \mathcal{L} = \textcolor{myorange}{(1)} + \textcolor{myorange}{(2)} + \textcolor{myorange}{(3)} + \textcolor{myorange}{(4)} + \textcolor{myorange}{(5)} + \textcolor{myorange}{(6)} - \textcolor{myblue}{(1)} - \textcolor{myblue}{(2)} - \textcolor{myblue}{(3)} - \textcolor{myblue}{(4)} - \textcolor{myblue}{(5)}
+$$
+\section{GP Logistic Model}
+\subsection{Model specifications}
+For logistic models, we first postulate a link function, $g\left(\cdot \right)$ for the predictors.
+\begin{align*}
+  y &= g^{-1}\left(\eta\right) + \epsilon, \quad \epsilon \sim \mathcal{N}\left(0, \gamma^{2}I_{n}\right)\\
+  g\left(\mathbb{E}\left[y\right]\right) &= \eta\\
+  \eta &= f\left(x\right) + A\beta\\
+  g^{-1}\left(x\right) &= e^{x}/\left(1+e^{x}\right)\\
+  f &\sim \mathcal{GP}\left(m\left(\cdot \right), \kappa\left(\cdot, \cdot \right)\right)
+\end{align*}
+Since $y$ is a Bernoulli random variable, $\mathbb{E}\left[y\right] = \mathbb{P}\left(y=1\right)$. Without loss of generality, we will assume the mean function to be zero and that the Gaussian process has a sparse approximation representation as in Tan \& Nott. Therefore,
+$$
+  f\left(x\right) \approx \sum_{r=1}^{m}\left[a_{r}\cos \left\{\left(s_{r} \odot x\right)^{T}\lambda \right\}+b_{r}\sin \left\{\left(s_{r}\odot x\right)^{T}\lambda \right\}\right]
+$$
+and this could further be represented in matrix form which reduces this to a linear model.
+$$
+  f\left(x\right) = Z\alpha
+$$
+\begin{align*}
+  \eta &= Z\alpha + A\beta\\
+  y &= \exp\left\{\left(Z\alpha+A\beta\right) -\log \left(\bs{1}+\exp \left\{Z\alpha +A\beta \right\}\right) \right\} + \epsilon
+\end{align*}
+Every scalar function applied to a vector or a matrix is done so elementwise. We think of the following priors:
+\begin{align*}
+  \alpha|\sigma &\sim \mathcal{N}\left(0, \frac{\sigma^{2}}{m}I_{2m}\right)\\
+  \beta &\sim \mathcal{N}\left(\mu_{\beta}, \Sigma_{\beta}\right) \\
+  \lambda &\sim \mathcal{N}\left(\mu_{\lambda}, \Sigma_{\lambda}\right) \\
+  \sigma &\sim \opn{half-Cauchy}\left(A_{\sigma}\right) \\
+  \gamma &\sim \opn{half-Cauchy}\left(A_{\gamma}\right)\\
+  \theta &= \left(\alpha, \beta, \lambda, \sigma, \gamma\right)
+\end{align*}
+\begin{align*}
+  \log p\left(y, \theta \right) &= y^{T}\left(Z\alpha+A\beta\right) -\bs{1}_{n}^{T}\log \left(\bs{1}_{n}+\exp \left\{Z\alpha + A\beta \right\}\right) -\left(m+\frac{s+d}{2}\right)\log \left(2\pi\right) -m\log \sigma^{2} + m\log m \\
+  &\quad -\frac{m}{2\sigma^{2}}\alpha^{T}\alpha -\frac{1}{2}\log \left|\Sigma_{\beta}\right| -\frac{1}{2}\left(\beta-\mu_{\beta}\right)^{T}\Sigma_{\beta}^{-1}\left(\beta-\mu_{\beta}\right) -\frac{1}{2}\log \left|\Sigma_{\lambda}\right| -\frac{1}{2}\left(\lambda-\mu_{\lambda}\right)^{T}\Sigma_{\lambda}^{-1}\left(\lambda-\mu_{\lambda}\right) \\
+  &\quad + \log \left(2A_{\sigma}\right)+\log \left(2A_{\gamma}\right) 2\log \pi -\log \left(A_{\sigma}^{2}+\sigma^{2}\right) -\log \left(A_{\gamma}^{2}+\gamma^{2}\right)
+\end{align*}
+Because $-\bs{1}_{n}^{T}\log \left(\bs{1}_{n}+\exp \left\{Z\alpha + A\beta \right\}\right)$ is analytically intractable for expectation which is essentially integration, we come up with the following approximation:
+\begin{align*}
+  -\log \left(1+e^{x}\right) &= \max_{\xi \in \RR} \left\{B\left(\xi\right)x^{2} -\frac{1}{2}x+C\left(\xi \right) \right\}, \quad \forall x\in\RR\\
+  B\left(\xi\right) &= -\opn{tanh}\left(\xi/2\right)/\left(4\xi\right)\\
+  C\left(\xi\right) &= \xi/2 -\log \left(1+e^{\xi}\right) +\xi \opn{tanh}\left(\xi/2\right)/4
+\end{align*}
+then
+\begin{align*}
+  -\bs{1}_{n}^{T}\log \left\{\bs{1}_{n}^{T}+\exp \left(Z\alpha+A\beta\right) \right\} &\ge \bs{1}_{n}^{T}\left\{B\left(\xi\right) \odot \left(Z\alpha+A\beta\right)^{2} -\frac{1}{2}\left(Z\alpha+A\beta\right) +C\left(\xi\right) \right\}\\
+  &= \left(Z\alpha+A\beta\right)^{T}\opn{Dg}\left\{B\left(\xi\right)\right\}\left(Z\alpha+A\beta\right) -\frac{1}{2}\bs{1}_{n}^{T}\left(Z\alpha+A\beta\right) +\bs{1}_{n}^{T}C\left(\xi\right),
+\end{align*}
+where $\xi = \left(\xi_{1}, \ldots , \xi_{n}\right)$.
+\begin{align*}
+  \log \underline{p}\left(y, \theta;\xi \right) &= y^{T}\left(Z\alpha+A\beta\right)+ \left(Z\alpha+A\beta\right)^{T}\opn{Dg}\left\{B\left(\xi\right)\right\}\left(Z\alpha+A\beta\right) -\frac{1}{2}\bs{1}_{n}^{T}\left(Z\alpha+A\beta\right) +\bs{1}_{n}^{T}C\left(\xi\right) \\
+  &\quad-\left(m+\frac{s+d}{2}\right)\log \left(2\pi\right) -m\log \sigma^{2} + m\log m -\frac{m}{2\sigma^{2}}\alpha^{T}\alpha -\frac{1}{2}\log \left|\Sigma_{\beta}\right| -\frac{1}{2}\left(\beta-\mu_{\beta}\right)^{T}\Sigma_{\beta}^{-1}\left(\beta-\mu_{\beta}\right)\\
+  &\quad -\frac{1}{2}\log \left|\Sigma_{\lambda}\right| -\frac{1}{2}\left(\lambda-\mu_{\lambda}\right)^{T}\Sigma_{\lambda}^{-1}\left(\lambda-\mu_{\lambda}\right) + \log \left(2A_{\sigma}\right)+\log \left(2A_{\gamma}\right) 2\log \pi -\log \left(A_{\sigma}^{2}+\sigma^{2}\right)\\
+  &\quad-\log \left(A_{\gamma}^{2}+\gamma^{2}\right)
+\end{align*}
+\end{document}

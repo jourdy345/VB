@@ -1,0 +1,124 @@
+-------------------------------------------------------------------------------
+
+README file corresponding to submitted code for
+
+	"Gaussian Variational Approximate Inference for Generalized Linear Mixed Models"
+	
+by
+
+   J.T. Ormerod and M.P. Wand.
+   
+-------------------------------------------------------------------------------
+
+The zip file GVA.zip contains the following R code:
+
+FILE									DESCRIPTION
+-------------------------------------------------------------------------------
+CalculateB.Rs					This file contains code for calculating the 
+                      B^{(r)}(\mu,\sigma^2) function using the adaptive 
+                      Gauss-Hermite quadrature method described in Appendix A.
+
+epil2.rda							The file contains the Epilepsy dataset used for the 
+                      examples in Figure 2 and 3.
+
+Figure2EpilRIM.Rs			An example which fits the random intecept model described 
+                      in the paper corresponding to Figure 2 to the Epilepsy 
+                      dataset using a variety of methods.
+
+Figure3EpilRISM.Rs    An example which fits the random slope model described 
+                      in the paper corresponding to Figure 3 to the Epilepsy 
+                      dataset using a variety of methods.
+                      
+Figure4ToenailRIM.Rs  An example which fits the random intecept model described 
+                      in the paper corresponding to Figure 2 to the Toenail 
+                      dataset using a variety of methods.
+
+GVAgrouped.Rs					The code used to fit the grouped data GLMM described in the
+                      paper using the GVA method. The function "GVA.randint.FIT" 
+                      is described below.
+
+GVArandint.Rs					Specialized code used to fit random intecept GLMMs using the 
+											GVA method. The function "GVA.grouped.FIT" is described below.
+
+Table1Setting1.Rs			The code used to generate the values in Table 1 for
+                      setting 1.
+                      
+Table1Setting2.Rs			The code used to generate the values in Table 1 for 
+                      setting 2.
+                      
+Table1Setting3.Rs			The code used to generate the values in Table 1 for 
+                      setting 3.
+                      
+-------------------------------------------------------------------------------
+
+GVA.grouped.FIT 
+
+Description
+
+Fits the grouped data GLMM described in the paper using the GVA method.
+
+Usage
+
+GVA.grouped.FIT(vbeta,mSigma,lvmu,lmLambda,family,vy,mX,lmZ) 
+
+Arguments
+
+vbeta			A vector containing the initial values for the fixed effects.
+mSigma		A vector containing the initial values for the random effect 
+          covariance matrix.
+lvmu      A list of vectors containing the initial values for the 
+          variational means of the random effects for each group.
+lmLambda  A list of matrices containing the initial values for the 
+          variational covariances of the random effects for each group.
+family    A string. Either "POISSON" or "LOGISTIC".
+vy        A vector of responses.
+mX        The design matrix for the fixed effects.
+lmZ       A list of design matrices for the random effects for each group.
+
+Output
+
+vbeta				The fitted values for the fixed effects.
+mSigma			The fitted values for the random effect covariance.
+lvmu				The optimal values for the variational means.
+lmLambda		The optimal values for the variational covariances.
+vbeta.serr	Standard error values for the fixed effects.
+sl 					The value for the lower bound on the likelihood.
+
+-------------------------------------------------------------------------------
+
+GVA.randint.FIT
+
+Description
+
+Fits random intecept GLMMs using the GVA method.
+
+Usage
+
+GVA.randint.FIT(vbeta,sigma2,vmu,vlambda,family,vy,mX,vn,id) 
+
+Arguments
+
+vbeta			A vector containing the initial values for the fixed effects.
+sigma2  	A positive initial value for the random effect variance.
+vmu				A vector containing the initial values for the variational means of the 
+          random effects for each group.
+vlambda		A vector containing the initial values for the variational variances of 
+          the random effects for each group.
+family    A string. Either "POISSON" or "LOGISTIC".
+vy				A vector of responses.
+mX				The design matrix for the fixed effects.
+vn				A vector containing the number of observations for each group.
+id				A vector containing a group id for each observation.
+
+Output                   
+         
+A list containing the following entries:
+
+vbeta				The fitted values for the fixed effects.
+sigma2			The fitted values for the random effect variance.
+vmu					The optimal values for the variational means.
+vlambda			The optimal values for the variational variances.
+vbeta.serr	Standard error values for the fixed effects.
+sl					The value for the lower bound on the likelihood.
+         
+-------------------------------------------------------------------------------             

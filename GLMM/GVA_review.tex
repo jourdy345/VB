@@ -1,0 +1,436 @@
+\documentclass[11pt]{article}
+
+% This first part of the file is called the PREAMBLE. It includes
+% customizations and command definitions. The preamble is everything
+% between \documentclass and \begin{document}.
+
+\usepackage[margin=1in]{geometry} % set the margins to 1in on all sides
+\usepackage{graphicx} % to include figures
+\usepackage{amsmath} % great math stuff
+\usepackage{amsfonts} % for blackboard bold, etc
+\usepackage{amsthm} % better theorem environments
+% various theorems, numbered by section
+\usepackage{amssymb}
+\usepackage[utf8]{inputenc}
+\usepackage{booktabs}
+\usepackage{array}
+\usepackage{courier}
+\usepackage[usenames, dvipsnames]{color}
+\usepackage{titlesec}
+
+\setcounter{secnumdepth}{4}
+
+\titleformat{\paragraph}
+{\normalfont\normalsize\bfseries}{\theparagraph}{1em}{}
+\titlespacing*{\paragraph}
+{0pt}{3.25ex plus 1ex minus .2ex}{1.5ex plus .2ex}
+
+\definecolor{myblue}{RGB}{72, 165, 226}
+\definecolor{myorange}{RGB}{222, 141, 8}
+
+\setlength{\heavyrulewidth}{1.5pt}
+\setlength{\abovetopsep}{4pt}
+
+
+\DeclareMathOperator{\id}{id}
+\DeclareMathOperator{\argmin}{\arg\!\min}
+\DeclareMathOperator{\Tr}{Tr}
+
+\newcommand{\bd}[1]{\mathbf{#1}} % for bolding symbols
+\newcommand{\RR}{\mathbb{R}} % for Real numbers
+\newcommand{\ZZ}{\mathbb{Z}} % for Integers
+\newcommand{\col}[1]{\left[\begin{matrix} #1 \end{matrix} \right]}
+\newcommand{\comb}[2]{\binom{#1^2 + #2^2}{#1+#2}}
+\newcommand{\bs}{\boldsymbol}
+\newcommand{\opn}{\operatorname}
+\begin{document}
+\nocite{*}
+
+\title{Simple Review of Gaussian Variational Approximate Inference}
+
+\author{Daeyoung Lim\thanks{Prof. Taeryon Choi} \\
+Department of Statistics \\
+Korea University}
+
+\maketitle
+
+
+\section{Figure 2}
+This section reviews the figure plotted in p.13 of the associated paper.
+\begin{table}[!htbp]
+\centering
+  \begin{tabular}{*6c}
+    \toprule
+    \multicolumn{6}{c}{\textbf{Variational Coefficients}}\\
+    \midrule
+    $\beta_{0}$ & $\beta_{1}$ & $\beta_{2}$ & $\beta_{3}$ & $\beta_{4}$ & $\beta_{5}$\\
+      -1.325 & 0.883 & -0.933 & 0.481 & -0.160 & 0.339\\
+    \bottomrule
+  \end{tabular}
+\end{table}
+
+\begin{table}[!htbp]
+\centering
+  \begin{tabular}{*6c}
+    \toprule
+    \multicolumn{6}{c}{\textbf{GVA Standard Errors}}\\
+    \midrule
+    $\beta_{0}$ & $\beta_{1}$ & $\beta_{2}$ & $\beta_{3}$ & $\beta_{4}$ & $\beta_{5}$\\
+      1.179 & 0.131 & 0.400 & 0.346 & 0.055 & 0.203\\
+    \bottomrule
+  \end{tabular}
+\end{table}
+\begin{itemize}
+  \item Coefficient estimates via GVA seem to align well with the plot given in the paper.
+  \item The caption under the \emph{confidence interval} plots should be a misnomer since interval estimation is called the \emph{credible interval} in Bayesian frameworks. Requires revision.
+  \item The credible intervals plotted in box and whisker plots are consistent with the numerical results calculated with the results above.
+  \item \emph{Adaptive Gauss-Hermite quadrature} and \emph{penalized quasi-likelihood} methods were unavailable.
+\end{itemize}
+
+
+\section{Figure 3}
+This section reviews the code for figure 3 in p.14.
+\begin{itemize}
+  \item The code returned an error that the number of \emph{adaptive Gauss-Hermite quadrature} greater than 1 is only available for models with a single, scalar random-effects term.
+  \item The line of code \texttt{glmer(formula=y~Base*trt+Age+Visit+(Visit|subject), data=epil2, family = poisson, nAGQ = 20)} is the source of this error.
+\end{itemize}
+
+
+\section{Figure 4}
+This section reviews the code for figure 4 in p.15.
+\begin{table}[!htbp]
+\centering
+  \begin{tabular}{*4c}
+    \toprule
+    \multicolumn{4}{c}{\textbf{Variational Coefficients}}\\
+    \midrule
+    $\beta_{0}$ & $\beta_{1}$ & $\beta_{2}$ & $\beta_{3}$\\
+      -1.434 & -0.134 & -0.377 & -0.130\\
+    \bottomrule
+  \end{tabular}
+\end{table}
+\begin{table}[!htbp]
+\centering
+  \begin{tabular}{*4c}
+    \toprule
+    \multicolumn{4}{c}{\textbf{GVA Standard Errors}}\\
+    \midrule
+    $\beta_{0}$ & $\beta_{1}$ & $\beta_{2}$ & $\beta_{3}$\\
+      0.386 & 0.526 & 0.043 & 0.065\\
+    \bottomrule
+  \end{tabular}
+\end{table}
+\begin{itemize}
+  \item R package \{glmmAK\} is deprecated under R version 3.2.3 (2015-12-10) -- ``Wooden Christmas-Tree''.
+  \item The required dataset `\texttt{toenail}' in R package \{glmmAK\} was downloaded from \url{https://github.com/cran/glmmAK/blob/master/data/toenail.rda}.
+  \item The results all match what is written in the paper.
+\end{itemize}
+
+
+\section{Model review}
+\begin{table}[!htbp]
+\centering
+  \begin{tabular}{*2c}
+    \toprule
+    \multicolumn{2}{c}{\textbf{Model Specifications}}\\
+    \midrule
+    Likelihood & $\bs{y}_{i}|\bs{u}_{i} \sim \exp\left\{\bs{y}_{i}^{T}\left(X_{i}\bs{\beta} + Z_{i}\bs{u}_{i} \right) - \bs{1}_{i}^{T}b\left(X_{i}\bs{\beta} + Z_{i}\bs{u}_{i} \right)+\bs{1}_{i}^{T}c(\bs{y}_{i}) \right\} $\\
+    \midrule
+    Prior & $\bs{u}_{i} \sim \mathcal{N}\left(\bs{0}, \Sigma \right)$\\
+    \bottomrule
+  \end{tabular}
+\end{table}
+The log-marginal likelihood $p(\bs{y})$ is, with the abuse of notation, $\int \ell \left(\bs{u}, \bs{\beta}, \Sigma \right)\, d\bs{u}$ where
+\begin{align*}
+  \ell(\bs{u}, \bs{\beta}, \Sigma) &= \log \left(\prod_{i=1}^{m} \exp \left\{\bs{y}_{i}^{T}\left(X_{i}\bs{\beta}+Z_{i}\bs{u}_{i} \right)-\bs{1}_{i}^{T}b\left(X_{i}\bs{\beta}+Z_{i}\bs{u}_{i} \right) + \bs{1}_{i}^{T}c(\bs{y}_{i}) \right\} \cdot \frac{1}{\sqrt{\left|2\pi \Sigma \right|}} e^{-\frac{1}{2}\bs{u}_{i}^{T}\Sigma^{-1}\bs{u}_{i}} \right)\\
+  &= \sum_{i=1}^{m}\left[\bs{y}_{i}^{T}\left(X_{i}\bs{\beta}+Z_{i}\bs{u}_{i} \right)-\bs{1}_{i}^{T}b\left(X_{i}\bs{\beta}+Z_{i}\bs{u}_{i} \right) + \bs{1}_{i}^{T}c(\bs{y}_{i}) - \frac{1}{2}\bs{u}_{i}^{T}\Sigma^{-1}\bs{u}_{i} - \frac{1}{2}\log\left|2\pi \Sigma \right| \right]
+\end{align*}
+Therefore,
+\begin{align*}
+  \ell \left(\bs{\beta}, \Sigma \right) &= \sum_{i=1}^{m} \left[\bs{y}_{i}^{T}X_{i}\bs{\beta} + \bs{1}_{i}^{T}c\left(\bs{y}_{i} \right) - \frac{1}{2} \log \left|2\pi \Sigma \right|\right] \\
+  & \quad + \sum_{i=1}^{m} \log \int_{\mathbb{R}^{k}} \exp \left\{ \bs{y}_{i}^{T}Z_{i}\bs{u}_{i} - \bs{1}_{i}^{T}b\left(X_{i}\bs{\beta} + Z_{i}\bs{u}_{i} \right)-\frac{1}{2}\bs{u}_{i}^{T}\Sigma^{-1}\bs{u}_{i} \right\}\, d\bs{u}
+\end{align*}
+The integral does not change even if we multiply the integrand by $1$:
+\begin{equation}\label{eq1}
+  \int_{\mathbb{R}^{k}} \exp \left\{ \bs{y}_{i}^{T}Z_{i}\bs{u}_{i} - \bs{1}_{i}^{T}b\left(X_{i}\bs{\beta} + Z_{i}\bs{u}_{i} \right)-\frac{1}{2}\bs{u}_{i}^{T}\Sigma^{-1}\bs{u}_{i} \right\}\frac{\varphi_{\Lambda_{i}} \left(\bs{u} - \mu_{i} \right)}{\varphi_{\Lambda_{i}} \left(\bs{u} - \mu_{i} \right)} \, d\bs{u}
+\end{equation}
+where $\varphi_{\Lambda_{i}} \left(\bs{u} - \mu_{i} \right)$ is the multivariate Gaussian p.d.f. of a random vector $\bs{u}$ with a mean vector $\mu_{i}$ and a covariance matrix $\Lambda_{i}$. Then (1) is rewritten in terms of the expectation with respect to $\bs{u}$:
+$$
+  (1) = \opn{E}_{\bs{u}} \left[\frac{\exp \left\{ \bs{y}_{i}^{T}Z_{i}\bs{u}_{i} - \bs{1}_{i}^{T}b\left(X_{i}\bs{\beta} + Z_{i}\bs{u}_{i} \right)-\frac{1}{2}\bs{u}_{i}^{T}\Sigma^{-1}\bs{u}_{i} \right\}}{\varphi_{\Lambda_{i}} \left(\bs{u} - \mu_{i} \right)} \right]
+$$
+According to \emph{Jensen's inequality},
+$\log \left(\opn{E}\left(X \right) \right) \ge \opn{E}\left(\log X \right)$, which thus yields
+\begin{align*}
+  & \log \left(\opn{E}_{\bs{u}} \left[\frac{\exp \left\{ \bs{y}_{i}^{T}Z_{i}\bs{u}_{i} - \bs{1}_{i}^{T}b\left(X_{i}\bs{\beta} + Z_{i}\bs{u}_{i} \right)-\frac{1}{2}\bs{u}_{i}^{T}\Sigma^{-1}\bs{u}_{i} \right\}}{\varphi_{\Lambda_{i}} \left(\bs{u} - \mu_{i} \right)} \right]\right)\\
+  & \ge \opn{E}_{\bs{u}} \left[\bs{y}_{i}^{T}Z_{i}\bs{u}_{i} - \bs{1}_{i}^{T}b\left(X_{i}\bs{\beta} + Z_{i}\bs{u}_{i} \right)-\frac{1}{2}\bs{u}_{i}^{T}\Sigma^{-1}\bs{u}_{i} - \log \left(\varphi_{\Lambda_{i}} \left(\bs{u} - \mu_{i} \right) \right) \right]
+\end{align*}
+
+The inequality gives us the lower bound of the variational approximation for the generalized linear mixed model.
+\begin{align*}
+\underline{\ell} \left(\bs{\beta}, \Sigma , \bs{\mu}, \bs{\Lambda} \right) &= \sum_{i=1}^{m} \left[\bs{y}_{i}^{T}X_{i}\bs{\beta} + \bs{1}_{i}^{T}c\left(\bs{y}_{i} \right) - \frac{1}{2} \log \left|2\pi \Sigma \right|\right] \\
+& \quad + \sum_{i=1}^{m} \opn{E}_{\bs{u}} \left[\bs{y}_{i}^{T}Z_{i}\bs{u}_{i} - \bs{1}_{i}^{T}b\left(X_{i}\bs{\beta} + Z_{i}\bs{u}_{i} \right)-\frac{1}{2}\bs{u}_{i}^{T}\Sigma^{-1}\bs{u}_{i} - \log \left(\varphi_{\Lambda_{i}} \left(\bs{u} - \mu_{i} \right) \right) \right]
+\end{align*}
+Computing the expectation is not hard except for the unspecified function $b(\cdot)$ which can be easily approximated via \emph{Gauss-Hermite quadrature}. Therefore, we have a scalar function as the objective function and are only left with optimizing the function over variational parameters $\bs{\mu}$ and $\bs{\Lambda}$ along with the original parameters $\bs{\beta}$ and $\Sigma$. The compuational formula for \emph{Newton-Raphson} algorithm is given in the supplementary document. However, the real problem is making sense of why the formula works and how the original authors of the paper computed the necessary elements such as the Hessian matrix and gradient vector for each parameter.\\
+\\
+\underline{\textbf{Stuff yet to be resolved}}
+\begin{itemize}
+  \item How to compute the abscissa of Hermite polynomials that are used in \emph{Gauss-Hermite quadrature}.
+  \item How to determine the number of nodes of \emph{Gauss-Hermite quadrature}.
+  \item How to compute the Hessian of $\opn{vech}\left(\Sigma \right)$ or other terms with $\opn{vech}\left(\cdot \right)$.
+  \item Why the \emph{Newton-Raphson} formula is written as what is given in the supplementary paper.
+\end{itemize}
+
+\section{Examples}
+We will from now on follow the examples and try to calculate the gradient vectors and Hessian matrices whose general forms are given in the supplementary material. To achieve this, we first need to compute $\mathcal{B}^{(1)}\left(\bs{\beta}, \bs{\mu}_{i}, \bs{\Lambda}_{i} \right)$.
+\subsection{Poisson Mixed}
+Specifying the parametric family of the GLM adds clarity to how we should compute the derivatives necessary for Newton's method. As a gentle reminder, the general model was
+$$
+  \bs{y}_{i}|\bs{u}_{i} \sim \exp\left\{\bs{y}_{i}^{T}\left(X_{i}\bs{\beta} + Z_{i}\bs{u}_{i} \right) - \bs{1}_{i}^{T}b\left(X_{i}\bs{\beta} + Z_{i}\bs{u}_{i} \right)+\bs{1}_{i}^{T}c(\bs{y}_{i}) \right\} .
+$$
+In Poisson mixed model, $b(x) = e^{x}$ and $c(x) = -\log \left(x! \right)$.
+\begin{align*}
+  B(\mu, \sigma^{2}) &= \exp \left(\mu + \frac{1}{2}\sigma^{2} \right)\\
+  \mathcal{B}\left(\bs{\beta}, \bs{\mu}_{i}, \bs{\Lambda}_{i} \right) &= B\left(\bs{X}_{i}\bs{\beta} + \bs{Z}_{i}\bs{\mu}_{i}, \opn{dg}\left(\bs{Z}_{i}\bs{\Lambda}_{i}\bs{Z}_{i}^{T} \right) \right)
+\end{align*}
+$\frac{\partial \mathcal{B}}{\partial \bs{\beta}}$ is our goal. For notational convenience, let's replace $\mathcal{B}$ with simple $f$.
+\begin{align*}
+  df &= d \left(\exp \left(\bs{X}_{i}\bs{\beta} \right) \circ \exp \left\{\bs{Z}_{i}\bs{\mu}_{i} + \frac{1}{2}\opn{dg}\left(\bs{Z}_{i}\Lambda_{i}\bs{Z}_{i}^{T} \right) \right\}\right)\\
+  &= d\exp \left(\bs{X}_{i}\bs{\beta} \right) \circ \exp \left\{\bs{Z}_{i}\bs{\mu}_{i} + \frac{1}{2}\opn{dg}\left(\bs{Z}_{i}\Lambda_{i}\bs{Z}_{i}^{T} \right) \right\}
+\end{align*}
+where $\circ$ indicates \emph{Hadamard product(or Schur product)} which is simply the elementwise product between two matrices(or vectors) of the same size. We differentiate the notation between \textcolor{myblue}{$\opn{Diag}$} and \textcolor{myorange}{$\opn{dg}$}. The former is applied to \textcolor{myblue}{vectors} and converts it into a diagonal matrix whose diagonal elements correspond to the elements of the vector. On the other hand, $\opn{dg}$ is applied to \textcolor{myorange}{matrices} and collects the diagonal entries and creates a column vector with them.
+\subsubsection{$\opn{D}_{\bs{\beta}} \underline{\ell}$}
+Let 
+\begin{align*}
+  s &= \bs{X}_{i}\bs{\beta} + \bs{Z}_{i}\bs{\mu}_{i} + \frac{1}{2}\opn{dg}\left(\bs{Z}_{i}\bs{\Lambda}_{i}\bs{Z}_{i}^{T} \right) \\
+  e &= \exp \left(s \right)\\
+  f &= \bs{1}^{T}e
+\end{align*}
+Then,
+$$
+  ds &= \bs{X}_{i}d\bs{\beta} + \bs{Z}_{i}d\bs{\mu}_{i} + \frac{1}{2}\opn{dg}\left(\bs{Z}_{i}d\bs{\Lambda}_{i}\bs{Z}_{i}^{T} \right).
+$$
+But since we are only interested in $d\bs{\beta}$, we set $d\bs{\mu}_{i}=0$, $d\bs{\Lambda}_{i} =0$.
+\begin{align*}
+  de &= d\exp\left(s \right)\\
+  &= e \circ ds\\
+  &= e \circ \bs{X}_{i}\, d\bs{\beta}
+\end{align*}
+Therefore, $df = \bs{1}^{T}de = e^{T}\bs{X}_{i}d\bs{\beta}$.
+$$
+  \textcolor{myorange}{\frac{\partial \underline{\ell}}{\partial \bs{\beta}}} = \sum_{i=1}^{m} \left( \bs{y}_{i}^{T} - e^{T} \right) \bs{X}_{i}
+$$
+\subsubsection{$\opn{D}_{\opn{vech}\left(\bs{\Sigma} \right)} \underline{\ell} $}
+Note that $A:B$ where $A$ and $B$ are matrices of the same size, is the \emph{Frobenius product}. Then we can rewrite $d\underline{\ell}$ as follows:
+\begin{align}
+  d\underline{\ell} &= \frac{1}{2}\sum_{i=1}^{m} \left[d \left(\log \det \left(\bs{\Sigma}^{-1}\bs{\Lambda}_{i} \right) \right) -d \left(\bs{\mu}_{i}\bs{\mu}_{i}^{T}:\bs{\Sigma}^{-1} \right) - d \left(\bs{\Lambda_{i}}:\bs{\Sigma}^{-1} \right) \right]\\
+  &= \frac{1}{2}\sum_{i=1}^{m} \left[d\left(\Tr \log \left(\bs{\Sigma}^{-1}\bs{\Lambda}_{i} \right) \right) - d\left(\bs{\mu}_{i}\bs{\mu}_{i}^{T}: \bs{\Sigma}^{-1}\right) - d \left(\bs{\Lambda}_{i}:\bs{\Sigma}^{-1} \right) \right]\\
+  &= \frac{1}{2}\sum_{i=1}^{m}\left[\left(\bs{\Sigma}^{-1}\bs{\Lambda}_{i} \right)^{-T}: \left(d\bs{\Sigma}^{-1}\bs{\Lambda}_{i} \right) - \bs{\mu}_{i}\bs{\mu}_{i}^{T}:d\bs{\Sigma}^{-1} - \bs{\Lambda}_{i}:d\bs{\Sigma}^{-1} \right]\\
+  &= \frac{1}{2}\sum_{i=1}^{m}\left[\left( \bs{\Sigma}^{T}\bs{\Lambda}_{i}^{-T}\right)\bs{\Lambda}_{i}^{T} - \bs{\mu}_{i}\bs{\mu}_{i}^{T} - \bs{\Lambda}_{i} \right] : d\bs{\Sigma}^{-1}\\
+  &= \frac{1}{2}\sum_{i=1}^{m}\left[-\bs{\Sigma}^{T} + \bs{\mu}_{i}\bs{\mu}_{i}^{T} + \bs{\Lambda}_{i} \right]:\bs{\Sigma}^{-1} d \bs{\Sigma} \bs{\Sigma}^{-1}\\
+  &= \frac{1}{2}\sum_{i=1}^{m} \left[\Sigma^{-T}\left(\bs{\mu}_{i}\bs{\mu}_{i}^{T} + \bs{\Lambda}_{i} \right)\bs{\Sigma}^{-T} - \bs{\Sigma}^{-T} \right]:d\bs{\Sigma}
+\end{align}
+\begin{itemize}
+  \item From equations (1) to (2), $\log \det \left(A \right) = \Tr \log \left(A \right)$ where $\log \left(A \right)$ is \underline{NOT} the elementwise logarithm but rather the matrix logarithm defined in terms of the Taylor series of $e^{A}$.
+  \item Let $f\left( X\right) = \log \det \left(X\right)$ where $X$ is a positive definite matrix.
+  $$
+  \frac{\partial}{\partial X} f\left(X\right) = X^{-1}.
+  $$
+  This should not be surprising since $\left(\log x \right)' = 1/x$. Positive-definiteness is important since there should be a guarantee that there is no eigenvalue whose value is 0. (The determinant should not be 0 since $\log (0)$ is not defined.)
+  \item In relation to the previous point,
+  $$
+    \frac{\partial}{\partial X}\Tr f\left(X \right) = \left(\,\left\frac{d}{dx}f\left(x \right)\right|_{x=X} \,\right)^{T}
+  $$
+  We can rewrite $\log \det \left(X \right) = \Tr \log \left(X)$ whose derivatives are consistent with each other provided that $X$ is positive definite.
+  \item It is a well-proven fact that the differential of the inverse of a matrix is as follows:
+  $$
+    d\Sigma^{-1} = -\Sigma^{-1}d\Sigma \Sigma^{-1}.
+  $$
+  \item The \emph{Frobenius product} $A:B$ can be described differently (in reference to the transition from eqn (4) to (5)):
+  $$
+    A:B = \Tr \left(B^{T}A \right).
+  $$
+  Since trace operator is not affected by transposition,
+  $$
+    A : BC = \Tr \left(C^{T}B^{T}A \right) = \Tr \left(A^{T}BC \right) = B^{T}A:C.
+  $$
+  \item Another variant of the \emph{Frobenius product} is
+  $$
+    A:B = \opn{vec}\left(A \right)^{T} \opn{vec} \left(B \right).
+  $$
+  Using $\bs{\Sigma}^{T}= \bs{\Sigma} $ and $\opn{vec}\left(X \right) = D_{p}\opn{vech}\left(X \right) $, we can recast the last line as follows:
+  $$
+    d\ell = \frac{1}{2}\sum_{i=1}^{m} \opn{vec}\left[\bs{\Sigma}^{-1}\left(\bs{\mu}_{i}\bs{\mu}_{i}^{T}+ \bs{\Lambda}_{i} \right)\bs{\Sigma^{-1}} - \bs{\Sigma}^{-1} \right]^{T} \left(D_{K}\opn{vech}\left(d\bs{\Sigma} \right) \right)
+  $$
+  $$
+    \therefore \textcolor{myorange}{\frac{\partial \underline{\ell}}{\partial \opn{vech}\left(\bs{\Sigma} \right) }} = \frac{1}{2}\sum_{i=1}^{m} \opn{vec}\left\{\bs{\Sigma}^{-1} \left(\bs{\mu}_{i}\bs{\mu}_{i}^{T} + \bs{\Lambda}_{i} \right)\bs{\Sigma}^{-1} - \bs{\Sigma}^{-1} \right\}^{T}D_{K}
+  $$
+\end{itemize}
+\subsubsection{$\opn{D}_{\bs{\mu}_{i}}\underline{\ell}$}
+This is similar to section 5.1.1 $\opn{D}_{\bs{\beta}}\underline{\ell}$.
+$$
+  \frac{\partial f}{\partial \bs{\mu}_{i}} = e^{T}\bs{Z}_{i}d\bs{\mu}_{i}
+$$
+$$
+  \therefore \textcolor{myorange}{\frac{\partial \underline{\ell}}{\partial \bs{\mu}_{i}}} = \left(y_{i} - e\right)^{T}\bs{Z}_{i} - \bs{\mu}_{i}^{T}\bs{\Sigma}^{-1}
+$$
+\subsubsection{$\opn{D}_{\opn{vech}\left(\bs{\Lambda}_{i} \right)}\underline{\ell} $}
+Collecting just the terms that contain $\bs{\Lambda}_{i}$,
+$$
+  d\underline{\ell} = -d\left(\bs{1}_{i}^{T}\exp \left(\bs{X}_{i}\bs{\beta}+ \bs{Z}_{i}\bs{\mu}_{i}+ \frac{1}{2} \opn{dg}\left(\bs{Z}_{i}\bs{\Lambda}_{i}\bs{Z}_{i}^{T} \right) \right)\right) + \frac{1}{2}\left\{d\log \det \left(\bs{\Sigma}^{-1}\bs{\Lambda}_{i} \right) - d\left(\bs{\Sigma}^{-1}: \bs{\Lambda}_{i} \right) \right\}
+$$
+As per the first term, for convenience, let's write 
+\begin{align*}
+  s &= \bs{X}_{i}\bs{\beta} + \bs{Z}_{i}\bs{\mu}_{i} + \frac{1}{2}\opn{dg}\left(\bs{Z}_{i}\bs{\Lambda}_{i}\bs{Z}_{i} \right)\\
+  e &= \exp \left(s \right)\\
+  f &= \bs{1}^{T}e
+\end{align*}
+Then,
+\begin{align*}
+  ds &= \bs{X}_{i}d\bs{\beta} + \bs{Z}_{i}d\bs{\mu}_{i} + \frac{1}{2}\opn{dg}\left(\bs{Z}_{i}d\bs{\Lambda}_{i}\bs{Z}_{i}^{T} \right)\\
+  de &= e \circ ds\\
+  df &= \bs{1}^{T}de\\
+  &= \bs{1}^{T}\left(e \circ ds \right)\\
+  &= e^{T}ds\\
+  &= e^{T}\left(\bs{X}_{i}d\bs{\beta} + \bs{Z}_{i}d\bs{\mu}_{i} + \frac{1}{2}\opn{dg}\left(\bs{Z}_{i}d\bs{\Lambda}_{i}\bs{Z}_{i}^{T} \right) \right)
+\end{align*}
+Since we are working on the gradient with respect to $\bs{\Lambda}_{i}$, set $d\bs{\beta}=0$ and $d\bs{\mu}_{i}=0$.
+\begin{align*}
+  df &= \frac{1}{2}e^{T}\opn{dg}\left(\bs{Z}_{i}d\bs{\Lambda}_{i}\bs{Z}_{i}^{T} \right)\\
+  &= \frac{1}{2}\opn{Diag}\left(e^{T}\right): \bs{Z}_{i}d\bs{\Lambda}_{i}\bs{Z}_{i}^{T}\\
+  &= \frac{1}{2}E: \bs{Z}_{i}d\bs{\Lambda}_{i}\bs{Z}_{i}^{T}\\
+  &= \frac{1}{2} \bs{Z}_{i}^{T}E\bs{Z}_{i}: d\bs{\Lambda}_{i}
+\end{align*}
+The second term is rather easy.
+\begin{align*}
+  d \log \det \left(\bs{\Sigma}^{-1}\bs{\Lambda}_{i} \right) &= d \Tr \log \left(\bs{\Sigma}^{-1}\bs{\Lambda}_{i} \right)\\
+  &= \left(\bs{\Sigma}^{-1}\bs{\Lambda}_{i} \right)^{-T}:d\bs{\Sigma}^{-1}\bs{\Lambda}_{i}\\
+  &= \bs{\Sigma}^{-T}\left(\bs{\Sigma}^{-1}\bs{\Lambda}_{i} \right)^{-T}: d\bs{\Lambda}_{i}\\
+  &= \bs{\Lambda}_{i}^{-T}:d\bs{\Lambda}_{i}
+\end{align*}
+Combining all three terms,
+\begin{align*}
+  d\underline{\ell} &= -\frac{1}{2}\bs{Z}_{i}^{T}E\bs{Z}_{i} : d\bs{\Lambda}_{i} + \frac{1}{2} \left[\bs{\Lambda}_{i}^{-T}: d\bs{\Lambda}_{i} - \bs{\Sigma}^{-1}:d\bs{\Lambda}_{i} \right]\\
+  &= \frac{1}{2}\left(\bs{\Lambda}_{i}^{-1}-\bs{\Sigma}^{-1} - \bs{Z}_{i}^{T}E\bs{Z}_{i} \right):d\bs{\Lambda}_{i}
+\end{align*}
+Using the $\opn{vec}$ operator, the differential form translates to
+$$
+  d\underline{\ell} = \frac{1}{2}\opn{vec}\left(\bs{\Lambda}_{i}^{-1} - \bs{\Sigma}^{-1}- \bs{Z}_{i}^{T}E\bs{Z}_{i} \right)^{T}D_{K}\opn{vech}\left(d\bs{\Lambda}_{i} \right)
+$$
+$$
+  \therefore \textcolor{myorange}{\frac{\partial \underline{\ell}}{\partial \opn{vech}\left(\bs{\Lambda}_{i} \right)}} = \frac{1}{2}\opn{vec}\left(\bs{\Lambda}_{i}^{-1} - \bs{\Sigma}^{-1}- \bs{Z}_{i}^{T}E\bs{Z}_{i} \right)^{T}D_{K}
+$$
+
+\subsubsection{$\opn{H}_{\bs{\beta\beta}}\underline{\ell}$ }
+Recall that
+$$
+  \frac{\partial \underline{\ell}}{\partial \bs{\beta}} = \sum_{i=1}^{m}\left(\bs{y} - e \right)^{T}\bs{X}_{i}.
+$$
+We set $f = \frac{\partial \underline{\ell}}{\partial \bs{\beta}}$.
+\begin{align*}
+  df &= -\sum_{i=1}^{m} \left(de\right)^{T}\bs{X}_{i}\\
+  &= -\sum_{i=1}^{m} \left(e \circ \bs{X}_{i}d\bs{\beta} \right)^{T}\bs{X}_{i}
+\end{align*}
+Here we should note that between two vectors $x, y$,
+$$
+  x \circ y = \opn{Diag}\left(x \right)y = \opn{Diag}\left(y \right)x.
+$$
+Therefore,
+\begin{align*}
+  df &= -\sum_{i=1}^{m} \left(\opn{Diag}\left(e \right)\bs{X}_{i}d\bs{\beta} \right)^{T}\bs{X}_{i}\\
+  &= -\sum_{i=1}^{m} \left(d\bs{\beta} \right)^{T}\bs{X}_{i}^{T}\opn{Diag}\left(e \right)\bs{X}_{i}
+\end{align*}
+Finally, we can recast the Hessian as
+\begin{align*}
+  \textcolor{myorange}{\frac{\partial^{2} \underline{\ell}}{\partial \bs{\beta}^{2}}} &= -\sum_{i=1}^{m} \bs{X}_{i}^{T}\opn{Diag}\left(e \right) \bs{X}_{i}\\
+  &= -\sum_{i=1}^{m} \bs{X}_{i}^{T}E\bs{X}_{i}.
+\end{align*}
+\subsubsection{$\opn{H}_{\opn{vech}\left(\bs{\Sigma} \right)\opn{vech}\left(\Sigma \right)\underline{\ell} } $}
+Recall that
+$$
+  \frac{\partial \underline{\ell}}{\partial \opn{vech}\left(\bs{\Sigma} \right) } = \frac{1}{2}\sum_{i=1}^{m} \opn{vec}\left\{\bs{\Sigma}^{-1} \left(\bs{\mu}_{i}\bs{\mu}_{i}^{T} + \bs{\Lambda}_{i} \right)\bs{\Sigma}^{-1} - \bs{\Sigma}^{-1} \right\}^{T}D_{K}.
+$$
+Let $f = \frac{\partial \underline{\ell}}{\partial \opn{vech}\left(\bs{\Sigma} \right) }$ this time.
+Before we jump in, let this be a gentle reminder of what we will be using:
+\begin{itemize}
+  \item $\opn{vec}\left(\bs{\Sigma} \right) = D_{K}\opn{vech}\left(\bs{\Sigma} \right)$
+  \item $\partial X^{-1} = -X^{-1}\partial X X^{-1} $
+  \item $\opn{vec}\left(A \pm B \right) = \opn{vec}\left(A \right) \pm \opn{vec}\left( B \right) $
+  \item $\opn{vec}\left(AXB \right) = \left(B^{T} \otimes A \right) \opn{vec}\left(X \right)$
+  \item $\left(A \otimes B \right)^{T} = A^{T} \otimes B^{T} $
+  \item Lastly, let's write
+  $$
+    M_{i} := \bs{\Sigma}^{-1}\left(\bs{\mu}_{i}\bs{\mu}_{i}^{T} + \bs{\Lambda}_{i} \right)\bs{\Sigma}^{-1} \,\, \left(M_{i}^{T} = M_{i} \right).
+  $$
+\end{itemize}
+Then,
+\begin{align*}
+  df &= \frac{1}{2}\sum_{i=1}^{m} \left[\opn{vec}\left(-\bs{\Sigma}^{-1}d\bs{\Sigma}M_{i} - M_{i}d\bs{\Sigma}\bs{\Sigma}^{-1} \right) + \opn{vec}\left(\bs{\Sigma}^{-1}d\bs{\Sigma}\bs{\Sigma}^{-1} \right)\right]^{T}D_{K}\\
+  &= \frac{1}{2}\sum_{i=1}^{m} \left[-\opn{vec}\left(\bs{\Sigma}^{-1}d\bs{\Sigma}M_{i} \right) - \opn{vec}\left(M_{i}d\bs{\Sigma}\bs{\Sigma}^{-1} \right) + \opn{vec}\left(\bs{\Sigma}^{-1}d\bs{\Sigma}\bs{\Sigma}^{-1} \right) \right]^{T}D_{K}\\
+  &= \frac{1}{2}\sum_{i=1}^{m} \left[- \left(M_{i} \otimes \bs{\Sigma}^{-1} \right) \opn{vec}\left(d\bs{\Sigma} \right) - \left(\bs{\Sigma}^{-1}\otimes M_{i} \right) \opn{vec}\left(d\bs{\Sigma} \right) + \left(\bs{\Sigma}^{-1} \otimes \bs{\Sigma}^{-1} \right)\opn{vec}\left(d\bs{\Sigma} \right) \right]^{T}D_{K}\\
+  &= \frac{1}{2}\sum_{i=1}^{m} \left\{-\opn{vec}\left(d\bs{\Sigma} \right)^{T}\left(M_{i}\otimes \bs{\Sigma}^{-1} \right)- \opn{vec}\left(d\bs{\Sigma} \right)^{T}\left(\bs{\Sigma}^{-1}\otimes M_{i} \right) + \opn{vec}\left(d\bs{\Sigma} \right)^{T} \left(\bs{\Sigma}^{-1} \otimes \bs{\Sigma}^{-1} \right) \right\}D_{K}\\
+  &= \frac{1}{2}\opn{vec}\left(d\bs{\Sigma} \right)^{T} \sum_{i=1}^{m} \left\{-\left(M_{i}\otimes \bs{\Sigma}^{-1}- \bs{\Sigma}^{-1}\otimes M_{i} \right) + \bs{\Sigma}^{-1}\otimes \bs{\Sigma}^{-1} \right\}\\
+  &= \frac{1}{2}\opn{vech}\left(d\bs{\Sigma} \right)^{T}D_{K}^{T} \sum_{i=1}^{m} \left\{-\left(M_{i}\otimes \bs{\Sigma}^{-1}+\bs{\Sigma}^{-1}\otimes M_{i} \right) + \bs{\Sigma}^{-1}\otimes \bs{\Sigma}^{-1} \right\}D_{K}\\
+  &= \opn{vech}\left(d\bs{\Sigma} \right)^{T} \frac{1}{2}D_{K}^{T}\left\{-\sum_{i=1}^{m}\left(M_{i} \otimes \bs{\Sigma}^{-1} + \bs{\Sigma}^{-1}\otimes M_{i} \right) + m\left(\bs{\Sigma}^{-1}\otimes \bs{\Sigma}^{-1} \right) \right\}D_{K}
+\end{align*}
+
+Therefore,
+$$
+  \textcolor{myorange}{\frac{\partial^{2} \underline{\ell}}{\partial \opn{vech}\left(d\bs{\Sigma} \right)\partial \opn{vech}\left( d\bs{\Sigma}\right)}} = \frac{1}{2}D_{K}^{T}\left\{-\sum_{i=1}^{m}\left(M_{i} \otimes \bs{\Sigma}^{-1} + \bs{\Sigma}^{-1}\otimes M_{i} \right) + m\left(\bs{\Sigma}^{-1}\otimes \bs{\Sigma}^{-1} \right) \right\}D_{K}
+$$
+\subsubsection{$\opn{H}_{\bs{\beta} \bs{\mu}_{i}}\underline{\ell} $ }
+Recall that
+$$
+\frac{\partial \underline{\ell}}{\partial \bs{\beta}} = \sum_{i=1}^{m} \left( \bs{y}_{i}^{T} - e^{T} \right) \bs{X}_{i}.
+$$
+We need to go through the same thing again. Differentiate $\frac{\partial \underline{\ell}}{\partial \bs{\beta}}$ with respect to $\bs{\mu}_{i}$. However, for the time being, we will only consider the $i^{\text{th}}$ element of $\bs{\mu}$, which rules out the need for summation.
+$$  
+  df = - \left(de\right)^{T}\bs{X}_{i}.
+$$
+\begin{align*}
+  de &= e \circ ds\\
+  ds &= \bs{X}_{i}d\bs{\beta} + \bs{Z}_{i}d\bs{\mu}_{i} + \frac{1}{2}\opn{dg}\left(\bs{Z}_{i}d\bs{\Lambda}_{i}\bs{Z}_{i}^{T} \right)
+\end{align*}
+Setting $d\bs{\beta}=0$, $d\bs{\Lambda}_{i} = 0$,
+\begin{align*}
+  de &= e \circ ds\\
+     &= e \circ \bs{Z}_{i}d\bs{\mu}_{i}\\
+     &= E\bs{Z}_{i}d\bs{\mu}_{i}
+\end{align*}
+where again $E = \opn{Diag}\left(e \right)$. (Readers who are not familiar with the notations are referred to section 5.1.1 and 5.1.4.)
+Therefore,
+$$
+  df = -\left(d\bs{\mu}_{i}\right)^{T}\bs{Z}_{i}^{T}E\bs{X}_{i}
+$$
+which is then yields
+$$
+  \textcolor{myorange}{\frac{\partial^{2} \underline{\ell}}{\partial \bs{\beta} \partial \bs{\mu}_{i}}} = -\bs{Z}_{i}^{T}E\bs{X}_{i}
+$$
+
+\subsubsection{$\opn{H}_{\opn{vech}\left(\bs{\Lambda}_{i}\right)\mu_{i}} $}
+We start from
+\begin{align*}
+  \frac{\partial \ell}{\partial \opn{vech}\left(\bs{\Lambda}_{i} \right)} = \frac{1}{2}\left(\opn{vec}\left(\bs{\Lambda}_{i}^{-1} - \Sigma^{-1} - \bs{Z}_{i}^{T}E\bs{Z}_{i} \right) \right)^{T}D_{K}
+\end{align*}
+Now setting $f =  \frac{\partial \ell}{\partial \opn{vech}\left(\bs{\Lambda}_{i} \right)}$,
+\begin{align*}
+  df &= -\frac{1}{2} \left(\opn{vec}\left(\bs{Z}_{i}^{T}E \bs{Z}_{i} \right) \right)^{T}D_{K}\\
+  dE &= \opn{Diag} \left(de \right).
+\end{align*}
+We now use the following theorem:
+\begin{align*}
+  \opn{vec}\left(Z^{T}\opn{Diag}\left(de \right)Z \right) = \mathcal{Q}\left(Z\right)^{T}de
+\end{align*}
+where $\mathcal{Q}\left(Z\right) = \left(Z \otimes \bs{1}^{T}\right) \circ \left(\bs{1}^{T}\otimes Z\right)$. $\bs{1}$ is a column vector filled with ones of the same dimension as the columns of $Z$.
+Then,
+\begin{align*}
+  df &= -\frac{1}{2}\left(\opn{vec}\left(\bs{Z}_{i}^{T}\opn{Diag}\left(de \right)\bs{Z}_{i} \right) \right)^{T}D_{K}\\
+  &= -\frac{1}{2}\left(de \right)^{T}\mathcal{Q}\left(\bs{Z}_{i}\right)D_{K}\\
+  &= -\frac{1}{2}\left(e \circ ds \right)^{T}\mathcal{Q}\left(\bs{Z}_{i}\right)D_{K}\\
+  &= -\frac{1}{2}\left(\opn{Diag}\left(e\right)\bs{Z}_{i}d\mu_{i} \right)^{T}\mathcal{Q}\left(\bs{Z}_{i}\right)D_{K}\\
+  &= -\frac{1}{2}\left(d\mu_{i} \right)^{T}\bs{Z}_{i}^{T}E\mathcal{Q}\left(\bs{Z}_{i}\right)D_{K}
+\end{align*}
+Thus,
+\begin{align*}
+  \textcolor{myorange}{\frac{\partial^{2}\ell}{\partial \opn{vech}\left(\bs{\Lambda}_{i}\right)\partial \mu_{i}}} = -\frac{1}{2}\bs{Z}_{i}^{T}E\mathcal{Q}\left(\bs{Z}_{i}\right)D_{K}.
+\end{align*}
+\end{document}

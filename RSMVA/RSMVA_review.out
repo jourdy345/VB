@@ -1,0 +1,14 @@
+\BOOKMARK [1][-]{section.1}{Finite Gaussian Mixture Model}{}% 1
+\BOOKMARK [1][-]{section.2}{Paper Review}{}% 2
+\BOOKMARK [2][-]{subsection.2.1}{Model Specifications}{section.2}% 3
+\BOOKMARK [3][-]{subsubsection.2.1.1}{Likelihood}{subsection.2.1}% 4
+\BOOKMARK [3][-]{subsubsection.2.1.2}{Priors}{subsection.2.1}% 5
+\BOOKMARK [2][-]{subsection.2.2}{Fitting the model}{section.2}% 6
+\BOOKMARK [2][-]{subsection.2.3}{Split-and-Merge algorithm}{section.2}% 7
+\BOOKMARK [3][-]{subsubsection.2.3.1}{Merge criterion}{subsection.2.3}% 8
+\BOOKMARK [3][-]{subsubsection.2.3.2}{Split criterion}{subsection.2.3}% 9
+\BOOKMARK [2][-]{subsection.2.4}{Model Selection}{section.2}% 10
+\BOOKMARK [3][-]{subsubsection.2.4.1}{Gating model selection}{subsection.2.4}% 11
+\BOOKMARK [1][-]{section.3}{Code Review}{}% 12
+\BOOKMARK [2][-]{subsection.3.1}{Easy example}{section.3}% 13
+\BOOKMARK [2][-]{subsection.3.2}{Hard example}{section.3}% 14

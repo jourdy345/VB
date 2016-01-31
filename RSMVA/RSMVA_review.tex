@@ -1,0 +1,226 @@
+\documentclass[11pt]{article}
+
+% This first part of the file is called the PREAMBLE. It includes
+% customizations and command definitions. The preamble is everything
+% between \documentclass and \begin{document}.
+
+\usepackage[margin=1in]{geometry} % set the margins to 1in on all sides
+\usepackage{graphicx} % to include figures
+\usepackage{amsmath} % great math stuff
+\usepackage{amsfonts} % for blackboard bold, etc
+\usepackage{amsthm} % better theorem environments
+% various theorems, numbered by section
+\usepackage{hyperref}
+\usepackage[utf8]{inputenc}
+\usepackage{booktabs}
+\usepackage{array}
+\usepackage{courier}
+\usepackage[usenames, dvipsnames]{color}
+\usepackage{titlesec}
+
+\setcounter{secnumdepth}{4}
+
+\titleformat{\paragraph}
+{\normalfont\normalsize\bfseries}{\theparagraph}{1em}{}
+\titlespacing*{\paragraph}
+{0pt}{3.25ex plus 1ex minus .2ex}{1.5ex plus .2ex}
+
+
+\definecolor{myblue}{RGB}{72, 165, 226}
+\definecolor{myorange}{RGB}{222, 141, 8}
+
+\setlength{\heavyrulewidth}{1.5pt}
+\setlength{\abovetopsep}{4pt}
+
+
+\DeclareMathOperator{\id}{id}
+\DeclareMathOperator{\argmin}{\arg\!\min}
+\DeclareMathOperator{\Tr}{Tr}
+
+\newcommand{\bd}[1]{\mathbf{#1}} % for bolding symbols
+\newcommand{\RR}{\mathbb{R}} % for Real numbers
+\newcommand{\ZZ}{\mathbb{Z}} % for Integers
+\newcommand{\col}[1]{\left[\begin{matrix} #1 \end{matrix} \right]}
+\newcommand{\comb}[2]{\binom{#1^2 + #2^2}{#1+#2}}
+\newcommand{\bs}{\boldsymbol}
+\newcommand{\opn}{\operatorname}
+\begin{document}
+\nocite{*}
+
+\title{Review on Regression Density Estimation with Mixtures of Heteroscedastic Experts}
+
+\author{Daeyoung Lim\thanks{Prof. Taeryon Choi} \\
+Department of Statistics \\
+Korea University}
+
+\maketitle
+
+\section{Finite Gaussian Mixture Model}
+Gaussian mixture model is a way of representing a probability density function as a sum of weighted Gaussian component densities.
+$$
+  p(y|x) = \sum_{j=1}^{k}\pi_{j}\mathcal{N}\left(y| \mu_{j}, \sigma_{j}^{2} \right)
+$$
+where $\mathcal{N}\left(y|\mu_{j}, \sigma_{j}^{2} \right)$ is the density function of the $i^{\text{th}}$ component Gaussian and $\sum_{j=1}^{k}\pi_{j}=1$, $\forall \pi_{j}\ge 0$. Normally, the mean and variance of each component are fixed values but in a model that allows heteroscedasticity, the mean and variance are functions of the covariates: $\mu_{j}\left(x \right), \sigma_{j}^{2}\left(x \right)$. This naturally yields the following representation of heteroscedastic Gaussian mixtures model:
+$$
+  p(y|x) = \sum_{j=1}^{k} \pi_{j}\left(x \right) \mathcal{N}\left(y|\mu_{j}\left(x \right), \sigma_{j}^{2}\left(x \right) \right).
+$$
+In this paper, the author assumes that the heteroscedasticy implies a linear structure within the means and variances. \par
+As with any mixtures model, RDE-MHN(Regression density estimation-mixtures of heteroscedastic normals) has 2 goals:
+\begin{itemize}
+  \item Select the number of components, $k$.
+  \item Select the number of covariates so as to avoid overfitting or underfitting.
+\end{itemize}
+Other than these 2 goals, there is another important issue in mixtures model.
+\begin{itemize}
+  \item Overcome the local maxima problem and make sure the optimization converges to the global maximum.
+\end{itemize}
+We use the variational approximation for fitting and use the estimated likelihood and lower bound to determine the number of components and variables to be included. The local maxima problem was effectively dealt with via \emph{split-and-merge} algorithm. In fitting the model, we need to keep in mind that we have three equations to fit: \emph{mean}, \emph{variance}, and \emph{gate}.
+
+\section{Paper Review}
+\subsection{Model Specifications}
+\subsubsection{Likelihood}
+\begin{table}[!htbp]
+\centering
+  \begin{tabular}{*2c}
+    \toprule
+    \multicolumn{2}{c}{\textbf{Likelihood}}\\
+    \midrule
+    $y_{i}|\delta_{i}=j, \bs{x}_{i}, \bs{\beta}, \bs{\alpha} \sim$ & $\mathcal{N}\left(\bs{v}_{i}'\bs{\beta}_{j}, \exp \left(\bs{w}_{i}'\bs{\alpha}_{j} \right) \right)\,\,\, ,i=1, \ldots , n $\\
+    \bottomrule
+  \end{tabular}
+\end{table}
+\begin{itemize}
+  \item \textcolor{myblue}{$\left(y_{i}, \bs{x}_{i} \right), \,\,\, i=1, \ldots, n$}: n observations where $y_{i}$ are univariate responses and $\bs{x}_{i}$ is $i^{\text{th}}$ row of the design matrix $X$, or $i^{\text{th}}$ \emph{covariate vector}.
+  \item \textcolor{myblue}{$\delta_{i}$}: a latent variable indicating from which component $y_{i}$ comes. Since there are $k$ components, $\delta_{i} \in \left\{1, 2, \ldots , k \right\}$.
+  \item The latent variable $\delta_{i}$ follows the \textcolor{myorange}{softmax function}:
+  $$
+    p\left(\delta_{i}=j|\bs{\gamma}, \bs{x}_{i} \right) = \frac{\exp \left(z_{i}'\gamma_{j} \right)}{\sum_{\ell=1}^{k} \exp \left(z_{i}'\gamma_{\ell} \right)}\,\,\, j=1, \ldots , k; \,\, i = 1, \ldots, n,
+  $$
+  where $\bs{\gamma}_{j} = \left(\gamma_{j1}, \ldots , \gamma_{jr} \right)'$ is a vector of unknown parameters in the gating model of the $j^{\text{th}}$ component and $\bs{z}_{i}$ is a sub-vector of $\bs{x}_{i}$ containing the covariates used to model the mixxing probabilities.
+  \item \textcolor{myblue}{$\bs{v}_{i}$, $\bs{w}_{i}$}: the covariate vectors in the mean and variance models respectively (which are sub-vectors of $\bs{x}_{i}$).
+\end{itemize}
+\subsubsection{Priors}
+\begin{table}[!htbp]
+\centering
+  \begin{tabular}{*2c}
+    \toprule
+    \multicolumn{2}{c}{\textbf{Priors}}\\
+    \midrule
+    $\bs{\beta}_{j}$& $\mathcal{N}\left(\bs{\mu}_{\beta_{j}}^{0}, \Sigma_{\beta_{j}}^{0} \right), \,\,\, j = 1, \ldots, k$\\
+    \midrule
+    $\bs{\alpha}_{j}$ & $\mathcal{N}\left(\bs{\mu}_{\alpha_{j}}^{0}, \Sigma_{\alpha_{j}}^{0} \right),\,\,\, j=1,\ldots, k $\\
+    \midrule
+    $\bs{\gamma}$ & $\mathcal{N}\left(\bs{\mu}_{\gamma}^{0}, \Sigma_{\gamma}^{0} \right) $\\
+    \midrule
+    $\delta_{i}=j|\bs{\gamma}\,\,(=p_{ij})$ & $\opn{softmax}\left(j, z_{i}'\gamma_{1}, \ldots , z_{i}'\gamma_{k} \right)$\\
+    \bottomrule\\
+  \end{tabular}
+\end{table}
+\begin{itemize}
+  \item $\bs{\beta}_{j}$: unknown parameters for the mean model.
+  \item $\bs{\alpha}_{j}$: unknown parameters for the variance model.
+  \item $\delta_{i}, \gamma$: unknown parameters for the gating model.
+\end{itemize}
+\subsection{Fitting the model}
+Parameter estimation does not diverge from the variational approximation framework. Compute the lower bound and maximize it! The maximization scheme is not a fixed object. It could either be a gradient-based method or a Hessian-based method or the EM-algorithm could be used as well. In this paper, the author uses the EM algorithm to optimize the lower bound.
+\subsection{Split-and-Merge algorithm}
+Aside from fitting the parameters, we should also split the components into several parts and also select a subset of covariates that prevents overfitting. In pursuit of such a goal, we employ the \emph{split-and-merge} algorithm where we go back and forth between splitting and merging the most seemingly plausible two components whereby we gradually approach the most desirable number of components and also explore the most appropriate subset of all features that has the most explaining power and does not overfit the model.
+\subsubsection{Merge criterion}
+To start with the merging scheme,
+\begin{itemize}
+\item there should be a \emph{metric} that measures how close two components are to decide whether or not the components should be merged.
+\item there should be a refined way of resetting the parameter estimates once the components are merged.
+\end{itemize}
+Here the \emph{metric} is the one that we discuss in mathematical analysis courses that satisfies 3 conditions:
+\begin{enumerate}
+  \item $d(p_{i}, p_{j}) \ge 0$ and $d(p_{i}, p_{j}) =0$ iff $p_{i}=p_{j} $. (Nonnegativity)
+  \item $d(p_{i}, p_{j})=d(p_{j}, p_{i})$. (Symmetry)
+  \item $d(p_{i}, p_{j})\le d(p_{i}, p_{r}) + d(p_{r}, p_{j})$. (Triangle inequality)
+\end{enumerate}
+In this paper, the author suggests the \emph{symmetrized KL divergence} or in short \emph{KL distance}. If we denote KL distance $\opn{KL}\left(P, Q\right)$ and KL divergence $\opn{KL}\left(P||Q \right)$, then the relation is defined as follows:
+$$
+  \opn{KL}\left(P, Q \right) := \frac{1}{2}\left(\opn{KL}\left(P||Q \right) + \opn{KL}\left(Q||P \right) \right).
+$$
+By doing so, the KL distance recovers the symmetry property and triangle inequality property of a metric. Considering the responses follow normal distribution, the average KL distance becomes
+$$
+  \opn{KL}\left(j_{1}, j_{2} \right) = \frac{1}{4n} \sum_{i=1}^{n} \left(\frac{\left(\bs{v}_{i}'\bs{\mu}_{\beta_{j_{1}}}^{q} - \bs{v}_{i}'\bs{\mu}_{\beta_{j_{2}}}^{q} \right)^{2} + \exp \left(\bs{w}_{i}'\bs{\mu}_{\alpha_{j_{1}}}^{q} \right)}{\exp \left(\bs{w}_{i}'\bs{\mu}_{\alpha_{j_{2}}}^{q} \right)} + \frac{\left(\bs{v}_{i}'\bs{\mu}_{\beta_{j_{1}}}^{q} - \bs{v}_{i}'\bs{\mu}_{\beta_{j_{2}}}^{q} \right)^{2} + \exp \left(\bs{w}_{i}'\bs{\mu}_{\alpha_{j_{2}}}^{q} \right)}{\exp \left(\bs{w}_{i}'\bs{\mu}_{\alpha_{j_{1}}}^{q} \right)} -2 \right).
+$$
+If the KL distance turns out small, it suggests that the two components being compared are not that far away from each other. In other words, they are \emph{most likely to be merged}. The merging procedure is constructed as follows:
+\begin{enumerate}
+  \item Compute the pair $\left(j_{1}, j_{2} \right)$ whose KL distance is the smallest.
+  \item Confirm if the merge improves the lower bound.
+  \item Check if the number of merging operations exceeded the maximum,$C_{\text{merge}}^{\text{max}}$ , set in advance.
+\end{enumerate}
+Once two components are merged, there has to be a rule that incorporates the information that two components had in advance and produces efficient initial values for parameters of the newly created component. Recal that there are three parts: mean, variance and gating models. The following is how to set the initial values.
+\begin{align*}
+  &\bs{\mu}_{\beta_{j'}}^{q} = \frac{\overline{q}_{.j_{1}}\bs{\mu}_{\beta_{j_{1}}}^{q} + \overline{q}_{.j_{2}}\bs{\mu}_{\beta_{j_{2}}}^{q}}{\overline{q}_{.j_{1}} + \overline{q}_{.j_{2}}},\,\,\, \Sigma_{\beta_{j'}}^{q} = \frac{\overline{q}_{.j_{1}}\Sigma_{\beta_{j_{1}}}^{q} + \overline{q}_{.j_{2}}\Sigma_{\beta_{j_{2}}}^{q}}{\overline{q}_{.j_{1}}+\overline{q}_{.j_{2}}},\\
+  &\bs{\mu}_{\alpha_{j'}}^{q} = \frac{\overline{q}_{.j_{1}}\bs{\mu}_{\alpha_{j_{1}}}^{q} + \overline{q}_{.j_{2}}\bs{\mu}_{\alpha_{j_{2}}}^{2}}{\overline{q}_{.j_{1}}+\overline{q}_{.j_{2}}}, \,\,\, \Sigma_{\alpha_{j'}}^{q} = \frac{\overline{q}_{.j_{1}}\Sigma_{\alpha_{j_{1}}}^{q} + \overline{q}_{.j_{2}}\Sigma_{\alpha_{j_{2}}}^{q}}{\overline{q}_{.j_{1}}+\overline{q}_{.j_{2}}},
+\end{align*}
+where $\overline{q}_{.j}=\frac{1}{n}\sum_{i=1}^{n}q_{ij}$ and $q_{ij'} = q_{ij_{1}}+q_{ij_{2}}$. Other parameters should be fixed at current values.
+\subsubsection{Split criterion}
+While exploring each component, there has to be a measure on which we can depend in determining whether we should split the component into two separate ones. This is equivalent to measuring the \emph{likelihood} of each component: how likely each component is from the perspective of the parameters. Therefore, we calculate the joint log-likelihood at each component point and see if the component is \emph{reliable}. The measure of reliability is given as follows:
+$$
+  R(j) = \frac{1}{n}\sum_{i=1}^{n}\log \hat{p}_{j}\left(\bs{x}_{i} \right) = \frac{1}{n}\sum_{i=1}^{n}\left(-\frac{1}{2}\log \left(2\pi \right) - \frac{1}{2}\bs{w}_{i}'\bs{\mu}_{\alpha_{j}}^{q}- \frac{1}{2}\frac{\left(y_{i} - \bs{v}_{i}'\bs{\mu}_{\beta_{j}}^{q} \right)^{2}}{\exp\left(\bs{w}_{i}'\bs{\mu}_{\alpha_{j}}^{q} \right)} \right).
+$$
+Therefore, the splitting procedure is given as follows:
+\begin{enumerate}
+  \item Find the component that displays the smallest $R(j)$.
+  \item Check if the split improves the lower bound.
+  \item Check if the number of split exceeded the maximum, $C_{\text{split}}^{\text{max}}$, set in advance.
+\end{enumerate}
+Once a component is split, there has to be a rule that sets the initial values for the parameter estimates of the two newly created components. This time, the rule is significantly simpler. Set both components' parameters same as the ones from the component before splitting. Put simply, duplicate 2 of the not-yet-split component with one exception: $q_{ij_{1}} = q_{ij_{2}} = q_{ij'}/2$.
+\subsection{Model Selection}
+The previous section was devoted to discussing how we can cluster the observations into multiple separate components using certain criteria. Given a design matrix, the previous chapter could be translated as row-wise operation whereas the current chapter which will shortly be discussed is going to be about how to choose the columns. \emph{Feature selection}, \emph{variable selection}, \emph{model selection}, or whatever you might call this, it is simply choosing the covariates that should be included into a certain model. Under the model that we are now discussing where heteroscedasticity is under consideration, we generated three component models: mean, variance, and gating model. Therefore, we have no choice but to come up with an efficient algorithm that explores all three models providing sufficient explaining power as to why one covariate should be included into what model.\par
+Variational approximation lends itself easily to model selection by offering its lower bound as a tool for model selection. As such, we will look whether the lower bound increases as we include covariates one by one. The three models need not be explained separately since they only rely on the increase in lower bound and they are eventually incorporated into the full algorithm. The gating model, however, needs additional clarification.
+\subsubsection{Gating model selection}
+Gating model selection adopts a new measure called \emph{distance correlation}. It was proven that it is the same as the \emph{Brownian covariance}. Let $x_{\hat{\ell}}$ denote the covariate that has the largest distance correlation with $y$. Then, we have three cases:
+\begin{enumerate}
+  \item If $\hat{\ell} \notin C_{m}\bigcup C_{v}$, then $\hat{\ell}$ is included in the gating model if it improves the lower bound.
+  \item If $\hat{\ell} \in C_{m}$ or $\hat{\ell} \in C_{v}$, $\hat{\ell}$ is included in the gating model if it improves the lower bound.
+  \item If $x_{\hat{\ell}}$ does not improve the lower bound, we consider the covariate with the next largest distance correlation until we no longer have any covariate left.
+\end{enumerate}
+The full algorithm is given in the paper.
+\section{Code Review}
+\subsection{Easy example}
+Since this is a simulation, the author set in advance the number of components to 3. The resultant number of components was also 3. Let the columns denote the components and the rows denote the parameters.
+$$
+  \bs{\mu}_{\bs{\beta}} = \begin{bmatrix}
+    -5.005175 & 4.931319 & 2.070027 \\
+    3.010657 & -1.954091 & -1.954091 \\
+    0.000000 & 0.000000 & 0.000000 \\
+    0.000000 & 0.000000 & 0.000000 \\
+    -4.020815 & 4.150012 & 1.762546 \\
+    0.000000 & 0.000000 & 0.000000 \\
+    0.000000 & 0.000000 & 0.000000 \\
+    0.000000 & 0.000000 & 0.000000
+  \end{bmatrix}
+$$
+$$
+  \bs{\mu}_{\bs{\alpha}} = \begin{bmatrix}
+    -0.926359 & -2.0850771 & -1.088369\\
+    1.370972 & 1.4123877 & -3.178568 \\
+    0.000000 & 0.000000 & 0.000000 \\
+    0.000000 & 0.000000 & 0.000000\\
+    -2.853680 & -0.7307139 & 3.100485\\
+    0.000000 & 0.000000 & 0.000000 \\
+    0.000000 & 0.000000 & 0.000000\\
+    0.000000 & 0.000000 & 0.000000
+  \end{bmatrix}
+$$
+$$
+  \bs{\mu}_{\bs{\gamma}} = \begin{bmatrix}
+    0 & -0.6961027 & 0.6338794\\
+    0 & 3.4261816 & 4.1524135\\
+    0 & 0.0000000 & 0.0000000\\
+    0 & 0.0000000 & 0.0000000 \\
+    0 & -2.1298831 & -5.4977586\\
+    0 & 0.0000000 & 0.0000000\\
+    0 & 0.0000000 & 0.0000000\\
+    0 & 0.0000000 & 0.0000000
+  \end{bmatrix}
+$$
+Because the author has not written down the true parameters, I am not sure if my results are correct. Neither am I sure if it is a coincidence that all thre models(mean, variance, and gating) have the same covariates.
+
+\subsection{Hard example}
+This example involves 1,000 covariates (high-dimension), 500 observations, and 3 components. Therefore, it is basically impossible to jot down the results of the R code. However, it turns out that the algorithm produces a result where the estimate vectors are sparse with a large number of zeros. It implies that the algorithm somehow ends up reaching a degenerate model. 
+\end{document}
