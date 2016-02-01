@@ -74,13 +74,13 @@ where $\theta = \left(m, s, \lambda, Z\right)$.
 Ignoring the summation with respect to $j$,
 \begin{align*}
   q\left(m_{j}\right) &\propto \exp \left\{\sum_{i=1}^{N}q\left(Z_{i}=j\right)\mathbb{E}\left[s_{j}\right]\log \left(\frac{y_{i}}{1-y_{i}}\right)m_{j}\right\}\cdot m_{j}^{\underline{n}_{m_{1}}-1}\left(1-m_{j}\right)^{\underline{n}_{m_{0}}-1}\\
-  &\propto \exp\left\{-C_{m}^{q}m_{j} \right\} m_{j}^{\underline{n}_{m_{1}}-1}\left(1-m_{j}\right)^{\underline{n}_{m_{0}}-1}, \quad C_{m}^{q}>0
+  &\propto \exp\left\{-C_{m_{j}}^{q}m_{j} \right\} m_{j}^{\underline{n}_{m_{1}}-1}\left(1-m_{j}\right)^{\underline{n}_{m_{0}}-1}, \quad C_{m_{j}}^{q}>0
 \end{align*}
 Let $$\mathcal{I}\left(a, \alpha, \beta\right) = \int_{0}^{1}e^{-ax}x^{\alpha-1}\left(1-x\right)^{\beta-1}\, dx. $$
 Therefore,
 \begin{align*}
-  q\left(m_{j}\right) &= \frac{\exp\left\{-C_{m}^{q}m_{j}\right\}m_{j}^{\underline{n}_{m_{1}}-1}\left(1-m_{j}\right)^{\underline{n}_{m_{0}}-1}}{\mathcal{I}\left(C_{m}^{q}, \underline{n}_{m_{1}}, \underline{n}_{m_{0}} \right)}\\
-  C_{m}^{q} &\leftarrow -\sum_{i=1}^{N}\phi_{ij}\mathbb{E}\left[s_{j}\right]\log \left(\frac{y_{i}}{1-y_{i}}\right)\\
+  q\left(m_{j}\right) &= \frac{\exp\left\{-C_{m_{j}}^{q}m_{j}\right\}m_{j}^{\underline{n}_{m_{1}}-1}\left(1-m_{j}\right)^{\underline{n}_{m_{0}}-1}}{\mathcal{I}\left(C_{m_{j}}^{q}, \underline{n}_{m_{1}}, \underline{n}_{m_{0}} \right)}\\
+  C_{m_{j}}^{q} &\leftarrow -\sum_{i=1}^{N}\phi_{ij}\mathbb{E}\left[s_{j}\right]\log \left(\frac{y_{i}}{1-y_{i}}\right)\\
   q\left(Z_{i}=j\right) &= \phi_{ij}.
 \end{align*}
 \subsection{$q\left(s_{j}\right)$}
@@ -124,7 +124,7 @@ $$
   \item The same logic applies for the expectations of $\log \Gamma \left(s_{j}m_{j}\right)$ and $\log \Gamma \left(s_{j}-s_{j}m_{j}-1\right)$.
   \item The expectation of $m_{j}$ is as follows: 
   $$
-  \left\langle m_{j}\right\rangle = \frac{\mathcal{I}\left(C_{m}^{q}, \underline{n}_{m_{1}}+1, \underline{n}_{m_{0}}\right)}{\mathcal{I}\left(C_{m}^{q}, \underline{n}_{m_{1}}, \underline{n}_{m_{0}}\right)}
+  \left\langle m_{j}\right\rangle = \frac{\mathcal{I}\left(C_{m_{j}}^{q}, \underline{n}_{m_{1}}+1, \underline{n}_{m_{0}}\right)}{\mathcal{I}\left(C_{m_{j}}^{q}, \underline{n}_{m_{1}}, \underline{n}_{m_{0}}\right)}
   $$
 \end{itemize}
 \subsection{$\mathbb{E}\left[\log p \left(m, s, \lambda, Z\right)\right]$}
@@ -158,11 +158,56 @@ For the prior distributions, normalizing constants of these distributions are of
 \subsection{$\mathbb{E}\left[\log q\left(m, s, \lambda, Z\right)\right]$}
 \subsubsection{$\mathbb{E}\left[\log q\left(m\right)\right] $}
 $$
-  q\left(m_{j}\right) = \frac{\exp \left\{-C_{m}^{q}m_{j} \right\}m_{j}^{\underline{n}_{m_{j}}-1}\left(1-m_{j}^{\underline{n}_{m_{0}}-1}\right)}{\mathcal{I}\left(C_{m}^{q}, \underline{n}_{m_{1}}, \underline{n}_{m_{0}}\right)}
+  q\left(m_{j}\right) = \frac{\exp \left\{-C_{m_{j}}^{q}m_{j} \right\}m_{j}^{\underline{n}_{m_{j}}-1}\left(1-m_{j}^{\underline{n}_{m_{0}}-1}\right)}{\mathcal{I}\left(C_{m_{j}}^{q}, \underline{n}_{m_{1}}, \underline{n}_{m_{0}}\right)}
 $$
 \begin{align*}
-  \log q\left(m_{j}\right) &= -C_{m}^{q}m_{j} +\left(\underline{n}_{m_{1}}-1\right)\log m_{j} + \left(\underline{n}_{m_{0}}-1\right)\log \left(1-m_{j}\right) - \log \mathcal{I}\left(C_{m}^{q}, \underline{n}_{m_{1}}, \underline{n}_{m_{0}}\right)\\
-  \mathbb{E}\left[\log q\left(m_{j}\right)\right] &= -C_{m}^{q}\left\langle m_{j}\right\rangle + \left(\underline{n}_{m_{1}}-1\right)\left\langle \log m_{j}\right\rangle + \left(\underline{n}_{m_{0}}-1\right)\left\langle \log \left(1-m_{j}\right)\right\rangle - \log \mathcal{I}\left(C_{m}^{q}, \underline{n}_{m_{1}}, \underline{n}_{m_{0}}\right)\\
-  \left\langle m_{j}\right\rangle &= \frac{\mathcal{I}\left(C_{m}^{q}, \underline{n}_{m_{1}}+1, \underline{n}_{m_{0}}\right)}{\mathcal{I}\left(C_{m}^{q}, \underline{n}_{m_{1}}, \underline{n}_{m_{0}}\right)}
+  \log q\left(m_{j}\right) &= -C_{m_{j}}^{q}m_{j} +\left(\underline{n}_{m_{1}}-1\right)\log m_{j} + \left(\underline{n}_{m_{0}}-1\right)\log \left(1-m_{j}\right) - \log \mathcal{I}\left(C_{m_{j}}^{q}, \underline{n}_{m_{1}}, \underline{n}_{m_{0}}\right)\\
+  \mathbb{E}\left[\log q\left(m_{j}\right)\right] &= -C_{m_{j}}^{q}\left\langle m_{j}\right\rangle + \left(\underline{n}_{m_{1}}-1\right)\left\langle \log m_{j}\right\rangle + \left(\underline{n}_{m_{0}}-1\right)\left\langle \log \left(1-m_{j}\right)\right\rangle - \log \mathcal{I}\left(C_{m_{j}}^{q}, \underline{n}_{m_{1}}, \underline{n}_{m_{0}}\right)\\
+  \left\langle m_{j}\right\rangle &= \frac{\mathcal{I}\left(C_{m_{j}}^{q}, \underline{n}_{m_{1}}+1, \underline{n}_{m_{0}}\right)}{\mathcal{I}\left(C_{m_{j}}^{q}, \underline{n}_{m_{1}}, \underline{n}_{m_{0}}\right)}
+\end{align*}
+As mentioned earlier, $\left\langle \log m_{j}\right\rangle$ and $\left\langle \log \left(1-m_{j}\right)\right\rangle$ should be evaluated numerically through Monte-Carlo method. Recall that
+$$
+  C_{m_{j}}^{q} = -\sum_{i=1}^{N}\phi_{ij}\underline{a}_{s}\beta_{s_{j}}\log \left(\frac{y_{i}}{1-y_{i}}\right).
+$$
+\subsubsection{$\mathbb{E}\left[\log q\left(s\right)\right]$}
+$$
+  q\left(s_{j}\right) = \frac{1}{\Gamma\left(\underline{a}_{s_{j}}\right)\beta_{s_{j}}^{\underline{a}_{s}}}s_{j}^{\underline{a}_{s}-1}\exp \left\{-\beta_{s_{j}}/s_{j} \right\}
+$$
+\begin{align*}
+  \mathbb{E}\left[\log q\left(s_{j}\right)\right] &= -\log \Gamma\left(\underline{a}_{s}\right) -\underline{a}_{s} \log \beta_{s_{j}} +\left(\underline{a}_{s}-1\right)\left\langle \log s_{j}\right\rangle -\beta_{s_{j}}\left\langle \frac{1}{s_{j}}\right\rangle\\
+  &= -\log \Gamma\left(\underline{a}_{s}\right) -\underline{a}_{s}\log \beta_{s_{j}} + \left(\underline{a}_{s}-1\right)\left(\varphi\left(\underline{a}_{s}\right)+\log \beta_{s_{j}}\right) -\frac{1}{\underline{a}_{s}-1}
+\end{align*}
+Mind you that
+$$
+  \beta_{s_{j}} = \left(-\sum_{i=1}^{N}\phi_{ij}\left(\left\langle m_{j}\right\rangle \log y_{i} + \left(1-\left\langle m_{j}\right\rangle \right)\log \left(1-y_{j}\right)\right)+ \frac{1}{\underline{b}_{s}}\right)^{-1}.
+$$
+\subsection{$\mathbb{E}\left[\log q\left(\lambda\right)\right]$}
+We will not consider the normalizing constant of $q\left(\lambda\right)$.
+$$
+  q\left(\lambda\right) \propto \prod_{j=1}^{M}\lambda_{j}^{\sum_{i=1}^{N}\phi_{ij} + \underline{a}}
+$$
+\begin{align*}
+  \mathbb{E}\left[\log q\left(\lambda\right)\right] &\propto \left(\sum_{i=1}^{N}\phi_{ij}+\underline{a}\right) \sum_{j=1}^{M}\left\langle \log \lambda_{j}\right\rangle \\
+  &\propto \left(\sum_{i=1}^{N}\phi_{ij}+\underline{a}\right) \sum_{j=1}^{M} \left(\varphi\left(\sum_{i=1}^{N}\phi_{ij}+\underline{a}\right)-\varphi\left(\sum_{j=1}^{M}\sum_{i=1}^{N}\phi_{ij}+M\underline{a}\right)\right)
+\end{align*}
+\subsubsection{$\mathbb{E}\left[\log q\left(Z\right)\right]$}
+$$
+  q\left(Z\right) \propto \prod_{j=1}^{M}\prod_{i=1}^{N}\phi_{ij}^{1\left[Z_{i}=j\right]}
+$$
+Thus,
+$$
+  \mathbb{E}\left[\log q\left(Z\right)\right] = \sum_{j=1}^{M}\sum_{i=1}^{N}\phi_{ij}\log \phi_{ij}
+$$
+\subsection{Resulting Lower Bound}
+We have thus far computed all the desired components for the lower bound. Therefore, the resultant lower bound is
+\begin{align*}
+  \mathcal{L} &= \sum_{i=1}^{N}\sum_{j=1}^{M}\phi_{ij} \left\langle \log \Gamma\left(s_{j}\right)\right\rangle -\left\langle \log \Gamma\left(s_{j}m_{j}\right)\right\rangle -\left\langle \log \Gamma \left(s_{j}-s_{j}m_{j}-1\right)\right\rangle +\left(\underline{a}_{s}\beta_{s_{j}}\left\langle m_{j}\right\rangle -1 \right)\log y_{i} \\
+  &\quad +\left(\underline{a}_{s}\beta_{s_{j}}\left(1-\left\langle m_{j}\right\rangle\right)-1\right)\log \left(1-y_{i}\right)\\
+  &\quad +\sum_{j=1}^{M}\left[\left(\sum_{i=1}^{N}\phi_{ij}+\underline{a}-1\right)\left(\varphi\left(\sum_{i=1}^{N}\phi_{ij}+\underline{a}\right)-\varphi\left(\sum_{j=1}^{M}\sum_{i=1}^{N}\phi_{ij}+M\underline{a}\right)\right)\right]\\
+  &\quad +\sum_{j=1}^{M}\left[\left(\underline{n}_{m_{1}}-1\right)\left\langle \log m_{j}\right\rangle +\left(\underline{n}_{m_{0}}-1\right)\left\langle \log \left(1-m_{j}\right)\right\rangle + \left(\underline{a}_{s}-1\right)\left(\varphi\left(\underline{a}_{s}\right)+\log \beta_{s_{j}}\right) -\underline{a}_{s}\beta_{s_{j}}/\underline{b}_{s} \right]\\
+  &\quad -\sum_{j=1}^{M}\left[-C_{m_{j}}^{q}\left\langle m_{j}\right\rangle +\left(\underline{n}_{m_{1}}-1\right) \left\langle \log m_{j}\right\rangle +\left(\underline{n}_{m_{0}}-1\right)\left\langle \log \left(1-m_{j}\right)\right\rangle -\log \mathcal{I}\left(C_{m_{j}}^{q}, \underline{n}_{m_{1}}, \underline{n}_{m_{0}}\right) \right]\\
+  &\quad -\sum_{j=1}^{M}\left[-\log \Gamma\left(\underline{a}_{s}\right) -\underline{a}_{s}\log \beta_{s_{j}} + \left(\underline{a}_{s}-1\right)\left(\varphi\left(\underline{a}_{s}\right)+\log \beta_{s_{j}}\right)-\frac{1}{\underline{a}_{s}-1} \right]\\
+  &\quad -\sum_{j=1}^{M}\left[\left(\sum_{i=1}^{N}\phi_{ij}+\underline{a} \right)\left(\varphi\left(\sum_{i=1}^{N}\phi_{ij}+ \underline{a}\right) -\varphi\left(\sum_{j=1}^{M}\sum_{i=1}^{N}\phi_{ij}+M\underline{a}\right)\right) \right]\\
+  &\quad -\sum_{j=1}^{M}\sum_{i=1}^{N}\phi_{ij}\log \phi_{ij}
 \end{align*}
 \end{document}
