@@ -4,12 +4,12 @@ library(gtools)
 
 # Acceptance-Rejection algorithm for q(m_j)
 m_sampling <- function(n, Cm, nm1, nm0) {
-  f_div_g <- function(x) exp(-Cm * x) * x^(nm1-1) * (1-x)^(nm0-1) / dbeta(x, nm1, nm0)
+  f_div_g <- function(x) exp(-Cm * x) * x^(nm1-1) * (1-x)^(nm0-1)
   M <- optimize(f_div_g, interval = c(0, 1), maximum = TRUE)$objective
   temp <- c()
   while (length(temp) < n) {
     u <- runif(1)
-    x <- rbeta(1, nm1, nm0)
+    x <- runif(1)
     if (M * u < f_div_g(x)) temp <- c(temp, x)
   }
   temp
