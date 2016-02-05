@@ -208,6 +208,11 @@ We have thus far computed all the desired components for the lower bound. Theref
   &\quad -\sum_{j=1}^{M}\left[-C_{m_{j}}^{q}\left\langle m_{j}\right\rangle +\left(\underline{n}_{m_{1}}-1\right) \left\langle \log m_{j}\right\rangle +\left(\underline{n}_{m_{0}}-1\right)\left\langle \log \left(1-m_{j}\right)\right\rangle -\log \mathcal{I}\left(C_{m_{j}}^{q}, \underline{n}_{m_{1}}, \underline{n}_{m_{0}}\right) \right]\\
   &\quad -\sum_{j=1}^{M}\left[-\log \Gamma\left(\underline{a}_{s}\right) -\underline{a}_{s}\log \beta_{s_{j}} + \left(\underline{a}_{s}-1\right)\left(\varphi\left(\underline{a}_{s}\right)+\log \beta_{s_{j}}\right)-\frac{1}{\underline{a}_{s}-1} \right]\\
   &\quad -\sum_{j=1}^{M}\left[\left(\sum_{i=1}^{N}\phi_{ij}+\underline{a} \right)\left(\varphi\left(\sum_{i=1}^{N}\phi_{ij}+ \underline{a}\right) -\varphi\left(\sum_{j=1}^{M}\sum_{i=1}^{N}\phi_{ij}+M\underline{a}\right)\right) \right]\\
-  &\quad -\sum_{j=1}^{M}\sum_{i=1}^{N}\phi_{ij}\log \phi_{ij}
+  &\quad -\sum_{j=1}^{M}\sum_{i=1}^{N}\phi_{ij}\log \phi_{ij}\\
+  &= \sum_{i=1}^{N}\sum_{j=1}^{M}\phi_{ij} \left\langle \log \Gamma\left(s_{j}\right)\right\rangle -\left\langle \log \Gamma\left(s_{j}m_{j}\right)\right\rangle -\left\langle \log \Gamma \left(s_{j}-s_{j}m_{j}-1\right)\right\rangle +\left(\underline{a}_{s}\beta_{s_{j}}\left\langle m_{j}\right\rangle -1 \right)\log y_{i}\\
+  &\quad +\left(\underline{a}_{s}\beta_{s_{j}}\left(1-\left\langle m_{j}\right\rangle\right)-1\right)\log \left(1-y_{i}\right) \qquad \textcolor{myorange}{\cdots \text{temp1}}\\
+  &\quad -\sum_{j=1}^{M}\left[\varphi\left(\sum_{i=1}^{N}\phi_{ij} + \underline{a}\right) - \varphi\left(\sum_{j=1}^{M}\sum_{i=1}^{N}\phi_{ij} +M\underline{a}\right) \right] \qquad \textcolor{myorange}{\cdots \text{temp2}}\\
+  &\quad +\sum_{j=1}^{M}\left[-\underline{a}_{s}\beta_{s_{j}}/\underline{b}_{s} + C_{m_{j}}^{q}\left\langle m_{j} \right\rangle +\log \mathcal{I}\left(C_{m_{j}}^{q}, \underline{n}_{m_{1}}, \underline{n}_{m_{0}}\right)\right] \qquad \textcolor{myorange}{\cdots \text{temp3}}\\
+  &\quad -\sum_{j=1}^{M}\left[-\log \Gamma\left(\underline{a}_{s}\right)-\underline{a}_{s}\log \beta_{s_{j}} -\frac{1}{\underline{a}_{s}-1} \right] -\sum_{j=1}^{M}\sum_{i=1}^{N}\phi_{ij}\log \phi_{ij} \qquad \textcolor{myorange}{\cdots \text{temp4}}
 \end{align*}
 \end{document}

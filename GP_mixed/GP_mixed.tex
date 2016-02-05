@@ -148,4 +148,113 @@ where $\xi = \left(\xi_{1}, \ldots , \xi_{n}\right)$.
   &\quad -\frac{1}{2}\log \left|\Sigma_{\lambda}\right| -\frac{1}{2}\left(\lambda-\mu_{\lambda}\right)^{T}\Sigma_{\lambda}^{-1}\left(\lambda-\mu_{\lambda}\right) + \log \left(2A_{\sigma}\right)+\log \left(2A_{\gamma}\right) 2\log \pi -\log \left(A_{\sigma}^{2}+\sigma^{2}\right)\\
   &\quad-\log \left(A_{\gamma}^{2}+\gamma^{2}\right)
 \end{align*}
+\section{Sparse GP Probit Regression}
+\subsection{Bayesian probit regression without random effects}
+The ordinary formulation goes like this:
+$$
+  \mathbb{P}\left(y_{i}=1|x_{i}, \beta\right) = \Phi\left(x_{i}^{T}\beta\right),
+$$
+where $\Phi$ is the cumulative distribution of standard Gaussian distribution. Since the following likelihood
+$$
+  \mathbb{P}\left(Y=y|X, \beta\right) = \prod_{i=1}^{n}\Phi\left(x_{i}^{T}\beta\right)^{y_{i}}\left[1-\Phi\left(x_{i}^{T}\beta\right)\right]^{1-y_{i}}
+$$
+hinders the tractable calculation of the posterior, we devise the following latent variable:
+$$
+  Z_{i} = x_{i}^{T}\beta + \epsilon_{i}, \quad \epsilon_{i} \sim \mathcal{N}\left(0, 1\right)
+$$
+for $i = 1, \ldots , n$ and let
+\begin{align*}
+  y_{i} = \begin{cases}1, & \text{if $Z_{i} \ge 0$}\\ 0, & \text{otherwise} \end{cases}.
+\end{align*}
+It automatically follows that
+\begin{align*}
+  Z_{i}|y_{i}=0, x_{i}, \beta &\sim \mathcal{N}\left(x_{i}^{T}\beta, 1\right) \bs{1}\left[Z_{i} < 0\right]\\
+  Z_{i}|y_{i}=1, x_{i}, \beta &\sim \mathcal{N}\left(x_{i}^{T}\beta, 1\right) \bs{1}\left[Z_{i}\ge 0\right]
+\end{align*}
+suggesting a truncated Gaussian for each $Z_{i}$ depending on what value $y_{i}$ takes on. According to probit regression without random effects, the introduction of latent variables enables the tractable computation of the posterior with regards to the parameters.
+\begin{align*}
+  \pi\left(Z, y, \beta\right) &= C\pi\left(\beta\right)\prod_{i=1}^{n}\left\{1\left[Z_{i}\ge 0\right]1\left[y_{i}=1\right] + 1\left[Z_{i}<0\right]1\left[y_{i}=0\right] \right\}\phi\left(Z_{i} - x_{i}^{T}\beta\right)
+\end{align*}
+where $C$ is the proportionality constant and $\phi$ is the density of standard Gaussian. Following the mean-field approximation and computing the optimal density for $Z_{i}$, it becomes a truncated normal about zero with mean $x_{i}^{T}\beta$ and variance $1$.
+\subsection{Incorporating random effects and nonparametric statistics}
+Taking one step forward, the random effects can be taken into consideration in many situations. Furthermore, we often do not know exactly what functional form the parameters should take on. Such situations greatly call for the use of nonparametric statistics.
+\begin{align*}
+  \mathbb{P}\left(y_{i}=1|f\right) = \Phi\left(f\left(x_{i}\right)\right).
+\end{align*}
+In the previous section where linear probit regression was considered, the functional form was assumed to be linear, i.e. $x_{i}^{T}\beta$. However, we now insist that $f$ could be any function. Adopting Gaussion process prior for $f$ and using sparse approximation,
+\begin{align*}
+  \mathbb{P}\left(y_{i}=1|f\right) = \Phi\left(Z_{i}^{T}\alpha\right).
+\end{align*}
+Note that $Z_{i}$ is different from the one we used in the previous section. Moreover, we will assume there exist additive random effects:
+$$
+  \mathbb{P}\left(y_{i}=1|f, \alpha, \beta\right) = \Phi\left(z_{i}^{T}\alpha + a_{i}^{T}\beta\right).
+$$
+Assume latent variables
+$$
+  y_{i}^{*} = z_{i}^{T}\alpha + a_{i}^{T}\beta + \epsilon, \quad \epsilon \sim \mathcal{N}\left(0, 1\right).
+$$
+Let 
+\begin{align*}
+  y_{i} = \begin{cases}
+    1, & \text{if $y_{i}^{*} \ge 0$}\\
+    0, & \text{if $y_{i}^{*} < 0$}.
+  \end{cases}
+\end{align*}
+Let's assume priors
+\begin{align*}
+  \alpha|\sigma &\sim \mathcal{N}\left(0, \frac{\sigma^{2}}{m}I_{2m}\right)\\
+    \beta &\sim \mathcal{N}\left(\mu_{\beta}, \Sigma_{\beta}\right) \\
+    \lambda &\sim \mathcal{N}\left(\mu_{\lambda}, \Sigma_{\lambda}\right) \\
+    \sigma &\sim \opn{half-Cauchy}\left(A_{\sigma}\right)\\
+    \theta &= \left(\alpha, \beta, \lambda, \sigma \right)
+\end{align*}
+\begin{align*}
+  \pi\left(y, y^{*}, \theta \right) &= C\pi\left(\alpha|\sigma\right)\pi\left(\beta\right)\pi\left(\lambda\right)\pi\left(\sigma\right)\prod_{i=1}^{n}\left\{1\left[y_{i}^{*}\ge 0\right]1\left[y_{i}=1\right] + 1\left[y_{i}^{*}<0\right]1\left[y_{i}=0\right] \right\}\phi\left(y_{i}^{*}-z_{i}^{T}\alpha_{i} - a_{i}^{T}\beta\right)
+\end{align*}
+\subsubsection{$q\left(\alpha\right)$}
+Let $y^{*} = \begin{bmatrix}y_{1}^{*} & \ldots & y_{n}^{*}\end{bmatrix}^{T}$.
+\begin{align*}
+  \log q\left(\alpha\right) &\propto \left\langle \log \pi\left(\alpha|\sigma\right)\prod_{i=1}^{n}\phi\left(y_{i}^{*}-z_{i}^{T}\alpha - a_{i}^{T}\beta\right)\right\rangle\\
+  &\propto -\frac{m}{2}\left\langle \frac{1}{\sigma^{2}}\right\rangle\alpha^{T}\alpha +\left\langle \sum_{i=1}^{n}\left[-\frac{1}{2}\left\{{y_{i}^{*}}^{2} -2\left(z_{i}^{T}\alpha + a_{i}^{T}\beta\right)y_{i}^{*} + \left(z_{i}^{T}\alpha + a_{i}^{T}\beta\right)^{2}\right\}\right]\right\rangle\\
+  &\propto -\frac{m}{2}\left\langle \frac{1}{\sigma^{2}} \right\rangle \alpha^{T}\alpha + \left\langle -\frac{1}{2}\sum_{i=1}^{n}\left[-2y_{i}^{*}z_{i}^{T}\alpha +\alpha^{T}z_{i}z_{i}^{T}\alpha +2\beta^{T}a_{i}z_{i}^{T}\alpha \right]\right\rangle\\
+  &\propto -\frac{m}{2}\left\langle \frac{1}{\sigma^{2}}\right\rangle \alpha^{T}\alpha -\frac{1}{2}\left\langle -2{y^{*}}^{T}Z\alpha + \alpha^{T}\left(\sum_{i=1}^{n}z_{i}z_{i}^{T}\right)\alpha + 2\beta^{T}\left(\sum_{i=1}^{n}a_{i}z_{i}^{T}\right)\alpha\right\rangle \\
+  &\propto -\frac{m}{2}\left\langle \frac{1}{\sigma^{2}}\right\rangle \alpha^{T}\alpha -\frac{1}{2}\left\{-2\left\langle {y^{*}}^{T}\right\rangle \left\langle Z\right\rangle \alpha + \alpha^{T}\left\langle Z^{T}Z \right\rangle \alpha + 2\left\langle\beta\right\rangle^{T} A^{T}\left\langle Z\right\rangle \alpha \right\}\\
+  &\propto -\frac{1}{2}\left\{\alpha^{T}\left(m\left\langle \frac{1}{\sigma^{2}}\right\rangle I_{2m} + \left\langle Z^{T}Z \right\rangle\right)\alpha-2\left(\left\langle Z\right\rangle^{T}\left\langle y^{*}\right\rangle -\left\langle Z \right\rangle^{T}A^{T}\left\langle \beta\right\rangle \right)^{T}\alpha \right\}\\
+  q\left(\alpha\right) &= \mathcal{N}\left(\mu_{q\left(\alpha\right)}, \Sigma_{q\left(\alpha\right)}\right)\\
+  \mu_{q\left(\alpha\right)} &= \Sigma_{q\left(\alpha\right)}\left(\left\langle Z\right\rangle^{T}\left\langle y^{*}\right\rangle -\left\langle Z \right\rangle^{T}A^{T}\left\langle \beta\right\rangle \right)\\
+  \Sigma_{q\left(\alpha\right)} &= \left(m\left\langle \frac{1}{\sigma^{2}}\right\rangle I_{2m} + \left\langle Z^{T}Z \right\rangle\right)^{-1}
+\end{align*}
+\subsubsection{$q\left(\beta\right)$}
+\begin{align*}
+  \log q\left(\beta\right) &\propto \log \pi\left(\beta\right)\prod_{i=1}^{n}\phi\left(y_{i}^{*}-z_{i}^{T}\alpha - a_{i}^{T}\beta \right) \\
+  &\propto -\frac{s}{2}\log \left(2\pi\right) -\frac{1}{2}\log \left|\Sigma_{\beta}\right| -\frac{1}{2}\left(\beta-\mu_{\beta}\right)^{T}\Sigma_{\beta}^{T}\left(\beta-\mu_{\beta}\right) \\
+  &\quad +\left\langle\sum_{i=1}^{T}\left[-\frac{1}{2}\left(y_{i}^{*} -2\left(z_{i}^{T}\alpha + a_{i}^{T}\beta\right)y_{i}^{*} + \left(z_{i}^{T}\alpha + a_{i}^{T}\beta\right)^{2}\right)\right]\right\rangle\\
+  &\propto -\frac{1}{2}\left(\beta^{T}\Sigma_{\beta}^{-1}\beta -2\mu_{\beta}^{T}\Sigma_{\beta}^{-1}\beta\right) +\left\langle\sum_{i=1}^{n}\left[-\frac{1}{2}\left(-2y_{i}^{*}a_{i}^{T}\beta + 2\alpha^{T}z_{i}a_{i}^{T}\beta + \beta^{T}a_{i}a_{i}^{T}\beta\right)\right]\right\rangle\\
+  &\propto -\frac{1}{2}\left(\beta^{T}\Sigma_{\beta}^{-1}\beta-2\mu_{\beta}^{T}\Sigma_{\beta}^{-1}\beta\right) - \frac{1}{2}\left(-2\left\langle{y^{*}}^{T}\right\rangle A\beta + 2\left\langle\alpha^{T}\right\rangle \left\langle Z^{T}\right\rangle A\beta + \beta^{T}A^TA\beta\right)\\
+  &\propto -\frac{1}{2}\left\{\beta^{T}\Sigma_{\beta}^{-1}\beta + \beta^{T}A^{T}A\beta -2\mu_{\beta}^{T}\Sigma_{\beta}^{-1}\beta +2\left\langle \alpha^{T}\right\rangle \left\langle Z^{T}\right\rangle A\beta -2\left\langle{y^{*}}^{T}\right\rangle A\beta\right\}\\
+  &\propto -\frac{1}{2}\left\{\beta^{T}\left(\Sigma_{\beta}^{-1} + A^{T}A\right)\beta -2\left(\Sigma_{\beta}^{-1}\mu_{\beta} +A^{T} \left\langle y^{*}\right\rangle -A^{T}\left\langle Z\right\rangle \left\langle \alpha\right\rangle \right)^{T}\beta\right\}\\
+  q\left(\beta\right) &= \mathcal{N}\left(\mu_{q\left(\beta\right)}, \Sigma_{q\left(\beta\right)}\right)\\
+  \mu_{q\left(\beta\right)} &= \Sigma_{q\left(\beta\right)} \left(\Sigma_{\beta}^{-1}\mu_{\beta} +A^{T} \left\langle y^{*}\right\rangle -A^{T}\left\langle Z\right\rangle \left\langle \alpha\right\rangle \right)\\
+  \Sigma_{q\left(\beta\right)} &= \left(\Sigma_{\beta}^{-1} + A^{T}A\right)^{-1}
+\end{align*}
+\subsubsection{$q\left(y^{*}\right)$}
+\begin{align*}
+  \log q\left(y^{*}\right) &\propto \left\langle \log \prod_{i=1}^{n}\left\{1\left[y_{i}^{*}\ge 0\right]1\left[y_{i}=1\right] + 1\left[y_{i}^{*}<0\right]1\left[y_{i}=0\right] \right\}\phi\left(y_{i}^{*}-z_{i}^{T}\alpha -a_{i}^{T}\beta\right) \right\rangle \\
+  &\propto \sum_{i=1}^{n}\log\left\{1\left[y_{i}^{*}\ge 0\right]1\left[y_{i}=1\right] + 1\left[y_{i}^{*}<0\right]1\left[y_{i}=0\right] \right\} \\
+  &\quad + \left\langle\sum_{i=1}^{n}\left[-\frac{1}{2}\left({y_{i}^{*}}^{2} -2\left(z_{i}^{T}\alpha +a_{i}^{T}\beta\right)y_{i}^{*} +\left(z_{i}^{T}\alpha +a_{i}^{T}\beta\right)^{2}\right) \right] \right\rangle\\
+  &\propto \sum_{i=1}^{n}\log\left\{1\left[y_{i}^{*}\ge 0\right]1\left[y_{i}=1\right] + 1\left[y_{i}^{*}<0\right]1\left[y_{i}=0\right] \right\} \\
+  &\quad -\frac{1}{2}\left({y^{*}}^{T}y^{*} -2\left(\left\langle Z\right\rangle \left\langle \alpha\right\rangle +A\left\langle\beta\right\rangle \right)^{T}y^{*}\right)\\
+  q\left(y^{*}\right) &= \mathcal{TN}\left(\left\langle Z\right\rangle \left\langle \alpha\right\rangle +A\left\langle\beta\right\rangle, I_{n}\right)
+\end{align*}
+where $\mathcal{TN}$ indicates truncated normal distribution, in this case multivariate. Each element of $y^{*}$ is truncated at zero. The direction of truncation remains the same. Assuming $y_{i}=1$,
+\begin{align*}
+  \mu_{q\left(y_{i}^{*}\right)} &= \left\langle z_{i}^{T}\right\rangle \mu_{q\left(\alpha\right)} + a_{i}^{T}\mu_{q\left(\beta\right)} + \frac{\phi\left(\left\langle z_{i}^{T}\right\rangle \mu_{q\left(\alpha\right)} + a_{i}^{T}\mu_{q\left(\beta\right)}\right)}{\Phi\left(\left\langle z_{i}^{T}\right\rangle \mu_{q\left(\alpha\right)} + a_{i}^{T}\mu_{q\left(\beta\right)}\right)}
+\end{align*}
+\subsubsection{$q\left(\sigma\right)$}
+\begin{align*}
+  \log q\left(\sigma\right) &\propto \left\langle \log \pi\left(\alpha|\sigma\right)\pi\left(\sigma\right) \right\rangle\\
+  &\propto -m\log \sigma^{2} -\frac{m}{2}\left\langle \alpha^{T}\alpha \right\rangle /\sigma^{2} -\log \left(A_{\sigma}^{2} +\sigma^{2}\right)\\
+  q\left(\sigma\right) &\propto \frac{\exp \left(-C_{\sigma}/\sigma^{2}\right)}{\sigma^{2m}\left(A_{\sigma}^{2}+\sigma^{2}\right)}\\
+  C_{\sigma} &= -\frac{m}{2}\left(\Tr\left(\Sigma_{q\left(\alpha\right)}\right) + \mu_{q\left(\alpha\right)}^{T}\mu_{q\left(\alpha\right)}\right)
+\end{align*}
 \end{document}
