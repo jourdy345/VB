@@ -10,6 +10,6 @@ double my_fun(double x, double Cm, double a, double b) {
 }
 
 // [[Rcpp::export]]
-double opt(Function f) {
-
+double opt(Function f1, Function f2, double Cm, double a, double b) {
+  arma::vec a = f2()
 }

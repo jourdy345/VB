@@ -47,10 +47,10 @@ E_lgamma_sm <- function(a_s, beta_s, Cm, nm1, nm0) {
 }
 
 # Expectation of log(Gamma(s_j - s_j * m_j - 1)) with respect to posterior q(s_j) & q(m_j)
-E_lgamma_s_sm_1 <- function(a_s, beta_s, Cm, nm1, nm0) {
+E_lgamma_s_sm <- function(a_s, beta_s, Cm, nm1, nm0) {
   s <- rgamma(10000, shape = a_s, scale = beta_s)
   m <- m_sampling(10000, Cm, nm1, nm0)
-  mean(lgamma(s - s * m - 1))
+  mean(lgamma(s - s * m))
 }
 
 # Lower bound
@@ -59,7 +59,7 @@ LB <- function(y, phi, a, a_s, beta_s, Cm, nm1, nm0, N, M) {
   temp1 <- 0
   for (i in 1:N) {
     for (j in 1:M) {
-      temp1 <- temp1 + phi[i, j] * E_lgamma_s(a_s, beta_s[j]) - E_lgamma_sm(a_s, beta_s[j], Cm[j], nm1, nm0) - E_lgamma_s_sm_1(a_s, beta_s[j], Cm[j], nm1, nm0) + (a_s * beta_s[j] * Emj(Cm[j], nm1, nm0) - 1) * log(y[i]) + (a_s * beta_s[j] * (1 - Emj(Cm[j], nm1, nm0)) - 1) * log(1 - y[i])
+      temp1 <- temp1 + phi[i, j] * E_lgamma_s(a_s, beta_s[j]) - E_lgamma_sm(a_s, beta_s[j], Cm[j], nm1, nm0) - E_lgamma_s_sm(a_s, beta_s[j], Cm[j], nm1, nm0) + (a_s * beta_s[j] * Emj(Cm[j], nm1, nm0) - 1) * log(y[i]) + (a_s * beta_s[j] * (1 - Emj(Cm[j], nm1, nm0)) - 1) * log(1 - y[i])
     }
   }
   
@@ -110,7 +110,7 @@ BMVB <- function(y, M, a, a_s, b_s, nm1, nm0) {
     ## phi_ij
     for (j in 1:M) {
       for (i in 1:N) {
-        phi[i, j] <- (y[i] / (1 - y[i]))^(a_s * beta_s[j] * Emj(Cm[j], nm1, nm0)) * (1 - y[i])^(a_s * beta_s[j]) * ((sum(phi[, j]) + a) / (sum(phi) + M * a)) / (y[i] * (1 - y[i]))
+        phi[i, j] <- exp(E_lgamma_s(a_s, beta_s[j]) - E_lgamma_sm(a_s, beta_s[j], Cm[j], nm1, nm0) - E_lgamma_s_sm(a_s, beta_s[j], Cm[j], nm1, nm0)) * (y[i] / (1 - y[i]))^(a_s * beta_s[j] * Emj(Cm[j], nm1, nm0)) * (1 - y[i])^(a_s * beta_s[j]) * exp( digamma(sum(phi[, j]) + a) - digamma(sum(phi) + M * a)) / (y[i] * (1 - y[i]))
       }
     }
 

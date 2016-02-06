@@ -1,5 +1,5 @@
 # Fdb version 3
-["pdflatex"] 1454581046 "Beta_Mixture_VB.tex" "Beta_Mixture_VB.pdf" "Beta_Mixture_VB" 1454581047
+["pdflatex"] 1454743497 "Beta_Mixture_VB.tex" "Beta_Mixture_VB.pdf" "Beta_Mixture_VB" 1454743498
   "/usr/local/texlive/2014/texmf-dist/fonts/map/fontname/texfonts.map" 1272929888 3287 e6b82fe08f5336d4d5ebc73fb1152e87 ""
   "/usr/local/texlive/2014/texmf-dist/fonts/tfm/public/amsfonts/cmextra/cmex7.tfm" 1246382020 1004 54797486969f23fa377b128694d548df ""
   "/usr/local/texlive/2014/texmf-dist/fonts/tfm/public/amsfonts/cmextra/cmex8.tfm" 1246382020 988 bdf658c3bfc2d96d3c8b02cfc1c94c20 ""
@@ -103,11 +103,11 @@
   "/usr/local/texlive/2014/texmf-var/fonts/map/pdftex/updmap/pdftex.map" 1401025944 1445653 26a0aacf3d70032b1ec192e8c7792117 ""
   "/usr/local/texlive/2014/texmf-var/web2c/pdftex/pdflatex.fmt" 1432105912 3832012 6f7eff98593f880114f876938cb37f01 ""
   "/usr/local/texlive/2014/texmf.cnf" 1401025936 577 a59edbde8d3a8c549d0eeaab1739e2ff ""
-  "Beta_Mixture_VB.aux" 1454581047 2613 dac9ceffbff50cfc5a6aa4ba007b27a0 ""
-  "Beta_Mixture_VB.out" 1454581047 926 cd1a32e26602efaeb20e12817f3bc329 ""
-  "Beta_Mixture_VB.tex" 1454581045 18697 a6d4349aac5b89d09e828055a9cac3f4 ""
+  "Beta_Mixture_VB.aux" 1454743498 2613 dac9ceffbff50cfc5a6aa4ba007b27a0 ""
+  "Beta_Mixture_VB.out" 1454743498 926 cd1a32e26602efaeb20e12817f3bc329 ""
+  "Beta_Mixture_VB.tex" 1454743494 18956 a1b1ba69a759421bed4b87ee4bf052c5 ""
   (generated)
   "Beta_Mixture_VB.out"
-  "Beta_Mixture_VB.log"
-  "Beta_Mixture_VB.pdf"
   "Beta_Mixture_VB.aux"
+  "Beta_Mixture_VB.pdf"
+  "Beta_Mixture_VB.log"

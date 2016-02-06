@@ -255,6 +255,12 @@ where $\mathcal{TN}$ indicates truncated normal distribution, in this case multi
   \log q\left(\sigma\right) &\propto \left\langle \log \pi\left(\alpha|\sigma\right)\pi\left(\sigma\right) \right\rangle\\
   &\propto -m\log \sigma^{2} -\frac{m}{2}\left\langle \alpha^{T}\alpha \right\rangle /\sigma^{2} -\log \left(A_{\sigma}^{2} +\sigma^{2}\right)\\
   q\left(\sigma\right) &\propto \frac{\exp \left(-C_{\sigma}/\sigma^{2}\right)}{\sigma^{2m}\left(A_{\sigma}^{2}+\sigma^{2}\right)}\\
-  C_{\sigma} &= -\frac{m}{2}\left(\Tr\left(\Sigma_{q\left(\alpha\right)}\right) + \mu_{q\left(\alpha\right)}^{T}\mu_{q\left(\alpha\right)}\right)
+  C_{\sigma} &= \frac{m}{2}\left(\Tr\left(\Sigma_{q\left(\alpha\right)}\right) + \mu_{q\left(\alpha\right)}^{T}\mu_{q\left(\alpha\right)}\right)
+\end{align*}
+\subsubsection{Lower Bound}
+Recall that 
+\begin{align*}
+  \pi\left(y, y^{*}, \theta \right) &= C\pi\left(\alpha|\sigma\right)\pi\left(\beta\right)\pi\left(\lambda\right)\pi\left(\sigma\right)\prod_{i=1}^{n}\left\{1\left[y_{i}^{*}\ge 0\right]1\left[y_{i}=1\right] + 1\left[y_{i}^{*}<0\right]1\left[y_{i}=0\right] \right\}\phi\left(y_{i}^{*}-z_{i}^{T}\alpha_{i} - a_{i}^{T}\beta\right)\\
+  \mathcal{L} &= \mathbb{E}\left[\log \pi\left(y, y^{*}, \theta \right) \right] - \mathbb{E}\left[\log q\left(y^{*}\right)q\left(\theta\right) \right]
 \end{align*}
 \end{document}

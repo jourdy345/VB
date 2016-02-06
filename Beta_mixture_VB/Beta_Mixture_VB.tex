@@ -74,13 +74,13 @@ where $\theta = \left(m, s, \lambda, Z\right)$.
 Ignoring the summation with respect to $j$,
 \begin{align*}
   q\left(m_{j}\right) &\propto \exp \left\{\sum_{i=1}^{N}q\left(Z_{i}=j\right)\mathbb{E}\left[s_{j}\right]\log \left(\frac{y_{i}}{1-y_{i}}\right)m_{j}\right\}\cdot m_{j}^{\underline{n}_{m_{1}}-1}\left(1-m_{j}\right)^{\underline{n}_{m_{0}}-1}\\
-  &\propto \exp\left\{-C_{m_{j}}^{q}m_{j} \right\} m_{j}^{\underline{n}_{m_{1}}-1}\left(1-m_{j}\right)^{\underline{n}_{m_{0}}-1}, \quad C_{m_{j}}^{q}>0
+  &\propto \exp\left\{C_{m_{j}}^{q}m_{j} \right\} m_{j}^{\underline{n}_{m_{1}}-1}\left(1-m_{j}\right)^{\underline{n}_{m_{0}}-1}
 \end{align*}
-Let $$\mathcal{I}\left(a, \alpha, \beta\right) = \int_{0}^{1}e^{-ax}x^{\alpha-1}\left(1-x\right)^{\beta-1}\, dx. $$
+Let $$\mathcal{I}\left(a, \alpha, \beta\right) = \int_{0}^{1}e^{ax}x^{\alpha-1}\left(1-x\right)^{\beta-1}\, dx. $$
 Therefore,
 \begin{align*}
-  q\left(m_{j}\right) &= \frac{\exp\left\{-C_{m_{j}}^{q}m_{j}\right\}m_{j}^{\underline{n}_{m_{1}}-1}\left(1-m_{j}\right)^{\underline{n}_{m_{0}}-1}}{\mathcal{I}\left(C_{m_{j}}^{q}, \underline{n}_{m_{1}}, \underline{n}_{m_{0}} \right)}\\
-  C_{m_{j}}^{q} &\leftarrow -\sum_{i=1}^{N}\phi_{ij}\mathbb{E}\left[s_{j}\right]\log \left(\frac{y_{i}}{1-y_{i}}\right)\\
+  q\left(m_{j}\right) &= \frac{\exp\left\{C_{m_{j}}^{q}m_{j}\right\}m_{j}^{\underline{n}_{m_{1}}-1}\left(1-m_{j}\right)^{\underline{n}_{m_{0}}-1}}{\mathcal{I}\left(C_{m_{j}}^{q}, \underline{n}_{m_{1}}, \underline{n}_{m_{0}} \right)}\\
+  C_{m_{j}}^{q} &\leftarrow \sum_{i=1}^{N}\phi_{ij}\mathbb{E}\left[s_{j}\right]\log \left(\frac{y_{i}}{1-y_{i}}\right)\\
   q\left(Z_{i}=j\right) &= \phi_{ij}.
 \end{align*}
 \subsection{$q\left(s_{j}\right)$}
@@ -100,13 +100,13 @@ Therefore, $\lambda \sim \opn{Dir}\left(\underline{a}_{q}\right)$ where the $j^{
 \begin{align*}
   \log q \left(Z\right) &\propto \mathbb{E}\left[\sum_{i=1}^{N}\sum_{j=1}^{M} 1\left[Z_{i}=j\right] \log f\left(y_{i}|s_{j}, m_{j}\right) + \sum_{j=1}^{M}\left[\left(\sum_{i=1}^{N} 1\left[Z_{i}=j\right]\right)\log \lambda_{j}\right]\right]\\
   &\propto \mathbb{E}\left[\sum_{i=1}^{N}\sum_{j=1}^{M} 1\left[Z_{i}=j\right] \left(\left(s_{j}m_{j}-1\right)\log y_{i}+\left(s_{j}-s_{j}m_{j}-1\right)\log \left(1-y_{i}\right)\right) + \sum_{j=1}^{M}\sum_{i=1}^{N}1\left[Z_{i}=j\right]\log \lambda_{j}\right]\\
-  &\propto \sum_{i=1}^{N}\sum_{j=1}^{M} 1\left[Z_{i}=j\right]\left[\log \left\{y_{i}^{\left\langle s_{j}\right\rangle \left\langle m_{j}\right\rangle -1} \left(1-y_{i}\right)^{\left\langle s_{j}\right\rangle -\left\langle s_{j}\right\rangle \left\langle m_{j}\right\rangle -1}\left\langle\lambda_{j}\right\rangle \right\}\right]\\
-  &\propto \sum_{i=1}^{N}\sum_{j=1}^{M} \log \left[\left(\frac{y_{i}}{1-y_{i}} \right)^{\left\langle s_{j}\right\rangle \left\langle m_{j}\right\rangle} \cdot \frac{\left(1-y_{i}\right)^{\left\langle s_{j}\right\rangle}\left\langle \lambda_{j}\right\rangle}{y_{i}\left(1-y_{i}\right)} \right]^{1\left[Z_{i}=j\right]}\\
-  q\left(Z\right) &\propto \prod_{i=1}^{N}\prod_{j=1}^{M} \left[\left(\frac{y_{i}}{1-y_{i}} \right)^{\left\langle s_{j}\right\rangle \left\langle m_{j}\right\rangle} \cdot \frac{\left(1-y_{i}\right)^{\left\langle s_{j}\right\rangle}\left\langle\lambda_{j}\right\rangle}{y_{i}\left(1-y_{i}\right)} \right]^{1\left[Z_{i}=j\right]}
+  &\propto \sum_{i=1}^{N}\sum_{j=1}^{M} 1\left[Z_{i}=j\right]\left[\log \left\{y_{i}^{\left\langle s_{j}\right\rangle \left\langle m_{j}\right\rangle -1} \left(1-y_{i}\right)^{\left\langle s_{j}\right\rangle -\left\langle s_{j}\right\rangle \left\langle m_{j}\right\rangle -1}\exp \left(\left\langle \log \lambda_{j} \right\rangle \right) \right\}\right]\\
+  &\propto \sum_{i=1}^{N}\sum_{j=1}^{M} \log \left[\left(\frac{y_{i}}{1-y_{i}} \right)^{\left\langle s_{j}\right\rangle \left\langle m_{j}\right\rangle} \cdot \frac{\left(1-y_{i}\right)^{\left\langle s_{j}\right\rangle}\exp \left(\left\langle \log \lambda_{j}\right\rangle\right) }{y_{i}\left(1-y_{i}\right)} \right]^{1\left[Z_{i}=j\right]}\\
+  q\left(Z\right) &\propto \prod_{i=1}^{N}\prod_{j=1}^{M} \left[\left(\frac{y_{i}}{1-y_{i}} \right)^{\left\langle s_{j}\right\rangle \left\langle m_{j}\right\rangle} \cdot \frac{\left(1-y_{i}\right)^{\left\langle s_{j}\right\rangle}\exp \left(\varphi\left(\sum_{i=1}^{N}\phi_{ij} + \underline{a}\right) - \varphi\left(\sum_{j=1}^{M}\sum_{i=1}^{N}\phi_{ij} + M\underline{a}\right)\right)}{y_{i}\left(1-y_{i}\right)} \right]^{1\left[Z_{i}=j\right]}
 \end{align*}
 Since we chose to denote $q\left(Z_{i}=j\right)$ with $\phi_{ij}$,
 $$
-  \phi_{ij} \leftarrow \left(\frac{y_{i}}{1-y_{i}} \right)^{\left\langle s_{j}\right\rangle \left\langle m_{j}\right\rangle} \cdot \frac{\left(1-y_{i}\right)^{\left\langle s_{j}\right\rangle}\left\langle\lambda_{j}\right\rangle}{y_{i}\left(1-y_{i}\right)} 
+  \phi_{ij} \leftarrow \left(\frac{y_{i}}{1-y_{i}} \right)^{\left\langle s_{j}\right\rangle \left\langle m_{j}\right\rangle} \cdot \frac{\left(1-y_{i}\right)^{\left\langle s_{j}\right\rangle}\exp \left(\varphi\left(\sum_{i=1}^{N}\phi_{ij} + \underline{a}\right) - \varphi\left(\sum_{j=1}^{M}\sum_{i=1}^{N}\phi_{ij} + M\underline{a}\right)\right)}{y_{i}\left(1-y_{i}\right)} 
 $$
 \section{Lower Bound}
 \begin{align*}
@@ -114,7 +114,7 @@ $$
   &= \mathbb{E}\left[\log p \left(y|m,s,\lambda, Z\right)\right] + \mathbb{E}\left[\log p \left(m,s, \lambda, Z\right)\right] -\mathbb{E}\left[\log q\left(m, s, \lambda, Z\right)\right]
 \end{align*}
 \subsection{$\mathbb{E}\left[\log p \left(y,\theta\right)\right]$}
-\begin{align*}\mathbb{E}\left[\log p \left(y, \theta \right)\right] &= \sum_{i=1}^{N}\sum_{j=1}^{M}\phi_{ij} \left\langle \log \Gamma\left(s_{j}\right)\right\rangle -\left\langle \log \Gamma\left(s_{j}m_{j}\right)\right\rangle -\left\langle \log \Gamma\left(s_{j}-s_{j}m_{j}-1\right)\right\rangle + \left(\left\langle s_{j}\right\rangle \left\langle m_{j}\right\rangle -1\right)\log y_{i} \\
+\begin{align*}\mathbb{E}\left[\log p \left(y, \theta \right)\right] &= \sum_{i=1}^{N}\sum_{j=1}^{M}\phi_{ij} \left\langle \log \Gamma\left(s_{j}\right)\right\rangle -\left\langle \log \Gamma\left(s_{j}m_{j}\right)\right\rangle -\left\langle \log \Gamma\left(s_{j}-s_{j}m_{j}\right)\right\rangle + \left(\left\langle s_{j}\right\rangle \left\langle m_{j}\right\rangle -1\right)\log y_{i} \\
 &\quad + \left(\left\langle s_{j}\right\rangle \left(1-\left\langle m_{j}\right\rangle\right)-1\right)\log \left(1-y_{i}\right)  \end{align*}
 \begin{itemize}
   \item The expectation of $\log \Gamma \left(m_{j}\right)$ is not analytically tractable but it certainly is numerically through Monte-Carlo methods and the strong law of large numbers. The sampling of $m_{j}$ is carried out through acceptance-rejection sampling method if we select the instrument density with care bearing $(0, 1)$ as its support.
