@@ -75,6 +75,14 @@ INPUT /usr/local/texlive/2014/texmf-dist/tex/latex/graphics/dvipsnam.def
 INPUT /usr/local/texlive/2014/texmf-dist/tex/latex/graphics/dvipsnam.def
 INPUT /usr/local/texlive/2014/texmf-dist/tex/latex/titlesec/titlesec.sty
 INPUT /usr/local/texlive/2014/texmf-dist/tex/latex/titlesec/titlesec.sty
+INPUT /usr/local/texlive/2014/texmf-dist/tex/latex/mh/empheq.sty
+INPUT /usr/local/texlive/2014/texmf-dist/tex/latex/mh/empheq.sty
+INPUT /usr/local/texlive/2014/texmf-dist/tex/latex/mh/mhsetup.sty
+INPUT /usr/local/texlive/2014/texmf-dist/tex/latex/mh/mhsetup.sty
+INPUT /usr/local/texlive/2014/texmf-dist/tex/latex/mh/mathtools.sty
+INPUT /usr/local/texlive/2014/texmf-dist/tex/latex/mh/mathtools.sty
+INPUT /usr/local/texlive/2014/texmf-dist/tex/latex/tools/calc.sty
+INPUT /usr/local/texlive/2014/texmf-dist/tex/latex/tools/calc.sty
 INPUT GP_mixed.aux
 INPUT GP_mixed.aux
 OUTPUT GP_mixed.aux

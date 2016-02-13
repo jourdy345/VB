@@ -17,6 +17,27 @@
 \usepackage{courier}
 \usepackage[usenames, dvipsnames]{color}
 \usepackage{titlesec}
+\usepackage{empheq}
+ 
+% Command "alignedbox{}{}" for a box within an align environment
+% Source: http://www.latex-community.org/forum/viewtopic.php?f=46&t=8144
+\newlength\dlf  % Define a new measure, dlf
+\newcommand\alignedbox[2]{
+% Argument #1 = before & if there were no box (lhs)
+% Argument #2 = after & if there were no box (rhs)
+&  % Alignment sign of the line
+{
+\settowidth\dlf{$\displaystyle #1$}  
+    % The width of \dlf is the width of the lhs, with a displaystyle font
+\addtolength\dlf{\fboxsep+\fboxrule}  
+    % Add to it the distance to the box, and the width of the line of the box
+\hspace{-\dlf}  
+    % Move everything dlf units to the left, so that & #1 #2 is aligned under #1 & #2
+\boxed{#1 #2}
+    % Put a box around lhs and rhs
+}
+}
+
 
 \newtheorem{thm}{Theorem}[section]
 \newtheorem{lem}[thm]{Lemma}
@@ -257,10 +278,32 @@ where $\mathcal{TN}$ indicates truncated normal distribution, in this case multi
   q\left(\sigma\right) &\propto \frac{\exp \left(-C_{\sigma}/\sigma^{2}\right)}{\sigma^{2m}\left(A_{\sigma}^{2}+\sigma^{2}\right)}\\
   C_{\sigma} &= \frac{m}{2}\left(\Tr\left(\Sigma_{q\left(\alpha\right)}\right) + \mu_{q\left(\alpha\right)}^{T}\mu_{q\left(\alpha\right)}\right)
 \end{align*}
-\subsubsection{Lower Bound}
+\subsubsection{LB: $\mathbb{E}\left[\log p\left(y, y^{*}|\theta\right) \right]$}
 Recall that 
 \begin{align*}
   \pi\left(y, y^{*}, \theta \right) &= C\pi\left(\alpha|\sigma\right)\pi\left(\beta\right)\pi\left(\lambda\right)\pi\left(\sigma\right)\prod_{i=1}^{n}\left\{1\left[y_{i}^{*}\ge 0\right]1\left[y_{i}=1\right] + 1\left[y_{i}^{*}<0\right]1\left[y_{i}=0\right] \right\}\phi\left(y_{i}^{*}-z_{i}^{T}\alpha_{i} - a_{i}^{T}\beta\right)\\
-  \mathcal{L} &= \mathbb{E}\left[\log \pi\left(y, y^{*}, \theta \right) \right] - \mathbb{E}\left[\log q\left(y^{*}\right)q\left(\theta\right) \right]
+  \mathcal{L} &= \mathbb{E}\left[\log \pi\left(y, y^{*}, \theta \right) \right] - \mathbb{E}\left[\log q\left(y^{*}\right)q\left(\theta\right) \right]\\
+  &= \mathbb{E}\left[\log p\left(y|y^{*}, \theta \right) \right] + \mathbb{E}\left[\log p\left(y^{*}|\theta \right) \right] + \mathbb{E}\left[\log p \left(\theta \right) \right] - \mathbb{E}\left[\log q\left(\theta\right) \right]
 \end{align*}
+The above equation includes all the nodes in the graphical model. Therefore, we compute the expecation of the logarithm of each node.
+\begin{align*}
+  \log p\left(y, y^{*}|\theta\right) &= \log \prod_{i=1}^{n}\left\{1\left[y_{i}^{*} \ge 0\right]1\left[y_{i}=1\right] + 1\left[y_{i}^{*}<0\right]1\left[y_{i}=0\right] \right\}\phi\left(y_{i}^{*} - z_{i}^{T}\alpha -a_{i}^{T}\beta\right)\\
+  &\implies \mathbb{E}\left[\sum_{i=1}^{n}\log\left\{1\left[y_{i}^{*} \ge 0\right]1\left[y_{i}=1\right] + 1\left[y_{i}^{*}<0\right]1\left[y_{i}=0\right] \right\}  \right] + \sum_{i=1}^{n} \mathbb{E}\left[\log \phi\left(y_{i}^{*} - z_{i}^{T}\alpha - a_{i}^{T}\beta\right) \right]
+\end{align*}
+If we set $U = \left\{1\left[y_{i}^{*} \ge 0\right]1\left[y_{i}=1\right] + 1\left[y_{i}^{*}<0\right]1\left[y_{i}=0\right] \right\}$ and let it be a new random variable, it is always $1$ with probability 1. Therefore, the logarithm of $U$, i.e. $\log U$ is always $0$ which terminates the need for calculating the expected value since it's $0$ regardless. We proceed to the remaining terms.
+\begin{align*}
+  \sum_{i=1}^{n}\mathbb{E}\left[\log \phi\left(y_{i}^{*} - z_{i}^{T}\alpha - a_{i}^{T}\beta\right) \right] \qquad \cdots (1)
+\end{align*}
+The entropy of the variational distribution of $q\left(y_{i}^{*}\right)$ should be coupled with eqn $(1)$ to simplify the calculation.
+\begin{align*}
+  &\sum_{i=1}^{n}\mathbb{E}\left[\log \phi\left(y_{i}^{*}-z_{i}^{T}\alpha - a_{i}^{T}\beta\right) - \log \phi\left(y_{i}^{*}-\left\langle z_{i}^{T}\right\rangle \mu_{q\left(\alpha\right)} - a_{i}^{T}\mu_{q\left(\beta\right)}\right)\right] \\
+  &+\sum_{i=1}^{n} \log \left(\left\{\Phi\left(\left\langle z_{i} \right\rangle^{T}\mu_{q\left(\alpha\right)} + a_{i}^{T}\mu_{q\left(\beta\right)}\right) \right\}^{y_{i}}\left\{1-\Phi\left(\left\langle z_{i} \right\rangle^{T}\mu_{q\left(\alpha\right)} + a_{i}^{T}\mu_{q\left(\beta\right)}\right) \right\}^{1-y_{i}} \right)\\
+  &= \sum_{i=1}^{n}\mathbb{E}\left[-\frac{1}{2}\left(- 2\left(z_{i}^{T}\alpha + a_{i}^{T}\beta \right)y_{i}^{*} + \left(z_{i}^{T}\alpha + a_{i}^{T}\beta \right)^{2} +2\left(\left\langle z_{i}\right\rangle^{T}\mu_{q\left(\alpha\right)}+a_{i}^{T}\mu_{q\left(\beta\right)} \right)y_{i}^{*}\right)\right]\\
+  &\quad +\frac{1}{2}\sum_{i=1}^{n}\left( \left(\left\langle z_{i}\right\rangle^{T}\mu_{q\left(\alpha\right)} +a_{i}^{T}\mu_{q\left(\beta\right)} \right)^{2}\right)\\
+  &\quad +\sum_{i=1}^{n} \log \left(\left\{\Phi\left(\left\langle z_{i} \right\rangle^{T}\mu_{q\left(\alpha\right)} + a_{i}^{T}\mu_{q\left(\beta\right)}\right) \right\}^{y_{i}}\left\{1-\Phi\left(\left\langle z_{i} \right\rangle^{T}\mu_{q\left(\alpha\right)} + a_{i}^{T}\mu_{q\left(\beta\right)}\right) \right\}^{1-y_{i}} \right)\\
+  \end{align*}
+  \begin{empheq}[box=\fbox]{align*}
+    &= \textcolor{myorange}{-\frac{1}{2}\left(\Tr \left(\left\langle Z^{T}Z \right\rangle \Sigma_{q\left(\alpha\right)}\right) + \mu_{q\left(\alpha\right)}^{T}\left(\left\langle Z^{T}Z\right\rangle - \left\langle Z \right\rangle^{T}\left\langle Z \right\rangle \right)\mu_{q\left(\alpha\right)} + \Tr \left(A^{T}A\Sigma_{q\left(\beta\right)}\right) \right)}\\
+    &\quad \textcolor{myorange}{+\sum_{i=1}^{n} \log \left(\left\{\Phi\left(\left\langle z_{i} \right\rangle^{T}\mu_{q\left(\alpha\right)} + a_{i}^{T}\mu_{q\left(\beta\right)}\right) \right\}^{y_{i}}\left\{1-\Phi\left(\left\langle z_{i} \right\rangle^{T}\mu_{q\left(\alpha\right)} + a_{i}^{T}\mu_{q\left(\beta\right)}\right) \right\}^{1-y_{i}} \right)}
+\end{empheq}
 \end{document}
