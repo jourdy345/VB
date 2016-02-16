@@ -306,4 +306,35 @@ The entropy of the variational distribution of $q\left(y_{i}^{*}\right)$ should 
     &= \textcolor{myorange}{-\frac{1}{2}\left(\Tr \left(\left\langle Z^{T}Z \right\rangle \Sigma_{q\left(\alpha\right)}\right) + \mu_{q\left(\alpha\right)}^{T}\left(\left\langle Z^{T}Z\right\rangle - \left\langle Z \right\rangle^{T}\left\langle Z \right\rangle \right)\mu_{q\left(\alpha\right)} + \Tr \left(A^{T}A\Sigma_{q\left(\beta\right)}\right) \right)}\\
     &\quad \textcolor{myorange}{+\sum_{i=1}^{n} \log \left(\left\{\Phi\left(\left\langle z_{i} \right\rangle^{T}\mu_{q\left(\alpha\right)} + a_{i}^{T}\mu_{q\left(\beta\right)}\right) \right\}^{y_{i}}\left\{1-\Phi\left(\left\langle z_{i} \right\rangle^{T}\mu_{q\left(\alpha\right)} + a_{i}^{T}\mu_{q\left(\beta\right)}\right) \right\}^{1-y_{i}} \right)}
 \end{empheq}
+\subsubsection{LB: $\mathbb{E}\left[\log \pi\left(\alpha|\sigma\right) \right] -\mathbb{E}\left[\log q\left(\alpha\right) \right] $}
+\begin{align*}
+  \mathbb{E}\left[\log \pi \left(\alpha|\sigma\right) \right] - \mathbb{E}\left[\log q\left(\alpha\right) \right] &= -m\left(\log \left(2\pi\right) + \left\langle \log\sigma^{2} \right\rangle - \log m   \right) - \left\langle \frac{m}{2\sigma^{2}}\alpha^{T}\alpha \right\rangle \\
+  &\quad - \left\langle \left(-m\log \left(2\pi\right) -\frac{1}{2}\log\left|\Sigma_{q\left(\alpha\right)} \right| - \frac{1}{2}\left(\alpha - \mu_{q\left(\alpha\right)} \right)^{T}\Sigma_{q\left(\alpha\right)}^{-1}\left(\alpha- \mu_{q\left(\alpha\right)} \right) \right) \right\rangle \\
+  &= -m\left\langle \log \sigma^{2}\right\rangle +m\log m -\frac{m}{2}\left\langle \frac{1}{\sigma^{2}}\right\rangle \left(\Tr \left(\Sigma_{q\left(\alpha\right)}\right) + \mu_{q\left(\alpha\right)}^{T}\mu_{q\left(\alpha\right)} \right) + \frac{1}{2}\log \left|\Sigma_{q\left(\alpha\right)}\right| + m
+\end{align*}
+\subsubsection{LB: $\mathbb{E}\left[\log \pi\left(\beta\right) \right] - \mathbb{E}\left[\log q\left(\beta\right) \right]$}
+\begin{align*}
+  \mathbb{E}\left[\log \pi\left(\beta\right) \right] - \mathbb{E}\left[\log q\left(\beta\right) \right] &= -\frac{1}{2}\log \left|2\pi \Sigma_{\beta} \right| -\left\langle \frac{1}{2}\left(\beta - \mu_{\beta} \right)^{T}\Sigma_{\beta}^{-1}\left(\beta - \mu_{\beta} \right)\right\rangle \\
+  &\quad -\left(-\frac{1}{2}\log \left| 2\pi \Sigma_{q\left(\beta\right)}\right| -\left\langle \frac{1}{2}\left(\beta-\mu_{q\left(\beta\right)} \right)^{T}\Sigma_{q\left(\beta\right)}^{-1}\left(\beta-\mu_{q\left(\beta\right)} \right)\right\rangle \right)\\
+  &= -\frac{1}{2}\log \left| 2\pi \Sigma_{\beta}\right| - \frac{1}{2}\left\{\Tr\left(\Sigma_{\beta}^{-1}\Sigma_{q\left(\beta\right)} \right) + \left(\mu_{q\left(\beta\right)}-\mu_{\beta} \right)^{T}\Sigma_{\beta}^{-1}\left(\mu_{q\left(\beta\right)}-\mu_{\beta} \right) \right\}\\
+  &\quad -\left(-\frac{1}{2}\log \left|2\pi \Sigma_{q\left(\beta\right)}\right|-\frac{s}{2} \right) 
+\end{align*}
+\subsubsection{LB: $\mathbb{E}\left[\log \pi\left(\sigma\right) \right]-\mathbb{E}\left[\log q\left(\sigma\right)\right] $}
+\begin{align*}
+  \mathbb{E}\left[\log \pi\left(\sigma\right) \right] - \mathbb{E}\left[\log q\left(\sigma\right) \right] &= \log \left(2A_{\sigma}\right) - \log \pi -\left\langle \log \left(A_{\sigma}^{2}+\sigma^{2}\right)\right\rangle + C_{\sigma}\frac{\mathcal{H}\left(2m, C_{\sigma}, A_{\sigma}^{2}\right)}{\mathcal{H}\left(2m-2, C_{\sigma}, A_{\sigma}^{2}\right)} \\
+  &\quad +\log \mathcal{H}\left(2m-2, C_{\sigma}, A_{\sigma}^{2}\right) +2m\left\langle \log \sigma \right\rangle +\left\langle \log\left(A_{\sigma}^{2}+\sigma^{2}\right)\right\rangle 
+\end{align*}
+\subsubsection{LB: $\mathbb{E}\left[\log \pi\left(\lambda\right) \right]- \mathbb{E}\left[\log q\left(\lambda\right) \right] $}
+\begin{align*}
+  \mathbb{E}\left[\log \pi\left(\lambda\right) \right]- \mathbb{E}\left[\log q\left(\lambda\right) \right] &= -\frac{1}{2}\log \left|\Sigma_{\lambda}\right| -\frac{1}{2}\left\{\Tr\left(\Sigma_{\lambda}^{-1}\Sigma_{q\left(\lambda\right)}\right) + \left(\mu_{q\left(\lambda\right)}-\mu_{\lambda}  \right)^{T}\Sigma_{\lambda}^{-1}\left(\mu_{q\left(\lambda\right)}-\mu_{\lambda} \right) \right\}\\
+  &\quad +\frac{1}{2}\log \left|\Sigma_{q\left(\lambda\right)}\right| +\frac{d}{2}
+\end{align*}
+\subsubsection{LB}
+\begin{align*}
+  \mathcal{L} &= -\frac{1}{2}\left\{\Tr \left(\left\langle Z^{T}Z\right\rangle \Sigma_{q\left(\alpha\right)}\right) + \mu_{q\left(\alpha\right)}^{T}\left(\left\langle Z^{T}Z \right\rangle -\left\langle Z\right\rangle^{T}\left\langle Z\right\rangle \mu_{q\left(\alpha\right)} + \Tr\left(A^{T}A\Sigma_{q\left(\beta\right)}\right) \right) \right\}\\
+  &\quad +\sum_{i=1}^{n}\log \left(\left\{\Phi\left(\left\langle z_{i} \right\rangle^{T}\mu_{q\left(\alpha\right)} + a_{i}^{T}\mu_{q\left(\beta\right)}\right) \right\}^{y_{i}}\left\{1-\Phi\left(\left\langle z_{i} \right\rangle^{T}\mu_{q\left(\alpha\right)} + a_{i}^{T}\mu_{q\left(\beta\right)}\right) \right\}^{1-y_{i}} \right)\\
+  &\quad +m\log m +\frac{1}{2}\log \left|\Sigma_{q\left(\alpha\right)} \right| + m -\frac{1}{2}\log \left|\Sigma_{\beta}\right| -\frac{1}{2}\left\{\Tr \left(\Sigma_{\beta}^{-1}\Sigma_{q\left(\beta\right)}\right) + \left(\mu_{q\left(\beta\right)}-\mu_{\beta} \right)^{T}\Sigma_{\beta}^{-1}\left(\mu_{q\left(\beta\right)}-\mu_{\beta} \right) \right\} \\
+  &\quad + \frac{1}{2}\log \left|\Sigma_{q\left(\beta\right)}\right| + \frac{s}{2} + \log \left(2A_{\sigma}\right) -\log \pi +\log \mathcal{H}\left(2m-2, C_{\sigma}, A_{\sigma}^{2}\right) +\frac{1}{2}\log \left|\Sigma_{q\left(\lambda\right)}\right| +\frac{d}{2}\\
+  &\quad -\frac{1}{2}\log \left|\Sigma_{\lambda}\right| -\frac{1}{2}\left\{\Tr\left(\Sigma_{\lambda}^{-1}\Sigma_{q\left(\lambda\right)} \right)+\left(\mu_{q\left(\lambda\right)}-\mu_{\lambda}\right)^{T}\Sigma_{\lambda}^{-1}\left(\mu_{q\left(\lambda\right)}-\mu_{\lambda}\right) \right\}
+\end{align*}
 \end{document}
