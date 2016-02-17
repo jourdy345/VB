@@ -18,6 +18,11 @@
 \usepackage[usenames, dvipsnames]{color}
 \usepackage{titlesec}
 \usepackage{empheq}
+\usepackage{tikz}
+
+\newcommand\encircle[1]{%
+  \tikz[baseline=(X.base)] 
+    \node (X) [draw, shape=circle, inner sep=0] {\strut #1};}
  
 % Command "alignedbox{}{}" for a box within an align environment
 % Source: http://www.latex-community.org/forum/viewtopic.php?f=46&t=8144
@@ -267,9 +272,9 @@ Let $y^{*} = \begin{bmatrix}y_{1}^{*} & \ldots & y_{n}^{*}\end{bmatrix}^{T}$.
   &\quad -\frac{1}{2}\left({y^{*}}^{T}y^{*} -2\left(\left\langle Z\right\rangle \left\langle \alpha\right\rangle +A\left\langle\beta\right\rangle \right)^{T}y^{*}\right)\\
   q\left(y^{*}\right) &= \mathcal{TN}\left(\left\langle Z\right\rangle \left\langle \alpha\right\rangle +A\left\langle\beta\right\rangle, I_{n}\right)
 \end{align*}
-where $\mathcal{TN}$ indicates truncated normal distribution, in this case multivariate. Each element of $y^{*}$ is truncated at zero. The direction of truncation remains the same. Assuming $y_{i}=1$,
+where $\mathcal{TN}$ indicates truncated normal distribution, in this case multivariate. Each element of $y^{*}$ is truncated at zero. The direction of truncation remains the same.
 \begin{align*}
-  \mu_{q\left(y_{i}^{*}\right)} &= \left\langle z_{i}^{T}\right\rangle \mu_{q\left(\alpha\right)} + a_{i}^{T}\mu_{q\left(\beta\right)} + \frac{\phi\left(\left\langle z_{i}^{T}\right\rangle \mu_{q\left(\alpha\right)} + a_{i}^{T}\mu_{q\left(\beta\right)}\right)}{\Phi\left(\left\langle z_{i}^{T}\right\rangle \mu_{q\left(\alpha\right)} + a_{i}^{T}\mu_{q\left(\beta\right)}\right)}
+  \mu_{q\left(y^{*}\right)} &= Z\mu_{q\left(\alpha\right)} +A\mu_{q\left(\beta\right)} +\frac{\phi\left(Z\mu_{q\left(\alpha\right)}+A\mu_{q\left(\beta\right)}\right)}{\left\{\Phi\left(Z\mu_{q\left(\alpha\right)}+A\mu_{q\left(\beta\right)}\right) \right\}^{y}\left\{\Phi\left(Z\mu_{q\left(\alpha\right)}+A\mu_{q\left(\beta\right)}\right)-1_{n} \right\}^{1_{n}-y}}
 \end{align*}
 \subsubsection{$q\left(\sigma\right)$}
 \begin{align*}
@@ -281,7 +286,7 @@ where $\mathcal{TN}$ indicates truncated normal distribution, in this case multi
 \subsubsection{LB: $\mathbb{E}\left[\log p\left(y, y^{*}|\theta\right) \right]$}
 Recall that 
 \begin{align*}
-  \pi\left(y, y^{*}, \theta \right) &= C\pi\left(\alpha|\sigma\right)\pi\left(\beta\right)\pi\left(\lambda\right)\pi\left(\sigma\right)\prod_{i=1}^{n}\left\{1\left[y_{i}^{*}\ge 0\right]1\left[y_{i}=1\right] + 1\left[y_{i}^{*}<0\right]1\left[y_{i}=0\right] \right\}\phi\left(y_{i}^{*}-z_{i}^{T}\alpha_{i} - a_{i}^{T}\beta\right)\\
+  \pi\left(y, y^{*}, \theta \right) &= C\pi\left(\alpha|\sigma\right)\pi\left(\beta\right)\pi\left(\lambda\right)\pi\left(\sigma\right)\prod_{i=1}^{n}\left\{1\left[y_{i}^{*}\ge 0\right]1\left[y_{i}=1\right] + 1\left[y_{i}^{*}<0\right]1\left[y_{i}=0\right] \right\}\phi\left(y_{i}^{*}-z_{i}^{T}\alpha - a_{i}^{T}\beta\right)\\
   \mathcal{L} &= \mathbb{E}\left[\log \pi\left(y, y^{*}, \theta \right) \right] - \mathbb{E}\left[\log q\left(y^{*}\right)q\left(\theta\right) \right]\\
   &= \mathbb{E}\left[\log p\left(y|y^{*}, \theta \right) \right] + \mathbb{E}\left[\log p\left(y^{*}|\theta \right) \right] + \mathbb{E}\left[\log p \left(\theta \right) \right] - \mathbb{E}\left[\log q\left(\theta\right) \right]
 \end{align*}
@@ -336,5 +341,25 @@ The entropy of the variational distribution of $q\left(y_{i}^{*}\right)$ should 
   &\quad +m\log m +\frac{1}{2}\log \left|\Sigma_{q\left(\alpha\right)} \right| + m -\frac{1}{2}\log \left|\Sigma_{\beta}\right| -\frac{1}{2}\left\{\Tr \left(\Sigma_{\beta}^{-1}\Sigma_{q\left(\beta\right)}\right) + \left(\mu_{q\left(\beta\right)}-\mu_{\beta} \right)^{T}\Sigma_{\beta}^{-1}\left(\mu_{q\left(\beta\right)}-\mu_{\beta} \right) \right\} \\
   &\quad + \frac{1}{2}\log \left|\Sigma_{q\left(\beta\right)}\right| + \frac{s}{2} + \log \left(2A_{\sigma}\right) -\log \pi +\log \mathcal{H}\left(2m-2, C_{\sigma}, A_{\sigma}^{2}\right) +\frac{1}{2}\log \left|\Sigma_{q\left(\lambda\right)}\right| +\frac{d}{2}\\
   &\quad -\frac{1}{2}\log \left|\Sigma_{\lambda}\right| -\frac{1}{2}\left\{\Tr\left(\Sigma_{\lambda}^{-1}\Sigma_{q\left(\lambda\right)} \right)+\left(\mu_{q\left(\lambda\right)}-\mu_{\lambda}\right)^{T}\Sigma_{\lambda}^{-1}\left(\mu_{q\left(\lambda\right)}-\mu_{\lambda}\right) \right\}
+\end{align*}
+\subsubsection{$q\left(\lambda\right)$}
+Notice that we have not yet come up with the updating algorithm for $\lambda$. This is because of the fact that the full conditional $\lambda|\text{rest}$ is just the prior density of $\lambda$ without any dependency on other parameters. Therefore, we instead rely on nonconjugate variational message passing.
+\begin{align*}
+  q\left(\lambda\right) &= \mathcal{N}\left(\mu_{q\left(\lambda\right)}, \Sigma_{q\left(\lambda\right)} \right)\\
+  &= \exp \left\{\eta'T\left(\lambda\right) - h\left(\eta\right) \right\}\\
+  \mathcal{V}\left(\eta\right) &= \frac{\partial^{2}h\left(\eta\right)}{\partial \eta \partial \eta'}\\
+  p\left(y, \lambda\right) &= \prod_{a} f_{a}\left(y, \lambda\right)\\
+  S_{a} &= \mathbb{E}_{q}\left[\log f_{a}\left(y, \lambda\right) \right]\\
+  \nabla_{\eta}\mathcal{L} &= \mathcal{V}\left(\eta\right)^{-1} \sum_{a\in N\left(\lambda\right)}  \frac{\partial S_{a}}{\partial \eta} - \eta\\
+  \eta &\leftarrow \mathcal{V}\left(\eta\right)^{-1}\sum_{a\in N\left(\lambda\right)} \frac{\partial S_{a}}{\partial \eta}\\
+  \Sigma_{q\left(\lambda\right)} &\leftarrow -\frac{1}{2}\left[\opn{vec}^{-1}\left(\sum_{a\in N\left(\lambda\right)} \frac{\partial S_{a}}{\partial \opn{vec}\left(\Sigma_{q\left(\lambda\right)}\right)} \right) \right]^{-1}\\
+  \mu_{q\left(\lambda\right)} &\leftarrow \mu_{q\left(\lambda\right)} +\Sigma_{q\left(\lambda\right)}\sum_{a\in N\left(\lambda\right)} \frac{\partial S_{q}}{\partial \mu_{q\left(\lambda\right)}}
+\end{align*}
+\begin{align*}
+  \mathbb{E}\left[\log p\left(y, \theta\right)\right] &= -m\log \left(\frac{2\pi\sigma^{2}}{m}\right) -\frac{m}{2}\left\langle \frac{1}{\sigma^{2}}\right\rangle \left\{\Tr \left(\Sigma_{q\left(\alpha\right)}\right)+\mu_{q\left(\alpha\right)}'\mu_{q\left(\alpha\right)} \right\} -\frac{1}{2}\log \left|2\pi \Sigma_{\beta}\right|\\
+  &\quad -\frac{1}{2}\left\{\Tr\left(\Sigma_{\beta}^{-1}\Sigma_{q\left(\beta\right)}\right)+\left(\mu_{q\left(\beta\right)}-\mu_{\beta}\right)'\Sigma_{\beta}^{-1}\left(\mu_{q\left(\beta\right)}-\mu_{\beta}\right) \right\}-\frac{1}{2}\log \left|2\pi\Sigma_{\lambda}\right|\\
+  &\quad -\frac{1}{2}\left\{\Tr \left(\Sigma_{\lambda}^{-1}\Sigma_{q\left(\lambda\right)}\right) + \left(\mu_{q\left(\lambda\right)}-\mu_{\lambda}\right)'\Sigma_{\lambda}^{-1}\left(\mu_{q\left(\lambda\right)}-\mu_{\lambda}\right) \right\} + \log \left(2A_{\sigma}\right)-\log \pi -\left\langle \log \left(A_{\sigma}^{2}+\sigma^{2}\right)\right\rangle \\
+  &\quad -\frac{n}{2}\log \left(2\pi\right) -\frac{1}{2}\left[\left\langle {y^{*}}'y^{*}\right\rangle -2\left(\left\langle Z \right\rangle \mu_{q\left(\alpha\right)}+A\mu_{q\left(\beta\right)} \right)'\mu_{q\left(y^{*}\right)}+\Tr\left\{\left\langle Z'Z \right\rangle \left(\Sigma_{q\left(\alpha\right)}+\mu_{q\left(\alpha\right)}\mu_{q\left(\alpha\right)}'\right) \right\} \right]\\
+  &\quad -\frac{1}{2}\left[2\mu_{q\left(\alpha\right)}'\left\langle Z \right\rangle'A\mu_{q\left(\beta\right)} + \Tr\left(A'A\Sigma_{q\left(\beta\right)} \right) + \mu_{q\left(\beta\right)}'A'A\mu_{q\left(\beta\right)} \right]
 \end{align*}
 \end{document}
