@@ -4,7 +4,7 @@
 % customizations and command definitions. The preamble is everything
 % between \documentclass and \begin{document}.
 
-\usepackage[margin=1in]{geometry} % set the margins to 1in on all sides
+\usepackage[margin=0.6in]{geometry} % set the margins to 1in on all sides
 \usepackage{graphicx} % to include figures
 \usepackage{amsmath} % great math stuff
 \usepackage{amsfonts} % for blackboard bold, etc
@@ -360,6 +360,24 @@ Notice that we have not yet come up with the updating algorithm for $\lambda$. T
   &\quad -\frac{1}{2}\left\{\Tr\left(\Sigma_{\beta}^{-1}\Sigma_{q\left(\beta\right)}\right)+\left(\mu_{q\left(\beta\right)}-\mu_{\beta}\right)'\Sigma_{\beta}^{-1}\left(\mu_{q\left(\beta\right)}-\mu_{\beta}\right) \right\}-\frac{1}{2}\log \left|2\pi\Sigma_{\lambda}\right|\\
   &\quad -\frac{1}{2}\left\{\Tr \left(\Sigma_{\lambda}^{-1}\Sigma_{q\left(\lambda\right)}\right) + \left(\mu_{q\left(\lambda\right)}-\mu_{\lambda}\right)'\Sigma_{\lambda}^{-1}\left(\mu_{q\left(\lambda\right)}-\mu_{\lambda}\right) \right\} + \log \left(2A_{\sigma}\right)-\log \pi -\left\langle \log \left(A_{\sigma}^{2}+\sigma^{2}\right)\right\rangle \\
   &\quad -\frac{n}{2}\log \left(2\pi\right) -\frac{1}{2}\left[\left\langle {y^{*}}'y^{*}\right\rangle -2\left(\left\langle Z \right\rangle \mu_{q\left(\alpha\right)}+A\mu_{q\left(\beta\right)} \right)'\mu_{q\left(y^{*}\right)}+\Tr\left\{\left\langle Z'Z \right\rangle \left(\Sigma_{q\left(\alpha\right)}+\mu_{q\left(\alpha\right)}\mu_{q\left(\alpha\right)}'\right) \right\} \right]\\
-  &\quad -\frac{1}{2}\left[2\mu_{q\left(\alpha\right)}'\left\langle Z \right\rangle'A\mu_{q\left(\beta\right)} + \Tr\left(A'A\Sigma_{q\left(\beta\right)} \right) + \mu_{q\left(\beta\right)}'A'A\mu_{q\left(\beta\right)} \right]
+  &\quad -\frac{1}{2}\left[2\mu_{q\left(\alpha\right)}'\left\langle Z \right\rangle'A\mu_{q\left(\beta\right)} + \Tr\left(A'A\Sigma_{q\left(\beta\right)} \right) + \mu_{q\left(\beta\right)}'A'A\mu_{q\left(\beta\right)} \right]\\
+  \frac{\partial}{\partial \mu_{q\left(\lambda\right)}} \mathbb{E}\left[\log p\left(y, \theta\right) \right] &= -\frac{1}{2}\frac{\partial}{\partial \mu_{q\left(\lambda\right)}}\left(\mu_{q\left(\lambda\right)}-\mu_{\lambda}\right)'\Sigma_{\lambda}^{-1}\left(\mu_{q\left(\lambda\right)}-\mu_{\lambda}\right) \quad \quad \quad \;\;\, \cdots (1)\\
+  &\quad \; +\frac{\partial}{\partial \mu_{q\left(\lambda\right)}} \mu_{q\left(\alpha\right)}'\left\langle Z \right\rangle'\mu_{q\left(y^{*}\right)} \qquad \qquad \;\; \quad \qquad  \quad \quad \quad \cdots (2) \\
+  &\quad \;-\frac{1}{2}\frac{\partial}{\partial \mu_{q\left(\lambda\right)}} \Tr\left\{\left\langle Z'Z \right\rangle \left(\Sigma_{q\left(\alpha\right)} + \mu_{q\left(\alpha\right)}\mu_{q\left(\alpha\right)}'\right) \right\} \;\;\; \,\quad \cdots (3)\\
+  &\quad\; -\frac{\partial}{\partial \mu_{q\left(\lambda\right)}} \mu_{q\left(\alpha\right)}'\left\langle Z \right\rangle'A\mu_{q\left(\beta\right)}\qquad \qquad \qquad \qquad \quad \; \;\;\; \cdots (4)\\
+  (1) &= -\frac{1}{2}\frac{\partial}{\partial \mu_{q\left(\lambda\right)}} \left(\mu_{q\left(\lambda\right)}'\Sigma_{\lambda}^{-1}\mu_{q\left(\lambda\right)} -2\mu_{q\left(\lambda\right)}'\Sigma_{\lambda}^{-1}\mu_{\lambda} +\mu_{\lambda}'\Sigma_{\lambda}^{-1}\mu_{\lambda} \right)\\
+  &= -\frac{1}{2}\left(2\Sigma_{\lambda}^{-1}\mu_{q\left(\lambda\right)} -2\Sigma_{\lambda}^{-1}\mu_{\lambda}\right)\\
+  &= \Sigma_{\lambda}^{-1}\left(\mu_{\lambda}-\mu_{q\left(\lambda\right)}\right)\\
+  (2)+(4) &= \sum_{i=1}^{n}\sum_{j=1}^{m} \left(\mu_{i}^{q\left(y^{*}\right)}-\mu_{i}^{A\mu_{q\left(\beta\right)}} \right)\exp\left(-\frac{1}{2}t_{ij}'\Sigma_{q\left(\lambda\right)}t_{ij} \right)\left\{\mu_{j+m}^{q\left(\alpha\right)}\cos \left(t_{ij}'\mu_{q\left(\lambda\right)}\right) -\mu_{j}^{q\left(\alpha\right)}\sin \left(t_{ij}'\mu_{q\left(\lambda\right)}\right) \right\}t_{ij}\\
+  (3) &= -\frac{1}{4}\sum_{i=1}^{n}\sum_{j=1}^{m}\sum_{r=1}^{m}\left[\nu_{ijr}^{-} \left\{2B_{jr}\cos \left({t_{ijr}^{-}}'\mu_{q\left(\lambda\right)} \right)-\left(A_{jr}+D_{jr}\right)\sin\left({t_{ijr}^{-}}'\mu_{q\left(\lambda\right)} \right) \right\}t_{ijr}^{-} \right.\\
+  &\quad \qquad \qquad \quad \;\;\,+\left. \nu_{ijr}^{+}\left\{2B_{jr}\cos \left({t_{ijr}^{+}}'\mu_{q\left(\lambda\right)}\right) +\left(D_{jr}-A_{jr}\right)\sin\left({t_{ijr}^{+}}'\mu_{q\left(\lambda\right)} \right)  \right\}t_{ijr}^{+} \right]\\
+  \textcolor{myorange}{\mu_{q\left(\lambda\right)}} &\textcolor{myorange}{\leftarrow \mu_{q\left(\lambda\right)} +\Sigma_{q\left(\lambda\right)}\left((1)+(2)+(3)+(4) \right)}
+\end{align*}
+\begin{align*}
+  \frac{\partial}{\partial \Sigma_{q\left(\lambda\right)}} \mathbb{E}\left[\log p\left(y, \theta\right) \right] &= -\frac{1}{2}\left(\Sigma_{\lambda}^{-1} + F_{1} + F_{2} \right)\\
+  F_{1} &= \sum_{i=1}^{n}\sum_{j=1}^{m} \left(\mu_{i}^{q\left(y^{*}\right)} -\mu_{i}^{A\mu_{q\left(\beta\right)}}\right)\exp\left(-\frac{1}{2}t_{ij}'\Sigma_{q\left(\lambda\right)}t_{ij}\right)\left\{\mu_{j}^{q\left(\alpha\right)}\cos \left(t_{ij}'\mu_{q\left(\lambda\right)}\right) + \mu_{j+m}^{q\left(\alpha\right)}\sin \left(t_{ij}'\mu_{q\left(\lambda\right)}\right) \right\}t_{ij}t_{ij}'\\
+  F_{2} &= -\frac{1}{2}\sum_{i=1}^{n}\sum_{j=1}^{m}\sum_{r=1}^{m} \left[\nu_{ijr}^{-}\left\{\left(A_{jr}+D_{jr}\right)\cos\left({t_{ijr}^{-}}'\mu_{q\left(\lambda\right)} \right) +2B_{jr}\sin\left({t_{ijr}^{-}}'\mu_{q\left(\lambda\right)} \right) \right\}t_{ijr}^{-}{t_{ijr}^{-}}'\right.\\
+  &\quad\qquad \qquad\;\; +\left. \nu_{ijr}^{+}\left\{\left(A_{jr}-D_{jr} \right)\cos\left({t_{ijr}^{+}}'\mu_{q\left(\lambda\right)} \right) +2B_{jr}\sin\left({t_{ijr}^{+}}'\mu_{q\left(\lambda\right)} \right) \right\}t_{ijr}^{+}{t_{ijr}^{+}}' \right]\\
+  \textcolor{myorange}{\Sigma_{q\left(\lambda\right)}} &\leftarrow \textcolor{myorange}{\left\{\Sigma_{\lambda}^{-1} + F_{1}+F_{2} \right\}^{-1}}
 \end{align*}
 \end{document}
