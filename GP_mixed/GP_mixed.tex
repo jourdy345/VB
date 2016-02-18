@@ -175,6 +175,7 @@ where $\xi = \left(\xi_{1}, \ldots , \xi_{n}\right)$.
   &\quad-\log \left(A_{\gamma}^{2}+\gamma^{2}\right)
 \end{align*}
 \section{Sparse GP Probit Regression}
+This section will extensively use the results of [1] Tan, Linda S. L., Ong, Victor M. H., Nott, David J., and Jasra, Ajay. “Variational Inference for Sparse Spectrum Gaussian Process Regression,” May 9, 2013.
 \subsection{Bayesian probit regression without random effects}
 The ordinary formulation goes like this:
 $$
@@ -378,6 +379,6 @@ Notice that we have not yet come up with the updating algorithm for $\lambda$. T
   F_{1} &= \sum_{i=1}^{n}\sum_{j=1}^{m} \left(\mu_{i}^{q\left(y^{*}\right)} -\mu_{i}^{A\mu_{q\left(\beta\right)}}\right)\exp\left(-\frac{1}{2}t_{ij}'\Sigma_{q\left(\lambda\right)}t_{ij}\right)\left\{\mu_{j}^{q\left(\alpha\right)}\cos \left(t_{ij}'\mu_{q\left(\lambda\right)}\right) + \mu_{j+m}^{q\left(\alpha\right)}\sin \left(t_{ij}'\mu_{q\left(\lambda\right)}\right) \right\}t_{ij}t_{ij}'\\
   F_{2} &= -\frac{1}{2}\sum_{i=1}^{n}\sum_{j=1}^{m}\sum_{r=1}^{m} \left[\nu_{ijr}^{-}\left\{\left(A_{jr}+D_{jr}\right)\cos\left({t_{ijr}^{-}}'\mu_{q\left(\lambda\right)} \right) +2B_{jr}\sin\left({t_{ijr}^{-}}'\mu_{q\left(\lambda\right)} \right) \right\}t_{ijr}^{-}{t_{ijr}^{-}}'\right.\\
   &\quad\qquad \qquad\;\; +\left. \nu_{ijr}^{+}\left\{\left(A_{jr}-D_{jr} \right)\cos\left({t_{ijr}^{+}}'\mu_{q\left(\lambda\right)} \right) +2B_{jr}\sin\left({t_{ijr}^{+}}'\mu_{q\left(\lambda\right)} \right) \right\}t_{ijr}^{+}{t_{ijr}^{+}}' \right]\\
-  \textcolor{myorange}{\Sigma_{q\left(\lambda\right)}} &\leftarrow \textcolor{myorange}{\left\{\Sigma_{\lambda}^{-1} + F_{1}+F_{2} \right\}^{-1}}
+  \textcolor{myorange}{\Sigma_{q\left(\lambda\right)}} &\textcolor{myorange}{\leftarrow \left\{\Sigma_{\lambda}^{-1} + F_{1}+F_{2} \right\}^{-1}}
 \end{align*}
 \end{document}
