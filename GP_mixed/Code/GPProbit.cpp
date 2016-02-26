@@ -14,24 +14,6 @@ arma::mat mvnRandomGenerate(int n, arma::vec mu, arma::mat sigma) {
    return arma::repmat(mu, 1, n).t() + Y * arma::chol(sigma);
 }
 
-/* designMatrixX = X
-   SMatrix       = S
-   cutOff        = m
-   dimension     = d
-*/
-arma::mat constructTmatrix(arma::mat designMatrixX, arma::mat SMatrix) {
-  int nOfData         = designMatrixX.n_rows;
-  int cutOff          = SMatrix.n_rows;
-  int dimension       = SMatrix.n_cols;
-  arma::mat Tmatrix   = arma::zeros<arma::mat>(nOfData * cutOff, dimension);
-
-  for (int i = 1; i < nOfData + 1; i++) {
-    Tmatrix.rows(cutOff * (i - 1), i * cutOff - 1) = SMatrix % arma::repmat(X.row(i - 1), cutOff, 1);
-  }
-
-  return Tmatrix;
-}
-
 /* nOfData = n
    cutOff  = m
 */
@@ -42,9 +24,9 @@ arma::mat eOfZ(arma::mat designMatrixX, arma::mat SMatrix, arma::vec muOptimalLa
   for (int i = 0; i < nOfData; i++) {
     arma::colvec ithColumn = Z.col(i);
     for (int r = 0; r < cutOff; r++) {
-      arma::rowvec t_ir = SMatrix.row(r) % designMatrixX.row(i);
-      ithColumn(r) = std::exp( -0.5 * arma::as_scalar( t_ir * sigmaOptimalLambda * t_ir.t() ) ) * std::cos( -0.5 * arma::as_scalar( t_ir * muOptimalLambda ) );
-      ithColumn(r + cutOff) = std::exp( -0.5 * arma::as_scalar( t_ir * sigmaOptimalLambda * t_ir.t() ) ) * std::sin( -0.5 * arma::as_scalar( t_ir * muOptimalLambda ) );
+      arma::colvec t_ir = (SMatrix.row(r) % designMatrixX.row(i)).t();
+      ithColumn(r) = std::exp( -0.5 * arma::dot( t_ir, sigmaOptimalLambda * t_ir ) ) * cos( -0.5 * arma::dot( t_ir, muOptimalLambda ) );
+      ithColumn(r + cutOff) = std::exp( -0.5 * arma::dot( t_ir, sigmaOptimalLambda * t_ir ) ) * sin( -0.5 * arma::dot( t_ir, muOptimalLambda ) );
 
     }
     Z.col(i) = ithColumn;
@@ -65,11 +47,11 @@ arma::mat eOfZTZ(arma::mat designMatrixX, arma::mat SMatrix, arma::colvec muOpti
   for (int i = 0; i < nOfData; i++) {
     for (int r = 0; r < cutOff; r++) {
       for (int l = 0; l < cutOff; l++) {
-        arma::rowvec tMinus_irl = (SMatrix.row(r) % designMatrixX.row(i)) - (SMatrix.row(l) % designMatrixX.row(i));
-        arma::rowvec tPlus_irl  = (SMatrix.row(r) % designMatrixX.row(i)) + (SMatrix.row(l) % designMatrixX.row(i));
-        P(r, l) = 0.5 * ( std::exp( -0.5 * arma::as_scalar( tMinus_irl * sigmaOptimalLambda * tMinus_irl.t() ) ) * std::cos( arma::as_scalar( tMinus_irl * muOptimalLambda ) ) + std::exp( arma::as_scalar( -0.5 * tPlus_irl * sigmaOptimalLambda * tPlus_irl.t() )) * std::cos( tPlus_irl * muOptimalLambda) );
-        Q(r, l) = 0.5 * ( std::exp( -0.5 * arma::as_scalar( tMinus_irl * sigmaOptimalLambda * tMinus_irl.t() ) ) * std::sin( arma::as_scalar( tMinus_irl * muOptimalLambda ) ) + std::exp( arma::as_scalar( -0.5 * tPlus_irl * sigmaOptimalLambda * tPlus_irl.t() )) * std::sin( tPlus_irl * muOptimalLambda) );
-        R(r, l) = 0.5 * ( std::exp( -0.5 * arma::as_scalar( tMinus_irl * sigmaOptimalLambda * tMinus_irl.t() ) ) * std::cos( arma::as_scalar( tMinus_irl * muOptimalLambda ) ) - std::exp( arma::as_scalar( -0.5 * tPlus_irl * sigmaOptimalLambda * tPlus_irl.t() )) * std::cos( tPlus_irl * muOptimalLambda) );
+        arma::colvec tMinus_irl = ((SMatrix.row(r) % designMatrixX.row(i)) - (SMatrix.row(l) % designMatrixX.row(i))).t();
+        arma::colvec tPlus_irl  = ((SMatrix.row(r) % designMatrixX.row(i)) + (SMatrix.row(l) % designMatrixX.row(i))).t();
+        P(r, l) = 0.5 * ( std::exp( -0.5 * ( arma::dot(tMinus_irl, sigmaOptimalLambda * tMinus_irl) )) * cos( arma::dot(tMinus_irl, muOptimalLambda) ) + std::exp( -0.5 * arma::dot(tPlus_irl, sigmaOptimalLambda * tPlus_irl )) * cos( arma::dot(tPlus_irl, muOptimalLambda) ));
+        Q(r, l) = 0.5 * ( std::exp( -0.5 * ( arma::dot(tMinus_irl, sigmaOptimalLambda * tMinus_irl) )) * sin( arma::dot(tMinus_irl, muOptimalLambda) ) + std::exp( -0.5 * arma::dot(tPlus_irl, sigmaOptimalLambda * tPlus_irl )) * sin( arma::dot(tPlus_irl, muOptimalLambda) ));
+        R(r, l) = 0.5 * ( std::exp( -0.5 * ( arma::dot(tMinus_irl, sigmaOptimalLambda * tMinus_irl) )) * cos( arma::dot(tMinus_irl, muOptimalLambda) ) - std::exp( -0.5 * arma::dot(tPlus_irl, sigmaOptimalLambda * tPlus_irl )) * cos( arma::dot(tPlus_irl, muOptimalLambda) ));
       }
     }
     P_temp += P;
@@ -151,11 +133,11 @@ double lowerBound(arma::colvec yResponse, arma::mat designMatrixX, arma::mat SMa
 
   double part2 = 0.0;
   arma::colvec functand = eOfZ(designMatrixX, SMatrix, muOptimalLambda, sigmaOptimalLambda) * muOptimalAlpha + A * muOptimalBeta;
-  for (int index = 0; index < nOfData; i++) {
-    if (yResponse(i) == 1.0) {
-      part2 += std::log(0.5 * std::erfc(-functand(i) * M_SQRT1_2));
+  for (int index = 0; index < nOfData; index++) {
+    if (yResponse(index) == 1.0) {
+      part2 += std::log(0.5 * std::erfc(-functand(index) * M_SQRT1_2));
     } else {
-      part2 += std::log( 1 - 0.5 * std::erfc(-functand(i) * M_SQRT1_2) );
+      part2 += std::log( 1 - 0.5 * std::erfc(-functand(index) * M_SQRT1_2) );
     }
   }
   double sign, detSigmaOptimalAlpha, detSigmaOptimalBeta, detSigmaOptimalLambda, detPriorSigmaLambda, detPriorSigmaBeta;
@@ -172,39 +154,43 @@ double lowerBound(arma::colvec yResponse, arma::mat designMatrixX, arma::mat SMa
   return part1 + part2 + part3 + part4 + part5;
 }
 
-arma::field sparseGPVariationalInference(arma::colvec yResponse, arma::mat designMatrixX, arma::mat SMatrix, arma::mat A, arma::colvec priorMuBeta, arma::mat priorSigmaBeta, arma::colvec priorMuLambda, arma::mat priorSigmaLambda, double A_sigma) {
+void sparseGPVBProbit(arma::colvec yResponse, arma::mat designMatrixX, arma::mat SMatrix, arma::mat A, arma::colvec priorMuBeta, arma::mat priorSigmaBeta, arma::colvec priorMuLambda, arma::mat priorSigmaLambda, double A_sigma) {
   int nOfData   = yResponse.size();
   int cutOff    = SMatrix.n_rows;
   int dimension = SMatrix.n_cols;
-
+  int sInt      = A.n_cols;
   double n      = static_cast<double>(nOfData);
   double m      = static_cast<double>(cutOff);
   double d      = static_cast<double>(dimension);
-  double s      = A.n_cols;
+  double s      = static_cast<double>(sInt);
   double oldLowerBound = -10000.0;
   double newLowerBound;
   // initialize variational parameters
-  arma::mat sigmaOptimalLambda, sigmaOptimalAlpha, sigmaOptimalBeta;
-  arma::colvec muOptimalResponseStar, muOptimalBeta, muOptimalLambda, muOptimalAlpha;
-  do {
+  arma::mat sigmaOptimalLambda; sigmaOptimalLambda.eye(dimension, dimension);
+  arma::colvec muOptimalLambda; muOptimalLambda.randn(dimension);
+  arma::colvec muOptimalBeta; muOptimalBeta.randn(sInt);
+  arma::mat sigmaOptimalAlpha, sigmaOptimalBeta;
+  arma::colvec muOptimalResponseStar, muOptimalAlpha;
+  double C_sigma = 10;
+  while (true) {
     // update μ(α), Σ(α)
     arma::mat tempDiagonalMatrix(2 * cutOff, 2 * cutOff); tempDiagonalMatrix.eye();
     sigmaOptimalAlpha = ( m * std::exp(logH(2.0 * m - 4.0, C_sigma, std::pow(A_sigma, 2.0)) - logH(2.0 * m - 2.0, C_sigma, std::pow(A_sigma, 2.0))) * tempDiagonalMatrix + eOfZTZ( designMatrixX, SMatrix, muOptimalLambda, sigmaOptimalLambda ) ).i();
     muOptimalAlpha    = sigmaOptimalAlpha * ( eOfZ( designMatrixX, SMatrix, muOptimalLambda, sigmaOptimalLambda ).t() * muOptimalResponseStar - ( A * eOfZ( designMatrixX, SMatrix, muOptimalLambda, sigmaOptimalLambda )).t() * muOptimalBeta );
 
-    // update μ(β), Σ(β)
-    sigmaOptimalBeta = (priorSigmaBeta.i() + A.t() * A).i();
-    muOptimalBeta = sigmaOptimalBeta * ( arma::solve( priorSigmaBeta, priorMuBeta ) + A.t() * muOptimalResponseStar - A.t() * eOfZ( designMatrixX, SMatrix, muOptimalLambda, sigmaOptimalLambda ) * muOptimalAlpha );
-
     // update μ(y*)
     arma::colvec functand = eOfZ( designMatrixX, SMatrix, muOptimalLambda, sigmaOptimalLambda ) * muOptimalAlpha + A * muOptimalBeta;
     for (int index = 0; index < nOfData; index++) {
-      if (yResponse == 1.0) {
-        muOptimalResponseStar(i) = functand(i) + ((1.0 / std::sqrt(2.0 * M_PI)) * std::exp(-0.5 * functand(i) * functand(i))) / (0.5 * std::erfc(-functand(i) * M_SQRT1_2));
+      if (yResponse(index) == 1.0) {
+        muOptimalResponseStar(index) = functand(index) + ((1.0 / std::sqrt(2.0 * M_PI)) * std::exp(-0.5 * functand(index) * functand(index))) / (0.5 * std::erfc(-functand(index) * M_SQRT1_2));
       } else {
-        muOptimalResponseStar(i) = functand(i) + ((1.0 / std::sqrt(2.0 * M_PI)) * std::exp(-0.5 * functand(i) * functand(i))) / (0.5 * std::erfc(-functand(i) * M_SQRT1_2) - 1.0);
+        muOptimalResponseStar(index) = functand(index) + ((1.0 / std::sqrt(2.0 * M_PI)) * std::exp(-0.5 * functand(index) * functand(index))) / (0.5 * std::erfc(-functand(index) * M_SQRT1_2) - 1.0);
       }
     }
+
+    // update μ(β), Σ(β)
+    sigmaOptimalBeta = (priorSigmaBeta.i() + A.t() * A).i();
+    muOptimalBeta = sigmaOptimalBeta * ( arma::solve( priorSigmaBeta, priorMuBeta ) + A.t() * muOptimalResponseStar - A.t() * eOfZ( designMatrixX, SMatrix, muOptimalLambda, sigmaOptimalLambda ) * muOptimalAlpha );
 
     // update C(σ)
     C_sigma = 0.5 * m * (arma::trace(sigmaOptimalAlpha) + arma::dot(muOptimalAlpha, muOptimalAlpha));
@@ -225,14 +211,14 @@ arma::field sparseGPVariationalInference(arma::colvec yResponse, arma::mat desig
     for (int i = 0; i < nOfData; i++) {
       double temp = muOptimalResponseStar(i) - AmuOptimalBeta(i);
       for (int j = 0; j < cutOff; j++) {
-        t_ij = SMatrix.row(j) % designMatrixX.row(i);
-        F1 = temp * std::exp( -0.5 * arma::dot(t_ij, sigmaOptimalLambda * t_ij) ) * (muOptimalAlpha(j) * std::cos( arma::dot(t_ij, muOptimalLambda) ) + muOptimalAlpha(j + cutOff) * std::sin( arma::dot( t_ij, muOptimalLambda ) )) * (t_ij * t_ij.t());
-        F3 = temp * std::exp( -0.5 * arma::dot(t_ij, sigmaOptimalLambda * t_ij) ) * (muOptimalAlpha(j + cutOff) * std::cos( arma::dot(t_ij, muOptimalLambda) ) - muOptimalLambda(j) * std::sin( arma::dot( t_ij, muOptimalLambda ) )) * t_ij;
+        t_ij = (SMatrix.row(j) % designMatrixX.row(i)).t();
+        F1 = temp * std::exp( -0.5 * arma::dot(t_ij, sigmaOptimalLambda * t_ij) ) * (muOptimalAlpha(j) * cos( arma::dot(t_ij, muOptimalLambda) ) + muOptimalAlpha(j + cutOff) * sin( arma::dot( t_ij, muOptimalLambda ) )) * (t_ij * t_ij.t());
+        F3 = temp * std::exp( -0.5 * arma::dot(t_ij, sigmaOptimalLambda * t_ij) ) * (muOptimalAlpha(j + cutOff) * cos( arma::dot(t_ij, muOptimalLambda) ) - muOptimalLambda(j) * sin( arma::dot( t_ij, muOptimalLambda ) )) * t_ij;
         for (int r = 0; r < cutOff; r++) {
-          tPlus_ijr = SMatrix.row(j) % designMatrixX.row(i) + SMatrix.row(r) % designMatrixX.row(i);
-          tMinus_ijr = SMatrix.row(j) % designMatrixX.row(i) - SMatrix.row(r) % designMatrixX.row(i);
-          F2 = ((std::exp( -0.5 * arma::dot( tMinus_ijr, sigmaOptimalLambda * tMinus_ijr ) ) * ( (A(j, r) + D(j, r) ) * std::cos( arma::dot( tMinus_ijr, muOptimalLambda ) ) + 2.0 * B(j, r) * std::sin( arma::dot( tMinus_ijr, muOptimalLambda ) ) ) * (tMinus_ijr * tMinus_ijr.t())) + (std::exp( -0.5 * arma::dot( tPlus_ijr, sigmaOptimalLambda * tPlus_ijr ) ) * ( (A(j, r) - D(j, r)) * std::cos( arma::dot(tPlus_ijr, muOptimalLambda) ) + 2.0 * B(j, r) * std::sin( arma::dot(tPlus_ijr, muOptimalLambda) ) ) * (tPlus_ijr * tPlus_ijr.t())));
-          F4 = (std::exp( -0.5 * arma::dot( tMinus_ijr, sigmaOptimalLambda * tMinus_ijr ) ) * ( 2.0 * B(j, r) * std::cos( arma::dot(tMinus_ijr, muOptimalLambda) ) - (A(j, r) + D(j, r)) * std::sin( arma::dot( tMinus_ijr, muOptimalLambda ) ) ) * tMinus_ijr) + std::exp( -0.5 * arma::dot( tPlus_ijr, sigmaOptimalLambda * tPlus_ijr ) ) * ( 2.0 * B(j, r) * std::cos( arma::dot(tPlus_ijr, muOptimalLambda) ) + (D(j, r) - A(j, r)) * std::sin( arma::dot( tPlus_ijr, muOptimalLambda ) ) ) * tPlus_ijr;
+          tPlus_ijr = (SMatrix.row(j) % designMatrixX.row(i) + SMatrix.row(r) % designMatrixX.row(i)).t();
+          tMinus_ijr = (SMatrix.row(j) % designMatrixX.row(i) - SMatrix.row(r) % designMatrixX.row(i)).t();
+          F2 = (std::exp( -0.5 * arma::dot( tMinus_ijr, sigmaOptimalLambda * tMinus_ijr ) ) * ( (A(j, r) + D(j, r) ) * cos( arma::dot( tMinus_ijr, muOptimalLambda ) ) + 2.0 * B(j, r) * sin( arma::dot( tMinus_ijr, muOptimalLambda ) ) ) * (tMinus_ijr * tMinus_ijr.t())) + (std::exp( -0.5 * arma::dot( tPlus_ijr, sigmaOptimalLambda * tPlus_ijr ) ) * ( (A(j, r) - D(j, r)) * cos( arma::dot(tPlus_ijr, muOptimalLambda) ) + 2.0 * B(j, r) * sin( arma::dot(tPlus_ijr, muOptimalLambda) ) ) * (tPlus_ijr * tPlus_ijr.t()));
+          F4 = (std::exp( -0.5 * arma::dot( tMinus_ijr, sigmaOptimalLambda * tMinus_ijr ) ) * ( 2.0 * B(j, r) * cos( arma::dot(tMinus_ijr, muOptimalLambda) ) - (A(j, r) + D(j, r)) * sin( arma::dot( tMinus_ijr, muOptimalLambda ) ) ) * tMinus_ijr) + std::exp( -0.5 * arma::dot( tPlus_ijr, sigmaOptimalLambda * tPlus_ijr ) ) * ( 2.0 * B(j, r) * cos( arma::dot(tPlus_ijr, muOptimalLambda) ) + (D(j, r) - A(j, r)) * sin( arma::dot( tPlus_ijr, muOptimalLambda ) ) ) * tPlus_ijr;
         }
       }
     }
@@ -242,18 +228,31 @@ arma::field sparseGPVariationalInference(arma::colvec yResponse, arma::mat desig
     sigmaOptimalLambda = (priorSigmaLambda.i() + F1 + F2).i();
     muOptimalLambda   += sigmaOptimalLambda * (arma::solve(priorSigmaLambda, priorMuLambda - muOptimalLambda) + F3 + F4);
 
-
     newLowerBound = lowerBound(yResponse, designMatrixX, SMatrix, muOptimalLambda, sigmaOptimalLambda, muOptimalAlpha, sigmaOptimalAlpha, muOptimalBeta, sigmaOptimalBeta, A, priorMuBeta, priorSigmaBeta, priorMuLambda, priorSigmaLambda, A_sigma, C_sigma);
-  } while (newLowerBound - oldLowerBound > 0e-10000);
+    if (newLowerBound - oldLowerBound < 0e-7) break;
+    else oldLowerBound = newLowerBound;
+  }
+  std::cout << "μ(α)" << std::endl;
+  std::cout << muOptimalAlpha.t() << std::endl;
+  std::cout << "Σ(α)" << std::endl;
+  std::cout << sigmaOptimalAlpha << std::endl;
+  std::cout << "μ(β)" << std::endl;
+  std::cout << muOptimalBeta.t() << std::endl;
+  std::cout << "Σ(β)" << std::endl;
+  std::cout << sigmaOptimalBeta << std::endl;
+  std::cout << "μ(λ)" << std::endl;
+  std::cout << muOptimalLambda.t() << std::endl;
+  std::cout << "Σ(λ)" << std::endl;
+  std::cout << sigmaOptimalLambda << std::endl;
 }
 
 int main() {
-  arma::colvec x = arma::randu<arma::colvec>(5);
-  arma::mat A = x * x.t();
-  arma::mat B = A.submat(0, 0, 3, 3);
-  arma::mat D = A.submat(2, 2, 4, 4);
-  std::cout << A << std::endl;
-  std::cout << B << std::endl;
-  std::cout << D << std::endl;
+  arma::mat x(6, 6); x.randn();
+  arma::mat y(6, 6); y.randn();
+  arma::rowvec z = x.row(2) % y.row(3);
+  arma::colvec zt = z.t();
+  std::cout << x << std::endl;
+  std::cout << y << std::endl;
+  std::cout << zt << std::endl;
   return 0;
 }
