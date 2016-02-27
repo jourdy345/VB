@@ -1,0 +1,101 @@
+
+#include <iostream>
+#include <armadillo>
+#include <cmath>
+#include "eOfZ.h"
+#include "eOfZTZ.h"
+#include "logH.h"
+#include "lowerBound.h"
+#include "sparseGPVBProbit.h"
+
+void sparseGPVBProbit(arma::colvec yResponse, arma::mat designMatrixX, arma::mat SMatrix, arma::mat A, arma::colvec priorMuBeta, arma::mat priorSigmaBeta, arma::colvec priorMuLambda, arma::mat priorSigmaLambda, double A_sigma) {
+  int nOfData   = yResponse.size();
+  int cutOff    = SMatrix.n_rows;
+  int dimension = SMatrix.n_cols;
+  int sInt      = A.n_cols;
+  double n      = static_cast<double>(nOfData);
+  double m      = static_cast<double>(cutOff);
+  double d      = static_cast<double>(dimension);
+  double s      = static_cast<double>(sInt);
+  double oldLowerBound = -10000.0;
+  double newLowerBound;
+  // initialize variational parameters
+  arma::mat sigmaOptimalLambda; sigmaOptimalLambda.eye(dimension, dimension);
+  arma::colvec muOptimalLambda; muOptimalLambda.randn(dimension);
+  arma::colvec muOptimalBeta; muOptimalBeta.randn(sInt);
+  arma::mat sigmaOptimalAlpha, sigmaOptimalBeta;
+  arma::colvec muOptimalResponseStar, muOptimalAlpha;
+  double C_sigma = 10;
+  while (true) {
+    // update μ(α), Σ(α)
+    arma::mat tempDiagonalMatrix(2 * cutOff, 2 * cutOff); tempDiagonalMatrix.eye();
+    sigmaOptimalAlpha = ( m * std::exp(logH(2.0 * m - 4.0, C_sigma, std::pow(A_sigma, 2.0)) - logH(2.0 * m - 2.0, C_sigma, std::pow(A_sigma, 2.0))) * tempDiagonalMatrix + eOfZTZ( designMatrixX, SMatrix, muOptimalLambda, sigmaOptimalLambda ) ).i();
+    muOptimalAlpha    = sigmaOptimalAlpha * ( eOfZ( designMatrixX, SMatrix, muOptimalLambda, sigmaOptimalLambda ).t() * muOptimalResponseStar - ( A * eOfZ( designMatrixX, SMatrix, muOptimalLambda, sigmaOptimalLambda )).t() * muOptimalBeta );
+
+    // update μ(y*)
+    arma::colvec functand = eOfZ( designMatrixX, SMatrix, muOptimalLambda, sigmaOptimalLambda ) * muOptimalAlpha + A * muOptimalBeta;
+    for (int index = 0; index < nOfData; index++) {
+      if (yResponse(index) == 1.0) {
+        muOptimalResponseStar(index) = functand(index) + ((1.0 / std::sqrt(2.0 * M_PI)) * std::exp(-0.5 * functand(index) * functand(index))) / (0.5 * std::erfc(-functand(index) * M_SQRT1_2));
+      } else {
+        muOptimalResponseStar(index) = functand(index) + ((1.0 / std::sqrt(2.0 * M_PI)) * std::exp(-0.5 * functand(index) * functand(index))) / (0.5 * std::erfc(-functand(index) * M_SQRT1_2) - 1.0);
+      }
+    }
+
+    // update μ(β), Σ(β)
+    sigmaOptimalBeta = (priorSigmaBeta.i() + A.t() * A).i();
+    muOptimalBeta = sigmaOptimalBeta * ( arma::solve( priorSigmaBeta, priorMuBeta ) + A.t() * muOptimalResponseStar - A.t() * eOfZ( designMatrixX, SMatrix, muOptimalLambda, sigmaOptimalLambda ) * muOptimalAlpha );
+
+    // update C(σ)
+    C_sigma = 0.5 * m * (arma::trace(sigmaOptimalAlpha) + arma::dot(muOptimalAlpha, muOptimalAlpha));
+
+    // update μ(λ), Σ(λ)
+    arma::mat F1(dimension, dimension);
+    arma::mat F2(dimension, dimension);
+    arma::colvec F3(dimension);
+    arma::colvec F4(dimension);
+    arma::colvec t_ij(dimension);
+    arma::colvec tPlus_ijr(dimension);
+    arma::colvec tMinus_ijr(dimension);
+    arma::colvec AmuOptimalBeta = A * muOptimalBeta;
+    arma::mat ABD = sigmaOptimalAlpha + muOptimalAlpha * muOptimalAlpha.t();
+    arma::mat A = ABD.submat(0, 0, cutOff - 1, cutOff - 1);
+    arma::mat B = ABD.submat(cutOff - 1, 0, 2 * cutOff - 1, cutOff - 1);
+    arma::mat D = ABD.submat(cutOff - 1, cutOff - 1, 2 * cutOff - 1, 2 * cutOff - 1);
+    for (int i = 0; i < nOfData; i++) {
+      double temp = muOptimalResponseStar(i) - AmuOptimalBeta(i);
+      for (int j = 0; j < cutOff; j++) {
+        t_ij = (SMatrix.row(j) % designMatrixX.row(i)).t();
+        F1 = temp * std::exp( -0.5 * arma::dot(t_ij, sigmaOptimalLambda * t_ij) ) * (muOptimalAlpha(j) * cos( arma::dot(t_ij, muOptimalLambda) ) + muOptimalAlpha(j + cutOff) * sin( arma::dot( t_ij, muOptimalLambda ) )) * (t_ij * t_ij.t());
+        F3 = temp * std::exp( -0.5 * arma::dot(t_ij, sigmaOptimalLambda * t_ij) ) * (muOptimalAlpha(j + cutOff) * cos( arma::dot(t_ij, muOptimalLambda) ) - muOptimalLambda(j) * sin( arma::dot( t_ij, muOptimalLambda ) )) * t_ij;
+        for (int r = 0; r < cutOff; r++) {
+          tPlus_ijr = (SMatrix.row(j) % designMatrixX.row(i) + SMatrix.row(r) % designMatrixX.row(i)).t();
+          tMinus_ijr = (SMatrix.row(j) % designMatrixX.row(i) - SMatrix.row(r) % designMatrixX.row(i)).t();
+          F2 = (std::exp( -0.5 * arma::dot( tMinus_ijr, sigmaOptimalLambda * tMinus_ijr ) ) * ( (A(j, r) + D(j, r) ) * cos( arma::dot( tMinus_ijr, muOptimalLambda ) ) + 2.0 * B(j, r) * sin( arma::dot( tMinus_ijr, muOptimalLambda ) ) ) * (tMinus_ijr * tMinus_ijr.t())) + (std::exp( -0.5 * arma::dot( tPlus_ijr, sigmaOptimalLambda * tPlus_ijr ) ) * ( (A(j, r) - D(j, r)) * cos( arma::dot(tPlus_ijr, muOptimalLambda) ) + 2.0 * B(j, r) * sin( arma::dot(tPlus_ijr, muOptimalLambda) ) ) * (tPlus_ijr * tPlus_ijr.t()));
+          F4 = (std::exp( -0.5 * arma::dot( tMinus_ijr, sigmaOptimalLambda * tMinus_ijr ) ) * ( 2.0 * B(j, r) * cos( arma::dot(tMinus_ijr, muOptimalLambda) ) - (A(j, r) + D(j, r)) * sin( arma::dot( tMinus_ijr, muOptimalLambda ) ) ) * tMinus_ijr) + std::exp( -0.5 * arma::dot( tPlus_ijr, sigmaOptimalLambda * tPlus_ijr ) ) * ( 2.0 * B(j, r) * cos( arma::dot(tPlus_ijr, muOptimalLambda) ) + (D(j, r) - A(j, r)) * sin( arma::dot( tPlus_ijr, muOptimalLambda ) ) ) * tPlus_ijr;
+        }
+      }
+    }
+    F2 *= -0.5;
+    F4 *= -0.25;
+
+    sigmaOptimalLambda = (priorSigmaLambda.i() + F1 + F2).i();
+    muOptimalLambda   += sigmaOptimalLambda * (arma::solve(priorSigmaLambda, priorMuLambda - muOptimalLambda) + F3 + F4);
+
+    newLowerBound = lowerBound(yResponse, designMatrixX, SMatrix, muOptimalLambda, sigmaOptimalLambda, muOptimalAlpha, sigmaOptimalAlpha, muOptimalBeta, sigmaOptimalBeta, A, priorMuBeta, priorSigmaBeta, priorMuLambda, priorSigmaLambda, A_sigma, C_sigma);
+    if (newLowerBound - oldLowerBound < 0e-7) break;
+    else oldLowerBound = newLowerBound;
+  }
+  std::cout << "μ(α)" << std::endl;
+  std::cout << muOptimalAlpha.t() << std::endl;
+  std::cout << "Σ(α)" << std::endl;
+  std::cout << sigmaOptimalAlpha << std::endl;
+  std::cout << "μ(β)" << std::endl;
+  std::cout << muOptimalBeta.t() << std::endl;
+  std::cout << "Σ(β)" << std::endl;
+  std::cout << sigmaOptimalBeta << std::endl;
+  std::cout << "μ(λ)" << std::endl;
+  std::cout << muOptimalLambda.t() << std::endl;
+  std::cout << "Σ(λ)" << std::endl;
+  std::cout << sigmaOptimalLambda << std::endl;
+}
