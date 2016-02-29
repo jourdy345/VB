@@ -64,9 +64,9 @@ void sparseGPVBProbit(arma::colvec yResponse, arma::mat designMatrixX, arma::mat
     arma::colvec tMinus_ijr(dimension);
     arma::colvec AmuOptimalBeta = A * muOptimalBeta;
     arma::mat ABD = sigmaOptimalAlpha + muOptimalAlpha * muOptimalAlpha.t();
-    arma::mat A = ABD.submat(0, 0, cutOff - 1, cutOff - 1);
-    arma::mat B = ABD.submat(cutOff - 1, 0, 2 * cutOff - 1, cutOff - 1);
-    arma::mat D = ABD.submat(cutOff - 1, cutOff - 1, 2 * cutOff - 1, 2 * cutOff - 1);
+    arma::mat Amat = ABD.submat(0, 0, cutOff - 1, cutOff - 1);
+    arma::mat Bmat = ABD.submat(cutOff - 1 , 0, 2 * cutOff - 1, cutOff - 1);
+    arma::mat Dmat = ABD.submat(cutOff - 1, cutOff - 1, 2 * cutOff - 1, 2 * cutOff - 1);
     for (int i = 0; i < nOfData; i++) {
       double temp = muOptimalResponseStar(i) - AmuOptimalBeta(i);
       for (int j = 0; j < cutOff; j++) {
@@ -76,8 +76,8 @@ void sparseGPVBProbit(arma::colvec yResponse, arma::mat designMatrixX, arma::mat
         for (int r = 0; r < cutOff; r++) {
           tPlus_ijr = (SMatrix.row(j) % designMatrixX.row(i) + SMatrix.row(r) % designMatrixX.row(i)).t();
           tMinus_ijr = (SMatrix.row(j) % designMatrixX.row(i) - SMatrix.row(r) % designMatrixX.row(i)).t();
-          F2 = (std::exp( -0.5 * arma::dot( tMinus_ijr, sigmaOptimalLambda * tMinus_ijr ) ) * ( (A(j, r) + D(j, r) ) * cos( arma::dot( tMinus_ijr, muOptimalLambda ) ) + 2.0 * B(j, r) * sin( arma::dot( tMinus_ijr, muOptimalLambda ) ) ) * (tMinus_ijr * tMinus_ijr.t())) + (std::exp( -0.5 * arma::dot( tPlus_ijr, sigmaOptimalLambda * tPlus_ijr ) ) * ( (A(j, r) - D(j, r)) * cos( arma::dot(tPlus_ijr, muOptimalLambda) ) + 2.0 * B(j, r) * sin( arma::dot(tPlus_ijr, muOptimalLambda) ) ) * (tPlus_ijr * tPlus_ijr.t()));
-          F4 = (std::exp( -0.5 * arma::dot( tMinus_ijr, sigmaOptimalLambda * tMinus_ijr ) ) * ( 2.0 * B(j, r) * cos( arma::dot(tMinus_ijr, muOptimalLambda) ) - (A(j, r) + D(j, r)) * sin( arma::dot( tMinus_ijr, muOptimalLambda ) ) ) * tMinus_ijr) + std::exp( -0.5 * arma::dot( tPlus_ijr, sigmaOptimalLambda * tPlus_ijr ) ) * ( 2.0 * B(j, r) * cos( arma::dot(tPlus_ijr, muOptimalLambda) ) + (D(j, r) - A(j, r)) * sin( arma::dot( tPlus_ijr, muOptimalLambda ) ) ) * tPlus_ijr;
+          F2 = (std::exp( -0.5 * arma::dot( tMinus_ijr, sigmaOptimalLambda * tMinus_ijr ) ) * ( (Amat(j, r) + Dmat(j, r) ) * cos( arma::dot( tMinus_ijr, muOptimalLambda ) ) + 2.0 * Bmat(j, r) * sin( arma::dot( tMinus_ijr, muOptimalLambda ) ) ) * (tMinus_ijr * tMinus_ijr.t())) + (std::exp( -0.5 * arma::dot( tPlus_ijr, sigmaOptimalLambda * tPlus_ijr ) ) * ( (Amat(j, r) - Dmat(j, r)) * cos( arma::dot(tPlus_ijr, muOptimalLambda) ) + 2.0 * Bmat(j, r) * sin( arma::dot(tPlus_ijr, muOptimalLambda) ) ) * (tPlus_ijr * tPlus_ijr.t()));
+          F4 = (std::exp( -0.5 * arma::dot( tMinus_ijr, sigmaOptimalLambda * tMinus_ijr ) ) * ( 2.0 * Bmat(j, r) * cos( arma::dot(tMinus_ijr, muOptimalLambda) ) - (Amat(j, r) + Dmat(j, r)) * sin( arma::dot( tMinus_ijr, muOptimalLambda ) ) ) * tMinus_ijr) + std::exp( -0.5 * arma::dot( tPlus_ijr, sigmaOptimalLambda * tPlus_ijr ) ) * ( 2.0 * Bmat(j, r) * cos( arma::dot(tPlus_ijr, muOptimalLambda) ) + (Dmat(j, r) - Amat(j, r)) * sin( arma::dot( tPlus_ijr, muOptimalLambda ) ) ) * tPlus_ijr;
         }
       }
     }
