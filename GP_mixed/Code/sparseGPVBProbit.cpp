@@ -23,15 +23,15 @@ void sparseGPVBProbit(arma::colvec yResponse, arma::mat designMatrixX, arma::mat
   arma::mat sigmaOptimalLambda; sigmaOptimalLambda.eye(dimension, dimension);
   arma::colvec muOptimalLambda; muOptimalLambda.randn(dimension);
   arma::colvec muOptimalBeta; muOptimalBeta.randn(sInt);
-  arma::mat sigmaOptimalAlpha, sigmaOptimalBeta;
-  arma::colvec muOptimalResponseStar, muOptimalAlpha;
-  double C_sigma = 10;
+  arma::colvec muOptimalAlpha; muOptimalAlpha.randn(2 * cutOff);
+  arma::mat sigmaOptimalAlpha(2 * cutOff, 2 * cutOff);
+  arma::mat sigmaOptimalBeta(sInt, sInt);
+  arma::colvec muOptimalResponseStar(nOfData);
+  double C_sigma = 10.0;
+  int count = 0;
   while (true) {
-    // update μ(α), Σ(α)
-    arma::mat tempDiagonalMatrix(2 * cutOff, 2 * cutOff); tempDiagonalMatrix.eye();
-    sigmaOptimalAlpha = ( m * std::exp(logH(2.0 * m - 4.0, C_sigma, std::pow(A_sigma, 2.0)) - logH(2.0 * m - 2.0, C_sigma, std::pow(A_sigma, 2.0))) * tempDiagonalMatrix + eOfZTZ( designMatrixX, SMatrix, muOptimalLambda, sigmaOptimalLambda ) ).i();
-    muOptimalAlpha    = sigmaOptimalAlpha * ( eOfZ( designMatrixX, SMatrix, muOptimalLambda, sigmaOptimalLambda ).t() * muOptimalResponseStar - ( A * eOfZ( designMatrixX, SMatrix, muOptimalLambda, sigmaOptimalLambda )).t() * muOptimalBeta );
-
+    count++;
+    std::cout << "count: " << count << std::endl;
     // update μ(y*)
     arma::colvec functand = eOfZ( designMatrixX, SMatrix, muOptimalLambda, sigmaOptimalLambda ) * muOptimalAlpha + A * muOptimalBeta;
     for (int index = 0; index < nOfData; index++) {
@@ -41,6 +41,11 @@ void sparseGPVBProbit(arma::colvec yResponse, arma::mat designMatrixX, arma::mat
         muOptimalResponseStar(index) = functand(index) + ((1.0 / std::sqrt(2.0 * M_PI)) * std::exp(-0.5 * functand(index) * functand(index))) / (0.5 * std::erfc(-functand(index) * M_SQRT1_2) - 1.0);
       }
     }
+    
+    // update μ(α), Σ(α)
+    arma::mat tempDiagonalMatrix(2 * cutOff, 2 * cutOff); tempDiagonalMatrix.eye();
+    sigmaOptimalAlpha = ( m * std::exp(logH(2.0 * m - 4.0, C_sigma, std::pow(A_sigma, 2.0)) - logH(2.0 * m - 2.0, C_sigma, std::pow(A_sigma, 2.0))) * tempDiagonalMatrix + eOfZTZ( designMatrixX, SMatrix, muOptimalLambda, sigmaOptimalLambda ) ).i();
+    muOptimalAlpha    = sigmaOptimalAlpha * ( eOfZ( designMatrixX, SMatrix, muOptimalLambda, sigmaOptimalLambda ).t() * muOptimalResponseStar - eOfZ( designMatrixX, SMatrix, muOptimalLambda, sigmaOptimalLambda ).t() * A * muOptimalBeta );
 
     // update μ(β), Σ(β)
     sigmaOptimalBeta = (priorSigmaBeta.i() + A.t() * A).i();
@@ -78,12 +83,16 @@ void sparseGPVBProbit(arma::colvec yResponse, arma::mat designMatrixX, arma::mat
     }
     F2 *= -0.5;
     F4 *= -0.25;
+    std::cout << "F2: " << F2 << std::endl;
+    std::cout << "F4: " << F4 << std::endl;
 
     sigmaOptimalLambda = (priorSigmaLambda.i() + F1 + F2).i();
     muOptimalLambda   += sigmaOptimalLambda * (arma::solve(priorSigmaLambda, priorMuLambda - muOptimalLambda) + F3 + F4);
 
     newLowerBound = lowerBound(yResponse, designMatrixX, SMatrix, muOptimalLambda, sigmaOptimalLambda, muOptimalAlpha, sigmaOptimalAlpha, muOptimalBeta, sigmaOptimalBeta, A, priorMuBeta, priorSigmaBeta, priorMuLambda, priorSigmaLambda, A_sigma, C_sigma);
-    if (newLowerBound - oldLowerBound < 0e-7) break;
+
+    std::cout << "newLowerBound: " << newLowerBound << std::endl;
+    if ((newLowerBound - oldLowerBound < 0e-7) || (count > 50000)) break;
     else oldLowerBound = newLowerBound;
   }
   std::cout << "μ(α)" << std::endl;
@@ -98,4 +107,6 @@ void sparseGPVBProbit(arma::colvec yResponse, arma::mat designMatrixX, arma::mat
   std::cout << muOptimalLambda.t() << std::endl;
   std::cout << "Σ(λ)" << std::endl;
   std::cout << sigmaOptimalLambda << std::endl;
+  std::cout << "Number of iterations" << std::endl;
+  std::cout << count << std::endl;
 }

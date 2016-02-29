@@ -17,5 +17,5 @@ arma::mat eOfZ(arma::mat designMatrixX, arma::mat SMatrix, arma::vec muOptimalLa
     }
     Z.col(i) = ithColumn;
   }
-  return Z;
+  return Z.t();
 }
