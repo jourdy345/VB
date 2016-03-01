@@ -4,7 +4,7 @@ Welcome to my repository for variational inference! The repository you've just s
 
 ### GP mixed C++ code compiling & linking
 ```bash
-$ g++ -c GPProbit.cpp
-$ g++ -o GPPprobit GPPProbit.o -llapack -lblas -larmadillo
+cd GP_mixed/Code
+g++ -o GP main.cpp gaussianCDF.cpp blockDiag.cpp lowerBound.cpp eOfZ.cpp eOfZTZ.cpp logH.cpp sparseGPVBProbit.cpp -llapack -lblas -larmadillolarmadillo
 ```
 Don't forget to link the added libraries.
