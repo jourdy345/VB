@@ -23,7 +23,7 @@ double logH(double p, double q, double r) {
     double lower = -b;
     double upper = b;
     char   m     = 0;
-    double h     = (upper - lower) / 100.0;
+    double h     = (upper - lower) / 200.0;
     double x_i, r_i;
     for (x_i = lower; x_i <= upper; x_i += h) {
       r_i = std::exp(p * std::log(mu0 + x_i * sig02) - q * std::pow(mu0 + x_i * sig02, 2.0) - std::log(r + std::pow(mu0 + x_i * sig02, -2.0)) - hmu0);

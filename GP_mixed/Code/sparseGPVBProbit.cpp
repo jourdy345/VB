@@ -18,7 +18,8 @@ void sparseGPVBProbit(arma::colvec yResponse, arma::mat designMatrixX, arma::mat
   double d      = static_cast<double>(dimension);
   double s      = static_cast<double>(sInt);
   double oldLowerBound = -10000.0;
-  double newLowerBound;
+  double newLowerBound = 0.0;
+  double dif = 100.0;
   // initialize variational parameters
   arma::mat sigmaOptimalLambda; sigmaOptimalLambda.eye(dimension, dimension);
   arma::colvec muOptimalLambda; muOptimalLambda.randn(dimension);
@@ -29,7 +30,8 @@ void sparseGPVBProbit(arma::colvec yResponse, arma::mat designMatrixX, arma::mat
   arma::colvec muOptimalResponseStar(nOfData);
   double C_sigma = 10.0;
   int count = 0;
-  while (true) {
+  int count2 = 0;
+  while ((dif > 1.0e-7) && (count < 5000)) {
     count++;
     std::cout << "count: " << count << std::endl;
     // update μ(y*)
@@ -76,52 +78,76 @@ void sparseGPVBProbit(arma::colvec yResponse, arma::mat designMatrixX, arma::mat
         for (int r = 0; r < cutOff; r++) {
           tPlus_ijr = (SMatrix.row(j) % designMatrixX.row(i) + SMatrix.row(r) % designMatrixX.row(i)).t();
           tMinus_ijr = (SMatrix.row(j) % designMatrixX.row(i) - SMatrix.row(r) % designMatrixX.row(i)).t();
-          std::cout << "i: " << i << std::endl;
-          std::cout << "Amat(" << j << ", " << r << "): " << Amat(j, r) << std::endl;
-          std::cout << "Bmat(" << j << ", " << r << "): " << Bmat(j, r) << std::endl;
-          std::cout << "Dmat(" << j << ", " << r << "): " << Dmat(j, r) << std::endl;
 
           F2 += (std::exp( -0.5 * arma::dot( tMinus_ijr, sigmaOptimalLambda * tMinus_ijr ) ) * ( (Amat(j, r) + Dmat(j, r) ) * cos( arma::dot( tMinus_ijr, muOptimalLambda ) ) + 2.0 * Bmat(j, r) * sin( arma::dot( tMinus_ijr, muOptimalLambda ) ) ) * (tMinus_ijr * tMinus_ijr.t())) + (std::exp( -0.5 * arma::dot( tPlus_ijr, sigmaOptimalLambda * tPlus_ijr ) ) * ( (Amat(j, r) - Dmat(j, r)) * cos( arma::dot(tPlus_ijr, muOptimalLambda) ) + 2.0 * Bmat(j, r) * sin( arma::dot(tPlus_ijr, muOptimalLambda) ) ) * (tPlus_ijr * tPlus_ijr.t()));
           F4 += (std::exp( -0.5 * arma::dot( tMinus_ijr, sigmaOptimalLambda * tMinus_ijr ) ) * ( 2.0 * Bmat(j, r) * cos( arma::dot(tMinus_ijr, muOptimalLambda) ) - (Amat(j, r) + Dmat(j, r)) * sin( arma::dot( tMinus_ijr, muOptimalLambda ) ) ) * tMinus_ijr) + std::exp( -0.5 * arma::dot( tPlus_ijr, sigmaOptimalLambda * tPlus_ijr ) ) * ( 2.0 * Bmat(j, r) * cos( arma::dot(tPlus_ijr, muOptimalLambda) ) + (Dmat(j, r) - Amat(j, r)) * sin( arma::dot( tPlus_ijr, muOptimalLambda ) ) ) * tPlus_ijr;
         }
       }
     }
-    F2 *= -0.5;
+    F2 *= -0.25;
     F4 *= -0.25;
-    std::cout << "F2: " << F2 << std::endl;
-    std::cout << "F4: " << F4 << std::endl;
 
-    std::cout << "the inverse of prior Sigma lambda" << std::endl;
-    std::cout << priorSigmaLambda.i() << std::endl;
-    std::cout << "Sigmalambda inverse times (prior mu lambda - mu optimal lambda)" << std::endl;
-    std::cout << arma::solve(priorSigmaLambda, priorMuLambda - muOptimalLambda) << std::endl;
-    std::cout << "next sigmaoptimallambda" << std::endl;
-    std::cout << (priorSigmaLambda.i() + F1 + F2).i() << std::endl;
-    std::cout << "next ABD" << std::endl;
-    std::cout << sigmaOptimalAlpha + muOptimalAlpha * muOptimalAlpha.t() << std::endl;
-    break;
-  //   sigmaOptimalLambda = (priorSigmaLambda.i() + F1 + F2).i();
-  //   muOptimalLambda   += sigmaOptimalLambda * (arma::solve(priorSigmaLambda, priorMuLambda - muOptimalLambda) + F3 + F4);
+    arma::mat    F5 = priorSigmaLambda.i() + F1 + F2;
+    arma::colvec F6 = arma::solve(priorSigmaLambda, priorMuLambda - muOptimalLambda) + F3 + F4;
+    // Adaptive nonconjugate message passing step 2
+    
+    double diff = -1.0;
+    double tempOldLowerBound = -1.0e7;
+    double tempNewLowerBound;
+    double stepSize = 1.0;
+    double rho = 1.5;
+    double tempStepSize;
+    while (diff < 0.0) {
+      arma::umat isPositiveDefinite = arma::zeros<arma::umat>(dimension);
+      arma::umat isSymmetric = arma::zeros<arma::umat>(dimension, dimension);
+      while ((arma::accu(isSymmetric) != (dimension * dimension)) || (arma::accu(isPositiveDefinite) != dimension)) {
+        count2++;
+        sigmaOptimalLambda = (((1.0 - stepSize) * priorSigmaLambda.i()) + stepSize * F5).i();
+        arma::cx_vec eigVal = arma::eig_gen(sigmaOptimalLambda);
+        arma::colvec realEigVal = arma::real(eigVal);
+        isPositiveDefinite = realEigVal > 0.0;
+        isSymmetric = sigmaOptimalLambda == sigmaOptimalLambda.t();
+        stepSize /= rho;
+      }
+      muOptimalLambda   += stepSize * sigmaOptimalLambda * F6;
+      tempNewLowerBound = lowerBound(yResponse, designMatrixX, SMatrix, muOptimalLambda, sigmaOptimalLambda, muOptimalAlpha, sigmaOptimalAlpha, muOptimalBeta, sigmaOptimalBeta, A, priorMuBeta, priorSigmaBeta, priorMuLambda, priorSigmaLambda, A_sigma, C_sigma);
+      diff = tempNewLowerBound - tempOldLowerBound;
+      tempOldLowerBound = tempNewLowerBound;
+      tempStepSize = stepSize;
+      stepSize = 1.0;
+      std::cout << "Count2: " << count2 << std::endl;
+    }
+    count2 = 0;
+    stepSize = tempStepSize * rho;
 
-  //   newLowerBound = lowerBound(yResponse, designMatrixX, SMatrix, muOptimalLambda, sigmaOptimalLambda, muOptimalAlpha, sigmaOptimalAlpha, muOptimalBeta, sigmaOptimalBeta, A, priorMuBeta, priorSigmaBeta, priorMuLambda, priorSigmaLambda, A_sigma, C_sigma);
+    newLowerBound = lowerBound(yResponse, designMatrixX, SMatrix, muOptimalLambda, sigmaOptimalLambda, muOptimalAlpha, sigmaOptimalAlpha, muOptimalBeta, sigmaOptimalBeta, A, priorMuBeta, priorSigmaBeta, priorMuLambda, priorSigmaLambda, A_sigma, C_sigma);
 
-  //   std::cout << "newLowerBound: " << newLowerBound << std::endl;
-  //   if ((newLowerBound - oldLowerBound < 0e-7) || (count > 50000)) break;
-  //   else oldLowerBound = newLowerBound;
-  // }
-  // std::cout << "μ(α)" << std::endl;
-  // std::cout << muOptimalAlpha.t() << std::endl;
-  // std::cout << "Σ(α)" << std::endl;
-  // std::cout << sigmaOptimalAlpha << std::endl;
-  // std::cout << "μ(β)" << std::endl;
-  // std::cout << muOptimalBeta.t() << std::endl;
-  // std::cout << "Σ(β)" << std::endl;
-  // std::cout << sigmaOptimalBeta << std::endl;
-  // std::cout << "μ(λ)" << std::endl;
-  // std::cout << muOptimalLambda.t() << std::endl;
-  // std::cout << "Σ(λ)" << std::endl;
-  // std::cout << sigmaOptimalLambda << std::endl;
-  // std::cout << "Number of iterations" << std::endl;
-  // std::cout << count << std::endl;
+    std::cout << "newLowerBound: " << newLowerBound << std::endl;
+    dif = std::abs(newLowerBound - oldLowerBound);
+    oldLowerBound = newLowerBound;
   }
+  arma::umat yStarResult = (muOptimalResponseStar > 0.0);
+  for (int i = 0; i < nOfData; i++) {
+    yResponse(i) = static_cast<unsigned int>(yResponse(i));
+  }
+  arma::umat crossVal = yStarResult == yResponse;
+  std::cout << "μ(α)" << std::endl;
+  std::cout << muOptimalAlpha.t() << std::endl;
+  std::cout << "Σ(α)" << std::endl;
+  std::cout << sigmaOptimalAlpha << std::endl;
+  std::cout << "μ(β)" << std::endl;
+  std::cout << muOptimalBeta.t() << std::endl;
+  std::cout << "Σ(β)" << std::endl;
+  std::cout << sigmaOptimalBeta << std::endl;
+  std::cout << "μ(λ)" << std::endl;
+  std::cout << muOptimalLambda.t() << std::endl;
+  std::cout << "Σ(λ)" << std::endl;
+  std::cout << sigmaOptimalLambda << std::endl;
+  std::cout << "Number of iterations" << std::endl;
+  std::cout << count << std::endl;
+  std::cout << "Does y* belong to the first category?" << std::endl;
+  std::cout << arma::vectorise(yStarResult) << std::endl;
+  std::cout << "How many did this model predict?" << std::endl;
+  std::cout << crossVal << std::endl;
+  std::cout << arma::accu(crossVal) << std::endl;
 }

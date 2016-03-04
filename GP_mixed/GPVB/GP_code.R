@@ -244,105 +244,105 @@ DIFF <- 1
 
 while ( dif>tol & count<iter ) {
 
-count <- count+1
-if (count>1) {a <- fac*apre}
-Eqinvs2 <- exp(logH(2*m,Csq,As^2)-logH(2*m-2,Csq,As^2))
-Eqinvg2 <- exp(logH(n,Cgq,Ag^2)-logH(n-2,Cgq,Ag^2))
+  count <- count+1
+  if (count>1) {a <- fac*apre}
+  Eqinvs2 <- exp(logH(2*m,Csq,As^2)-logH(2*m-2,Csq,As^2))
+  Eqinvg2 <- exp(logH(n,Cgq,Ag^2)-logH(n-2,Cgq,Ag^2))
 
-# update mulq,siglq #
-A <- as.vector(AL[1:m,1:m])
-B <- as.vector(AL[1:m,(m+1):(2*m)])
-C <- as.vector(AL[(m+1):(2*m),(m+1):(2*m)])
+  # update mulq,siglq #
+  A <- as.vector(AL[1:m,1:m])
+  B <- as.vector(AL[1:m,(m+1):(2*m)])
+  C <- as.vector(AL[(m+1):(2*m),(m+1):(2*m)])
 
-T1 <- T%*%mulq
-T2 <- rep(-y,rep(m,n))*exp(-0.5*rowSums((T%*%siglq)*T))
-F1 <- -crossprod(as.vector(T2*(muaq[1:m]*cos(T1)+muaq[(m+1):(2*m)]*sin(T1)))*T,T)
-F3 <- 2*colSums(as.vector(T2*(muaq[(m+1):(2*m)]*cos(T1)-muaq[1:m]*sin(T1)))*T)
+  T1 <- T%*%mulq
+  T2 <- rep(-y,rep(m,n))*exp(-0.5*rowSums((T%*%siglq)*T))
+  F1 <- -crossprod(as.vector(T2*(muaq[1:m]*cos(T1)+muaq[(m+1):(2*m)]*sin(T1)))*T,T)
+  F3 <- 2*colSums(as.vector(T2*(muaq[(m+1):(2*m)]*cos(T1)-muaq[1:m]*sin(T1)))*T)
 
-T3m <- Tm%*%mulq
-T3p <- Tp%*%mulq
-T4m <- exp(-0.5*rowSums((Tm%*%siglq)*Tm))
-T4p <- exp(-0.5*rowSums((Tp%*%siglq)*Tp))
+  T3m <- Tm%*%mulq
+  T3p <- Tp%*%mulq
+  T4m <- exp(-0.5*rowSums((Tm%*%siglq)*Tm))
+  T4p <- exp(-0.5*rowSums((Tp%*%siglq)*Tp))
 
-F2 <- -0.25*( crossprod(as.vector(T4m*((A+C)*cos(T3m)+2*B*sin(T3m)))*Tm,Tm) 
-            + crossprod(as.vector(T4p*((A-C)*cos(T3p)+2*B*sin(T3p)))*Tp,Tp) )
-F4 <- 0.5*colSums( as.vector(T4m*(-(A+C)*sin(T3m)+2*B*cos(T3m)))*Tm 
-                 + as.vector(T4p*((C-A)*sin(T3p)+2*B*cos(T3p)))*Tp  )
+  F2 <- -0.25*( crossprod(as.vector(T4m*((A+C)*cos(T3m)+2*B*sin(T3m)))*Tm,Tm) 
+              + crossprod(as.vector(T4p*((A-C)*cos(T3p)+2*B*sin(T3p)))*Tp,Tp) )
+  F4 <- 0.5*colSums( as.vector(T4m*(-(A+C)*sin(T3m)+2*B*cos(T3m)))*Tm 
+                   + as.vector(T4p*((C-A)*sin(T3p)+2*B*cos(T3p)))*Tp  )
 
-temp1 <- solve(sigl0)+Eqinvg2*(F1+F2)
-temp2 <- solve(sigl0,mul0-mulq)-0.5*Eqinvg2*(F3+F4)
+  temp1 <- solve(sigl0)+Eqinvg2*(F1+F2)
+  temp2 <- solve(sigl0,mul0-mulq)-0.5*Eqinvg2*(F3+F4)
 
-siglqnew <- solve((1-a)*solve(siglq)+a*temp1)
-EV <- eigen(siglqnew,only.values=TRUE)$values
+  siglqnew <- solve((1-a)*solve(siglq)+a*temp1)
+  EV <- eigen(siglqnew,only.values=TRUE)$values
 
-while (isSymmetric(siglqnew,tol=1.0e-10)==FALSE | any(Re(EV)<0) ) {
-a <- 2/3*a
-siglqnew <- solve((1-a)*solve(siglq)+a*temp1)
-EV <- eigen(siglqnew,only.values=TRUE)$values
-}
+  while (isSymmetric(siglqnew,tol=1.0e-10)==FALSE | any(Re(EV)<0) ) {
+    a <- 2/3*a
+    siglqnew <- solve((1-a)*solve(siglq)+a*temp1)
+    EV <- eigen(siglqnew,only.values=TRUE)$values
+  }
 
-siglq <- siglqnew
-mulq <- mulq+a*crossprod(siglq,temp2)
-apre <- a
-EqZ <- MZ(n,m,T,mulq,siglq)
-EqZTZ <- MZTZ(n,m,Tm,Tp,mulq,siglq)
+  siglq <- siglqnew
+  mulq <- mulq+a*crossprod(siglq,temp2)
+  apre <- a
+  EqZ <- MZ(n,m,T,mulq,siglq)
+  EqZTZ <- MZTZ(n,m,Tm,Tp,mulq,siglq)
 
-# update muaq,sigaq #
-sigaq <- solve(m*Eqinvs2*diag(2*m)+Eqinvg2*EqZTZ)
-muaq <- as.vector(crossprod(sigaq, Eqinvg2*crossprod(EqZ,y)))
+  # update muaq,sigaq #
+  sigaq <- solve(m*Eqinvs2*diag(2*m)+Eqinvg2*EqZTZ)
+  muaq <- as.vector(crossprod(sigaq, Eqinvg2*crossprod(EqZ,y)))
 
-# update Cgq,Csq #
-AA <- EqZ%*%muaq
-AL <- sigaq+tcrossprod(muaq)
-Csq <- m/2*as.numeric(crossprod(muaq)+tr(sigaq))
-Cgq <- 0.5*as.numeric(crossprod(y,y-2*AA)+sum(AL*EqZTZ))
+  # update Cgq,Csq #
+  AA <- EqZ%*%muaq
+  AL <- sigaq+tcrossprod(muaq)
+  Csq <- m/2*as.numeric(crossprod(muaq)+tr(sigaq))
+  Cgq <- 0.5*as.numeric(crossprod(y,y-2*AA)+sum(AL*EqZTZ))
 
-lb <- RLBC(y,X,T,As,Ag,mul0,sigl0,Csq,Cgq,muaq,sigaq,mulq,siglq)$lb
+  lb <- RLBC(y,X,T,As,Ag,mul0,sigl0,Csq,Cgq,muaq,sigaq,mulq,siglq)$lb
 
-DIFF <- lb-lbold
-if (count==1 & DIFF<0) {
-cat('DIVERGE',"\n")
-break}
+  DIFF <- lb-lbold
+  if (count==1 & DIFF<0) {
+    cat('DIVERGE',"\n")
+  break
+  }
 
-if (DIFF>0){
-mulqpre <- mulq
-siglqpre <- siglq
+  if (DIFF>0){
+    mulqpre <- mulq
+    siglqpre <- siglq
+  } else {
+    count <- count+1
+    a <- 1
+    siglqnew <- solve(temp1)
+    EV <- eigen(siglqnew,only.values=TRUE)$values
 
-} else {
-count <- count+1
-a <- 1
-siglqnew <- solve(temp1)
-EV <- eigen(siglqnew,only.values=TRUE)$values
+    while (isSymmetric(siglqnew,tol=1.0e-10)==FALSE | any(Re(EV)<0) ) {
+      a <- 2/3*a
+      siglqnew <- solve((1-a)*solve(siglq)+a*temp1)
+      EV <- eigen(siglqnew,only.values=TRUE)$values
+    }
 
-while (isSymmetric(siglqnew,tol=1.0e-10)==FALSE | any(Re(EV)<0) ) {
-a <- 2/3*a
-siglqnew <- solve((1-a)*solve(siglq)+a*temp1)
-EV <- eigen(siglqnew,only.values=TRUE)$values
-}
+    siglq <- siglqnew
+    mulq <- mulqpre+a*crossprod(siglq,temp2)
+    apre <- a
+    EqZ <- MZ(n,m,T,mulq,siglq)
+    EqZTZ <- MZTZ(n,m,Tm,Tp,mulq,siglq)
 
-siglq <- siglqnew
-mulq <- mulqpre+a*crossprod(siglq,temp2)
-apre <- a
-EqZ <- MZ(n,m,T,mulq,siglq)
-EqZTZ <- MZTZ(n,m,Tm,Tp,mulq,siglq)
+    # update muaq,sigaq #
+    sigaq <- solve(m*Eqinvs2*diag(2*m)+Eqinvg2*EqZTZ)
+    muaq <- as.vector(crossprod(sigaq,Eqinvg2*crossprod(EqZ,y)))
 
-# update muaq,sigaq #
-sigaq <- solve(m*Eqinvs2*diag(2*m)+Eqinvg2*EqZTZ)
-muaq <- as.vector(crossprod(sigaq,Eqinvg2*crossprod(EqZ,y)))
+    # update Cgq,Csq #
+    AA <- EqZ%*%muaq
+    AL <- sigaq+tcrossprod(muaq)
+    Csq <- m/2*as.numeric(crossprod(muaq)+tr(sigaq))
+    Cgq <- 0.5*as.numeric(crossprod(y,y-2*AA)+sum(AL*EqZTZ))
 
-# update Cgq,Csq #
-AA <- EqZ%*%muaq
-AL <- sigaq+tcrossprod(muaq)
-Csq <- m/2*as.numeric(crossprod(muaq)+tr(sigaq))
-Cgq <- 0.5*as.numeric(crossprod(y,y-2*AA)+sum(AL*EqZTZ))
+    lb <- RLBC(y,X,T,As,Ag,mul0,sigl0,Csq,Cgq,muaq,sigaq,mulq,siglq)$lb
+  }
 
-lb <- RLBC(y,X,T,As,Ag,mul0,sigl0,Csq,Cgq,muaq,sigaq,mulq,siglq)$lb
-}
-
-lbrecord <- rbind(lbrecord,c(count,lb))
-dif <- abs((lb-lbold)/lb)
-lbold <- lb
-cat(count,lb,round(mulq,1),Cgq,Csq,dif,DIFF,apre,"\n")
+  lbrecord <- rbind(lbrecord,c(count,lb))
+  dif <- abs((lb-lbold)/lb)
+  lbold <- lb
+  cat(count,lb,round(mulq,1),Cgq,Csq,dif,DIFF,apre,"\n")
 }
 
 list(Cgq=Cgq,Csq=Csq,muaq=muaq,sigaq=sigaq,

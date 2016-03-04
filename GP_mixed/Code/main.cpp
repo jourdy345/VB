@@ -65,7 +65,7 @@ int main() {
   // linear now contains all floating point values in the comma-delimited
   // data file.  now dump them to the screen to verify:
   // copy( linear.begin(), linear.end(), ostream_iterator<float>( cout, " " ) );
-
+  arma::arma_rng::set_seed_random();
   arma::mat tempMat = arma::conv_to<arma::mat>::from(linear);
   int n = tempMat.n_rows;
   arma::mat temp(n-1, 1);
@@ -116,13 +116,12 @@ int main() {
   int Xcol = X.n_cols;
   int Srow = S.n_rows;
   int Acol = A.n_cols;
-  arma::colvec priorMuBeta = arma::randn<arma::colvec>(Acol);
+  arma::colvec priorMuBeta = arma::zeros<arma::colvec>(Acol);
   arma::mat priorSigmaBeta = 3.0 * arma::eye(Acol, Acol);
-  arma::colvec priorMuLambda = arma::randn<arma::colvec>(Xcol);
+  arma::colvec priorMuLambda = arma::zeros<arma::colvec>(Xcol);
   arma::mat priorSigmaLambda = 5.0 * arma::eye(Xcol, Xcol);
-  double A_sigma = 10.0;
+  double A_sigma = 1.5;
   sparseGPVBProbit(y, X, S, A, priorMuBeta, priorSigmaBeta, priorMuLambda, priorSigmaLambda, A_sigma);
   // g++ -o GP main.cpp gaussianCDF.cpp blockDiag.cpp lowerBound.cpp eOfZ.cpp eOfZTZ.cpp logH.cpp sparseGPVBProbit.cpp -llapack -lblas -larmadillo
-
   return 0;
 }
