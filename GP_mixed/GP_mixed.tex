@@ -120,6 +120,14 @@ $$
 $$
   \mathcal{L} = \textcolor{myorange}{(1)} + \textcolor{myorange}{(2)} + \textcolor{myorange}{(3)} + \textcolor{myorange}{(4)} + \textcolor{myorange}{(5)} + \textcolor{myorange}{(6)} - \textcolor{myblue}{(1)} - \textcolor{myblue}{(2)} - \textcolor{myblue}{(3)} - \textcolor{myblue}{(4)} - \textcolor{myblue}{(5)}
 $$
+\subsection{Variational update}
+\subsubsection{$q\left(\alpha\right)$}
+\begin{align*}
+  \log q\left(\alpha\right) &\propto \left\langle\log\mathcal{N}\left(y|Z\alpha + A\beta, \gamma^{2}I_{n}\right)\mathcal{N}\left(\alpha\middle| 0, \frac{\sigma^{2}}{m}I_{2m}\right)\right\rangle\\
+  &\propto \mathbb{E}\left[\frac{1}{\gamma^{2}}\right]\left(\mathbb{E}\left[Z'\right]y - \mathbb{E}\left[Z'\right]Am_{\beta}\right)\alpha - \frac{1}{2}\alpha' \left(m\mathbb{E}\left[\frac{1}{\sigma^{2}}\right]I_{2m} +\mathbb{E}\left[\frac{1}{\gamma^{2}}\right]\mathbb{E}\left[Z'Z\right]\right)\alpha\\
+  S_{\alpha} &= \left(\frac{\mathcal{H}\left(n, C_{\gamma}, A_{\gamma}^{2}\right)}{\mathcal{H}\left(n-2, C_{\gamma}, A_{\gamma}^{2}\right)}\mathbb{E}\left[Z'Z\right] +m\frac{\mathcal{H}\left(2m, C_{\sigma}, A_{\sigma}^{2}\right)}{\mathcal{H}\left(2m-2, C_{\sigma}, A_{\sigma}^{2}\right)}I_{2m} \right)^{-1}\\
+  m_{\alpha} &= \frac{\mathcal{H}\left(n, C_{\gamma}, A_{\gamma}^{2}\right)}{\mathcal{H}\left(n-2, C_{\gamma}, A_{\gamma}^{2}\right)}S_{\alpha}\mathbb{E}\left[Z'\right] \left(y - Am_{\beta}\right)
+\end{align*}
 \section{GP Logistic Model}
 \subsection{Model specifications}
 For logistic models, we first postulate a link function, $g\left(\cdot \right)$ for the predictors.
