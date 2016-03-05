@@ -100,7 +100,7 @@ The model specifications remain the same except that the random effect term has 
 where $A$ is the design matrix for the random effects and $\beta$ is the parameter vector of the random effects.
 \subsection{Lower bound}
 $$
-  p\left(y, \theta \right) = \mathcal{N}\left(y|Z\alpha + A\beta, \gamma^{2}I_{n}\right) \mathcal{N}\left(\alpha \middle|0, \frac{\sigma^{2}}{m}I_{2m}\right)\mathcal{N}\left(\beta|0,\Sigma_{\beta}\right)\mathcal{N}\left(\lambda,\mu_{\lambda},\Sigma_{\lambda}\right)\operatorname{HC}\left(A_{\sigma}\right)\opn{HC}\left(A_{\gamma}\right)
+  p\left(y, \theta \right) = \mathcal{N}\left(y|Z\alpha + A\beta, \gamma^{2}I_{n}\right) \mathcal{N}\left(\alpha \middle|0, \frac{\sigma^{2}}{m}I_{2m}\right)\mathcal{N}\left(\beta|0,\Sigma_{\beta}\right)\mathcal{N}\left(\lambda|\mu_{\lambda},\Sigma_{\lambda}\right)\operatorname{HC}\left(A_{\sigma}\right)\opn{HC}\left(A_{\gamma}\right)
 $$
 \begin{align*}
   \textcolor{myorange}{(1)}\;\mathbb{E}\left[\log p\left(y|\theta \right)\right] &= -\frac{n}{2}\log \left(2\pi \right) - \frac{n}{2}\mathbb{E}\left[\log \gamma^{2}\right] \\
@@ -117,9 +117,14 @@ $$
   \textcolor{myblue}{(4)}\;\mathbb{E}\left[\log q\left(\sigma\right)\right] &= -C_{\sigma}\frac{\mathcal{H}\left(2m, C_{\sigma}, A_{\sigma}^{2}\right)}{\mathcal{H}\left(2m-2, C_{\sigma}, A_{\sigma}^{2}\right)} -\log \mathcal{H}\left(2m-2, C_{\sigma}, A_{\sigma}^{2}\right) -2m \mathbb{E}\left[\log \sigma\right] -\mathbb{E}\left[\log \left(A_{\sigma}^{2}+\sigma^{2}\right)\right]\\
   \textcolor{myblue}{(5)}\;\mathbb{E}\left[\log q\left(\gamma\right)\right] &= -C_{\gamma}\frac{\mathcal{H}\left(n, C_{\gamma}, A_{\gamma}^{2}\right)}{\mathcal{H}\left(n-2, C_{\gamma}, A_{\gamma}^{2}\right)} -\log \mathcal{H}\left(n-2, C_{\gamma}, A_{\gamma}^{2}\right) -n \mathbb{E}\left[\log \gamma\right] -\mathbb{E}\left[\log \left(A_{\gamma}^{2}+\gamma^{2}\right)\right]
 \end{align*}
-$$
-  \mathcal{L} = \textcolor{myorange}{(1)} + \textcolor{myorange}{(2)} + \textcolor{myorange}{(3)} + \textcolor{myorange}{(4)} + \textcolor{myorange}{(5)} + \textcolor{myorange}{(6)} - \textcolor{myblue}{(1)} - \textcolor{myblue}{(2)} - \textcolor{myblue}{(3)} - \textcolor{myblue}{(4)} - \textcolor{myblue}{(5)}
-$$
+\begin{align*}
+  \mathcal{L} &= \textcolor{myorange}{(1)} + \textcolor{myorange}{(2)} + \textcolor{myorange}{(3)} + \textcolor{myorange}{(4)} + \textcolor{myorange}{(5)} + \textcolor{myorange}{(6)} - \textcolor{myblue}{(1)} - \textcolor{myblue}{(2)} - \textcolor{myblue}{(3)} - \textcolor{myblue}{(4)} - \textcolor{myblue}{(5)}\\
+  &= -\frac{n}{2}\log\left(2\pi\right) +m\log m -\frac{m}{2}\mathbb{E}\left[\frac{1}{\sigma^{2}}\right]\left(\Tr\left(S_{\alpha}\right)+m_{\alpha}'m_{\alpha}\right)+\frac{1}{2}\log\left|\Sigma_{\beta}^{-1}S_{\beta}\right|+\frac{1}{2}\log \left|\Sigma_{\lambda}^{-1}S_{\lambda}\right|+\frac{1}{2}\log\left|S_{\alpha}\right| \\
+  &\quad -\frac{1}{2}\left\{\Tr \left(\Sigma_{\beta}^{-1}S_{\beta}\right)+m_{\beta}'\Sigma_{\beta}^{-1}m_{\beta} \right\} -\frac{1}{2}\left(m_{\lambda}-\mu_{\lambda}\right)'\Sigma_{\lambda}^{-1}\left(m_{\lambda}-\mu_{\lambda}\right)+\log \left(\frac{4A_{\sigma}A_{\gamma}}{\pi^{2}}\right)+m+\frac{d}{2}+\frac{s}{2}\\
+  &\quad +C_{\sigma}\frac{\mathcal{H}\left(2m, C_{\sigma}, A_{\sigma}^{2}\right)}{\mathcal{H}\left(2m-2, C_{\sigma}, A_{\sigma}^{2}\right)} +C_{\gamma}\frac{\mathcal{H}\left(n, C_{\gamma}, A_{\gamma}^{2}\right)}{\mathcal{H}\left(n-2, C_{\gamma}, A_{\gamma}^{2}\right)} +\log \mathcal{H}\left(2m-2, C_{\sigma}, A_{\sigma}^{2}\right) + \log \mathcal{H}\left(n-2, C_{\gamma}, A_{\gamma}^{2}\right)\\
+  &\quad -\frac{1}{2}\mathbb{E}\left[\frac{1}{\gamma^{2}}\right]\left\{y'y -2\left(\mathbb{E}\left[Z\right]m_{\alpha}+Am_{\beta}\right)'y +\Tr\left(\mathbb{E}\left[Z'Z\right]\left(S_{\alpha}+m_{\alpha}m_{\alpha}'\right)\right) +2m_{\beta}'A'\mathbb{E}\left[Z\right]m_{\alpha}\right.\\
+  &\quad \left. +\Tr\left(A'AS_{\beta}\right) +m_{\beta}'A'Am_{\beta} \right\}
+\end{align*}
 \subsection{Variational update}
 \subsubsection{$q\left(\alpha\right)$}
 \begin{align*}
@@ -127,6 +132,42 @@ $$
   &\propto \mathbb{E}\left[\frac{1}{\gamma^{2}}\right]\left(\mathbb{E}\left[Z'\right]y - \mathbb{E}\left[Z'\right]Am_{\beta}\right)\alpha - \frac{1}{2}\alpha' \left(m\mathbb{E}\left[\frac{1}{\sigma^{2}}\right]I_{2m} +\mathbb{E}\left[\frac{1}{\gamma^{2}}\right]\mathbb{E}\left[Z'Z\right]\right)\alpha\\
   S_{\alpha} &= \left(\frac{\mathcal{H}\left(n, C_{\gamma}, A_{\gamma}^{2}\right)}{\mathcal{H}\left(n-2, C_{\gamma}, A_{\gamma}^{2}\right)}\mathbb{E}\left[Z'Z\right] +m\frac{\mathcal{H}\left(2m, C_{\sigma}, A_{\sigma}^{2}\right)}{\mathcal{H}\left(2m-2, C_{\sigma}, A_{\sigma}^{2}\right)}I_{2m} \right)^{-1}\\
   m_{\alpha} &= \frac{\mathcal{H}\left(n, C_{\gamma}, A_{\gamma}^{2}\right)}{\mathcal{H}\left(n-2, C_{\gamma}, A_{\gamma}^{2}\right)}S_{\alpha}\mathbb{E}\left[Z'\right] \left(y - Am_{\beta}\right)
+\end{align*}
+\subsubsection{$q\left(\beta\right)$}
+\begin{align*}
+  \log q\left(\beta\right) &\propto \log \mathcal{N}\left(y|Z\alpha + A\beta, \gamma^{2}I_{n}\right) + \log \mathcal{N}\left(\beta|0, \Sigma_{\beta}\right)\\
+  &\propto -\frac{1}{2}\mathbb{E}\left[\frac{1}{\gamma^{2}}\right]\left(-2y'A\beta+2m_{\alpha}'\mathbb{E}\left[Z'\right]A\beta + \beta'A'A\beta\right) -\frac{1}{2}\beta'\Sigma_{\beta}^{-1}\beta\\
+  &\propto -\frac{1}{2}\left\{\beta'\left(\mathbb{E}\left[\frac{1}{\gamma^{2}}\right]A'A +\Sigma_{\beta}^{-1} \right)\beta -2\left(A'y -A'\mathbb{E}\left[Z\right]m_{\alpha}\right)\beta \right\}\\
+  S_{\beta} &= \left(\frac{\mathcal{H}\left(n, C_{\gamma}, A_{\gamma}^{2}\right)}{\mathcal{H}\left(n-2, C_{\gamma}, A_{\gamma}^{2}\right)}A'A +\Sigma_{\beta}^{-1}\right)^{-1}\\
+  m_{\beta} &= S_{\beta}A'\left(y-\mathbb{E}\left[Z\right]m_{\alpha}\right)
+\end{align*}
+\subsubsection{$q\left(\sigma\right)$}
+\begin{align*}
+  \log q\left(\sigma\right) &\propto \log\mathcal{N}\left(\alpha \middle|0, \frac{\sigma^{2}}{m}I_{2m}\right)\opn{HC}\left(A_{\sigma}\right)\\
+  &\propto -m\log \sigma^{2} -\frac{m}{2}\left(\Tr \left(S_{\apha}\right) +m_{\alpha}'m_{\alpha}\right)/\sigma^{2} -\log \left(A_{\sigma}^{2}+\sigma^{2}\right)\\
+  q\left(\alpha\right) &\propto \frac{\exp\left\{-\frac{m}{2}\left(\Tr\left(S_{\alpha}\right) +m_{\alpha}'m_{\alpha} \right)/\sigma^{2} \right\}}{\sigma^{2m}\left(A_{\sigma}^{2}+\sigma^{2}\right)}
+\end{align*}
+\subsubsection{$q\left(\gamma\right)$}
+\begin{align*}
+  \log q\left(\gamma\right) &\propto \log \mathcal{N}\left(y|Z\alpha +A\beta, \gamma^{2}I_{n}\right) +\log \opn{HC}\left(A_{\gamma}\right)\\
+  &\propto -n\log \gamma -\log \left(A_{\beta}^{2}+\gamma^{2} \right)\\
+  &\quad -\frac{1}{2\gamma^{2}}\left(y'y -2y'\left(\mathbb{E}\left[Z\right]m_{\alpha} +Am_{\beta} \right) +\Tr\left(\mathbb{E}\left[Z'Z\right]\left(S_{\alpha} +m_{\alpha}m_{\alpha}' \right) \right) +2m_{\beta}'A'\mathbb{E}\left[Z\right]m_{\alpha} +m_{\beta}'A'Am_{\beta} +\Tr\left(S_{\beta}\right) \right)\\
+  q\left(\gamma\right) &\propto \frac{\exp\left\{-C_{\gamma}/\gamma^{2} \right\}}{\gamma^{n}\left(A_{\gamma}^{2}+\gamma^{2}\right)}\\
+  C_{\gamma} &= \frac{1}{2}\left(y'y -2y'\left(\mathbb{E}\left[Z\right]m_{\alpha} +Am_{\beta} \right) +\Tr\left(\mathbb{E}\left[Z'Z\right]\left(S_{\alpha} +m_{\alpha}m_{\alpha}' \right) \right) +2m_{\beta}'A'\mathbb{E}\left[Z\right]m_{\alpha} +m_{\beta}'A'Am_{\beta} +\Tr\left(S_{\beta}\right) \right)
+\end{align*}
+\subsubsection{$q\left(\lambda\right)$}
+To perform nonconjugate variational message passing, we first need to compute $\mathbb{E}\left[\log p\left(y, \theta\right)\right]$ leaving only the parts that contain $\left(m_{\lambda}, S_{\lambda}\right)$ since every other element will be eliminated once we differentiate it with regard to the mean and covariance of lambda.
+\begin{align*}
+  \mathbb{E}\left[\log p\left(y,\theta\right)\right] &\propto \mathbb{E}\left[\frac{1}{\gamma^{2}}\right]y'\mathbb{E}\left[Z\right]m_{\alpha} -\frac{1}{2}\mathbb{E}\left[\frac{1}{\gamma^{2}}\right]\left(\Tr\left(\mathbb{E}\left[Z'Z\right]\left(S_{\alpha}+m_{\alpha}m_{\alpha}'\right)\right) \\
+  &\quad- \mathbb{E}\left[\frac{1}{\gamma^{2}}\right]m_{\beta}'A'\mathbb{E}\left[Z\right]m_{\alpha} -\frac{1}{2}\left(m_{\lambda}-\mu_{\lambda}\right)'\Sigma_{\lambda}^{-1}\left(m_{\lambda}-\mu_{\lambda}\right) -\frac{1}{2}\Tr\left(\Sigma_{\lambda}^{-1}S_{\lambda}\right)\\
+  &\propto \mathbb{E}\left[\frac{1}{\gamma^{2}}\right]\left\{y-Am_{\beta} \right\}'\mathbb{E}\left[Z\right]m_{\alpha} -\frac{1}{2}\mathbb{E}\left[\frac{1}{\gamma^{2}}\right]\left(\Tr\left(\mathbb{E}\left[Z'Z\right]\left(S_{\alpha}+m_{\alpha}m_{\alpha}'\right)\right)\\
+  &\quad -\frac{1}{2}\left(m_{\lambda}-\mu_{\lambda}\right)'\Sigma_{\lambda}^{-1}\left(m_{\lambda}-\mu_{\lambda}\right) -\frac{1}{2}\Tr\left(\Sigma_{\lambda}^{-1}S_{\lambda}\right)\\
+  \mathbb{E}\left[\frac{1}{\gamma^{2}}\right]\left\{y-Am_{\beta} \right\}'\mathbb{E}\left[Z\right]m_{\alpha} &= \mathbb{E}\left[\frac{1}{\gamma^{2}}\right]\sum_{i=1}^{n}\sum_{j=1}^{2m}\left\langle Z \right\rangle_{ij} e_{i}m_{j}^{\alpha}, \qquad e=y-Am_{\beta}\\
+  &= \mathbb{E}\left[\frac{1}{\gamma^{2}}\right]\sum_{i=1}^{n}\sum_{j=1}^{m}e_{i}\exp\left\{-\frac{1}{2}t_{ij}'S_{\lambda}t_{ij} \right\}\left(m_{j}^{\alpha}\cos\left(t_{ij}'m_{\lambda}\right)+m_{j+m}^{\alpha}\sin\left(t_{ij}'m_{\lambda}\right) \right)\\
+  F_{3} &= \frac{\partial}{\partial m_{\lambda}}\mathbb{E}\left[\frac{1}{\gamma^{2}}\right]\left\{y-Am_{\beta} \right\}'\mathbb{E}\left[Z\right]m_{\alpha} \\
+  &= \mathbb{E}\left[\frac{1}{\gamma^{2}}\right]\sum_{i=1}^{n}\sum_{j=1}^{m}e_{i}\exp\left\{-\frac{1}{2}t_{ij}'S_{\lambda}t_{ij} \right\}\left(m_{j+m}^{\alpha}\cos\left(t_{ij}'m_{\lambda}\right)-m_{j}^{\alpha}\sin\left(t_{ij}'m_{\lambda}\right) \right)t_{ij}\\
+  F_{1} &= \frac{\partial}{\partial S_{\lambda}}\mathbb{E}\left[\frac{1}{\gamma^{2}}\right]\left\{y-Am_{\beta} \right\}'\mathbb{E}\left[Z\right]m_{\alpha} \\
+  &= -\frac{1}{2}\mathbb{E}\left[\frac{1}{\gamma^{2}}\right]\sum_{i=1}^{n}\sum_{j=1}^{m}e_{i}\exp\left\{-\frac{1}{2}t_{ij}'S_{\lambda}t_{ij} \right\}\left(m_{j}^{\alpha}\cos\left(t_{ij}'m_{\lambda}\right)+m_{j+m}^{\alpha}\sin\left(t_{ij}'m_{\lambda}\right) \right)t_{ij}t_{ij}'
 \end{align*}
 \section{GP Logistic Model}
 \subsection{Model specifications}
