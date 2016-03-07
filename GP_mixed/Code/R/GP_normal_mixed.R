@@ -38,13 +38,14 @@ MNLP <- function(ypr,prmean,prvar) {0.5*mean( (ypr-prmean)^2/prvar+log(prvar)+lo
 #----------------------------------#
 
 Tfunc <- function(X,S) {
-n <- dim(X)[1]
-m <- dim(S)[1]
-d <- dim(S)[2]
-T <- matrix(0,(n*m),d)
-for (i in 1:n) {
- T[((i-1)*m+1):(i*m),] <- S*matrix(rep(X[i,],m),nrow=m,ncol=d,byrow=TRUE)}
-list(T=T)
+  n <- dim(X)[1]
+  m <- dim(S)[1]
+  d <- dim(S)[2]
+  T <- matrix(0,(n*m),d)
+  for (i in 1:n) {
+    T[((i-1)*m+1):(i*m),] <- S*matrix(rep(X[i,],m),nrow=m,ncol=d,byrow=TRUE)
+  }
+  list(T=T)
 }
 
 
@@ -53,24 +54,26 @@ list(T=T)
 #---------------------#
 
 MZ <- function(n,m,T,mulq,siglq) {
-mz <- matrix(0,n,(2*m))
-t1 <- T%*%mulq
-t2 <- exp(-0.5*rowSums((T%*%siglq)*T))
-mz[,1:m] <- matrix(cos(t1)*t2,n,m,byrow=TRUE)
-mz[,(m+1):(2*m)] <- matrix(sin(t1)*t2,n,m,byrow=TRUE) 
-return(mz)}
+  mz <- matrix(0,n,(2*m))
+  t1 <- T%*%mulq
+  t2 <- exp(-0.5*rowSums((T%*%siglq)*T))
+  mz[,1:m] <- matrix(cos(t1)*t2,n,m,byrow=TRUE)
+  mz[,(m+1):(2*m)] <- matrix(sin(t1)*t2,n,m,byrow=TRUE) 
+  return(mz)
+}
 
 MZTZ <- function(n,m,Tm,Tp,mulq,siglq) {
-mztz <- matrix(0,(2*m),(2*m))
-T3m <- matrix(Tm%*%mulq,n,m^2,byrow=TRUE)
-T3p <- matrix(Tp%*%mulq,n,m^2,byrow=TRUE)
-T4m <- matrix(exp(-0.5*rowSums((Tm%*%siglq)*Tm)),n,m^2,byrow=TRUE)
-T4p <- matrix(exp(-0.5*rowSums((Tp%*%siglq)*Tp)),n,m^2,byrow=TRUE)
-mztz[1:m,1:m] <- 0.5*matrix(colSums(T4m*cos(T3m)+T4p*cos(T3p)),m,m,byrow=TRUE)
-mztz[1:m,(m+1):(2*m)] <- 0.5*matrix(colSums(-T4m*sin(T3m)+T4p*sin(T3p)),m,m,byrow=TRUE)
-mztz[(m+1):(2*m),1:m] <- t(mztz[1:m,(m+1):(2*m)])
-mztz[(m+1):(2*m),(m+1):(2*m)] <- 0.5*matrix(colSums(T4m*cos(T3m)-T4p*cos(T3p)),m,m,byrow=TRUE)
-return(mztz) }
+  mztz <- matrix(0,(2*m),(2*m))
+  T3m <- matrix(Tm%*%mulq,n,m^2,byrow=TRUE)
+  T3p <- matrix(Tp%*%mulq,n,m^2,byrow=TRUE)
+  T4m <- matrix(exp(-0.5*rowSums((Tm%*%siglq)*Tm)),n,m^2,byrow=TRUE)
+  T4p <- matrix(exp(-0.5*rowSums((Tp%*%siglq)*Tp)),n,m^2,byrow=TRUE)
+  mztz[1:m,1:m] <- 0.5*matrix(colSums(T4m*cos(T3m)+T4p*cos(T3p)),m,m,byrow=TRUE)
+  mztz[1:m,(m+1):(2*m)] <- 0.5*matrix(colSums(-T4m*sin(T3m)+T4p*sin(T3p)),m,m,byrow=TRUE)
+  mztz[(m+1):(2*m),1:m] <- t(mztz[1:m,(m+1):(2*m)])
+  mztz[(m+1):(2*m),(m+1):(2*m)] <- 0.5*matrix(colSums(T4m*cos(T3m)-T4p*cos(T3p)),m,m,byrow=TRUE)
+  return(mztz)
+}
 
 
 #----------------------------------#
@@ -83,22 +86,30 @@ h2 <- function(x,p,q,r) { -p/x^2-2*q-2*(3*r*x^2+1)/(r*x^3+x)^2 } #second derivat
 hmaxpt <- function(p,q,r) { sqrt((p*r-2*q+sqrt((p*r-2*q)^2+8*q*r*(p+2)))/(4*q*r)) }
 
 logH <- function(p,q,r){
-mu0 <- hmaxpt(p,q,r)
-sig0 <- (-h2(mu0,p,q,r))^(-0.5)
-hmu0 <- h(mu0,p,q,r)
-sig02 <- sig0*sqrt(2)
-lowerlimit <- (-mu0)/sig02
-integrand <- function(u) {exp(h(mu0+u*sig02,p,q,r)-hmu0)}
-b <- 1
-epsilon <- 1
-while (epsilon > 1.0e-5) {
-b <- 2*b
-if (-b > lowerlimit) {
-epsilon <- max(integrand(b),integrand(-b)) } else {epsilon <- integrand(b)} }
+  mu0 <- hmaxpt(p,q,r)
+  sig0 <- (-h2(mu0,p,q,r))^(-0.5)
+  hmu0 <- h(mu0,p,q,r)
+  sig02 <- sig0*sqrt(2)
+  lowerlimit <- (-mu0)/sig02
+  integrand <- function(u) {exp(h(mu0+u*sig02,p,q,r)-hmu0)}
+  b <- 1
+  epsilon <- 1
+  while (epsilon > 1.0e-5) {
+    b <- 2*b
+    if (-b > lowerlimit) {
+      epsilon <- max(integrand(b),integrand(-b)) 
+    } else {
+      epsilon <- integrand(b)
+    }
+  }
 
-if (-b > lowerlimit) {I0 <- integrate(integrand, lower=-b, upper=b)$value
-} else {I0 <- integrate(integrand, lower=lowerlimit, upper=b)$value}
-hmu0+log(sig02)+log(I0)}
+  if (-b > lowerlimit) {
+    I0 <- integrate(integrand, lower=-b, upper=b)$value
+  } else {
+    I0 <- integrate(integrand, lower=lowerlimit, upper=b)$value
+  }
+  hmu0+log(sig02)+log(I0)
+}
 
 
 #--------------------------------------------------------------------#
@@ -152,32 +163,26 @@ list(prmean=prmean,prvar=prvar)
 # Lower bound #
 #-------------#
 
-RLBC <- function(y,X,T,As,Ag,mul0,sigl0,Csq,Cgq,muaq,sigaq,mulq,siglq) {
+LBC <- function(y,X,A,T,Tm,Tp,As,Ag,mul0,sigl0,Csq,Cgq,muaq,sigaq,mulq,siglq,mub0,sigb0,mubq,sigbq) {
 n <- length(y)
 d <- dim(X)[2]
 m <- dim(T)[1]/n
+s <- dim(A)[2]
 t1 <- as.matrix(solve(sigl0,siglq))
-lb <- ( -n/2*log(2*pi)+d/2+m+m*log(m)+0.5*determinant(as.matrix(sigaq))$modulus[1]
-        +0.5*determinant(t1)$modulus[1]-0.5*quadinv(mulq-mul0,sigl0)-0.5*tr(t1)
-        +log(4*As*Ag/(pi^2))+logH(2*m-2,Csq,As^2)+logH(n-2,Cgq,Ag^2) )
-list(lb=lb) }
-
-
-LBC <- function(y,X,T,Tm,Tp,As,Ag,mul0,sigl0,Csq,Cgq,muaq,sigaq,mulq,siglq) {
-n <- length(y)
-d <- dim(X)[2]
-m <- dim(T)[1]/n
-t1 <- as.matrix(solve(sigl0,siglq))
+t2 <- as.matrix(solve(sigb0,sigbq))
 mz <- MZ(n,m,T,mulq,siglq) 
 AA <- mz%*%muaq
-lb <- ( -n/2*log(2*pi)+d/2+m+m*log(m)+0.5*determinant(as.matrix(sigaq))$modulus[1]
-        +0.5*determinant(t1)$modulus[1]-0.5*quadinv(mulq-mul0,sigl0)-0.5*tr(t1)
-        +log(2*As)+log(2*Ag)-2*log(pi)+logH(2*m-2,Csq,As^2)+logH(n-2,Cgq,Ag^2)
-        -0.5*m*exp(logH(2*m,Csq,As^2)-logH(2*m-2,Csq,As^2))*(crossprod(muaq)+tr(sigaq))
-        +Csq*exp(logH(2*m,Csq,As^2)-logH(2*m-2,Csq,As^2))
-        -0.5*exp(logH(n,Cgq,Ag^2)-logH(n-2,Cgq,Ag^2))*(crossprod(y-2*AA)
-        +sum(MZTZ(n,m,Tm,Tp,mulq,siglq)*(tcrossprod(muaq)+sigaq)))
-        +Cgq*exp(logH(n,Cgq,Ag^2)-logH(n-2,Cgq,Ag^2))  )
+AA2 <- A%*%mubq
+lb <- ( -0.5 * n * log(2 * pi) + m * log(m) - 0.5 * m * exp(logH(2*m, Csq, As^2) - logH(2*m-2,Csq,As^2)) * (tr(sigaq)+crossprod(muaq)) + 0.5 * (determinant(t2)$modulus[1] + determinant(t1)$modulus[1] + determinant(sigaq)$modulus[1] - tr(t2) - quadinv(mubq, sigb0) - quadinv(mulq-mul0, sigl0)) + log(4*As*Ag)-2*log(pi)+m+0.5*(d+s) + Csq *exp(logH(2*m,Csq,As^2)-logH(2*m-2,Csq,As^2)) + Cgq*exp(logH(n,Cgq,Ag^2)-logH(n-2,Cgq,Ag^2)) + logH(2*m-2,Csq,As^2)+logH(n-2,Cgq,Ag^2) -0.5*exp(logH(n,Cgq,Ag^2)-logH(n-2,Cgq,Ag^2))*(crossprod(y-2*(AA+AA2),y) + sum(MZTZ(n,m,Tm,Tp,mulq,siglq)*(tcrossprod(muaq)+sigaq)) +2*crossprod(AA2, AA)+sum((A%*%sigbq)*A) + crossprod(AA2)) )
+
+# lb <- ( -n/2*log(2*pi)+d/2+m+m*log(m)+0.5*determinant(as.matrix(sigaq))$modulus[1]
+#         +0.5*determinant(t1)$modulus[1]-0.5*quadinv(mulq-mul0,sigl0)-0.5*tr(t1)
+#         +log(2*As)+log(2*Ag)-2*log(pi)+logH(2*m-2,Csq,As^2)+logH(n-2,Cgq,Ag^2)
+#         -0.5*m*exp(logH(2*m,Csq,As^2)-logH(2*m-2,Csq,As^2))*(crossprod(muaq)+tr(sigaq))
+#         +Csq*exp(logH(2*m,Csq,As^2)-logH(2*m-2,Csq,As^2))
+#         -0.5*exp(logH(n,Cgq,Ag^2)-logH(n-2,Cgq,Ag^2))*(crossprod(y-2*AA)
+#         +sum(MZTZ(n,m,Tm,Tp,mulq,siglq)*(tcrossprod(muaq)+sigaq)))
+#         +Cgq*exp(logH(n,Cgq,Ag^2)-logH(n-2,Cgq,Ag^2))  )
 list(lb=lb) }
 
 
@@ -186,12 +191,12 @@ list(lb=lb) }
 # only applicable to small data where n*m*m does not exceed 10^7 #
 #----------------------------------------------------------------#
 
-VARC <- function(y,X,T,As,Ag,mul0,sigl0,tol=1.0e-5,fac=1.5,fit=NULL,iter=500) {
+VARC <- function(y,X,Amat,T,As,Ag,mul0,sigl0,sigb0,tol=1.0e-5,fac=1.5,fit=NULL,iter=500) {
 
   n <- length(y)
   d <- dim(X)[2]
   m <- dim(T)[1]/n
-
+  s <- dim(Amat)[2]
   Tm <- matrix(0,(n*m*m),d)
   Tp <- matrix(0,(n*m*m),d)
   for (i in 1:n) {
@@ -211,13 +216,17 @@ VARC <- function(y,X,T,As,Ag,mul0,sigl0,tol=1.0e-5,fac=1.5,fit=NULL,iter=500) {
     mulq <- rep(0.5,d)
     siglq <- 0.5*diag(d)
 
+    # initialize mubq, sigbq #
+    sigbq <- solve(Eqinvg2 * crossprod(Amat) + sigb0)
+    mubq <- crossprod(sigbq,crossprod(Amat, y-MZ(n,m,T,mulq,siglq)))
+
     # initialize muaq,sigaq #
     EqZ <- MZ(n,m,T,mulq,siglq)
     EqZTZ <- MZTZ(n,m,Tm,Tp,mulq,siglq)
     Eqinvs2 <- exp(logH(2*m,Csq,As^2)-logH(2*m-2,Csq,As^2))
     Eqinvg2 <- exp(logH(n,Cgq,Ag^2)-logH(n-2,Cgq,Ag^2))
     sigaq <- solve(m*Eqinvs2*diag(2*m) + Eqinvg2*EqZTZ)
-    muaq <- as.vector(crossprod(sigaq, Eqinvg2*crossprod(EqZ,y)))
+    muaq <- as.vector(crossprod(sigaq, Eqinvg2*crossprod(EqZ,y-Amat%*%mubq)))
     lbold <- -10e7
     lbrecord <- NULL
     count <- 0
@@ -230,6 +239,8 @@ VARC <- function(y,X,T,As,Ag,mul0,sigl0,tol=1.0e-5,fac=1.5,fit=NULL,iter=500) {
     siglq <- fit$siglq
     muaq <- fit$muaq
     sigaq <- fit$sigaq
+    mubq <- fit$mubq
+    sigbq <- fit$sigbq
     lbold <- fit$lb
     lbrecord <- fit$lbrecord
     count <- dim(fit$lbrecord)[1]
@@ -255,7 +266,7 @@ VARC <- function(y,X,T,As,Ag,mul0,sigl0,tol=1.0e-5,fac=1.5,fit=NULL,iter=500) {
     C <- as.vector(AL[(m+1):(2*m),(m+1):(2*m)])
 
     T1 <- T%*%mulq
-    T2 <- rep(-y,rep(m,n))*exp(-0.5*rowSums((T%*%siglq)*T))
+    T2 <- rep(-y+Amat%*%muqb,rep(m,n))*exp(-0.5*rowSums((T%*%siglq)*T))
     F1 <- -crossprod(as.vector(T2*(muaq[1:m]*cos(T1)+muaq[(m+1):(2*m)]*sin(T1)))*T,T)
     F3 <- 2*colSums(as.vector(T2*(muaq[(m+1):(2*m)]*cos(T1)-muaq[1:m]*sin(T1)))*T)
 
@@ -293,11 +304,12 @@ VARC <- function(y,X,T,As,Ag,mul0,sigl0,tol=1.0e-5,fac=1.5,fit=NULL,iter=500) {
 
     # update Cgq,Csq #
     AA <- EqZ%*%muaq
+    AB <- Amat %*% mubq
     AL <- sigaq+tcrossprod(muaq)
     Csq <- m/2*as.numeric(crossprod(muaq)+tr(sigaq))
-    Cgq <- 0.5*as.numeric(crossprod(y,y-2*AA)+sum(AL*EqZTZ))
+    Cgq <- 0.5*as.numeric(crossprod(y,y-2*(AA+AB))+sum(AL*EqZTZ) + 2*+2*crossprod(AB, AA) + crossprod(AB) + tr(sigbq))
 
-    lb <- RLBC(y,X,T,As,Ag,mul0,sigl0,Csq,Cgq,muaq,sigaq,mulq,siglq)$lb
+    lb <- LBC(y,X,T,As,Ag,mul0,sigl0,Csq,Cgq,muaq,sigaq,mulq,siglq)$lb
 
     DIFF <- lb-lbold
     if (count==1 & DIFF<0) {
@@ -330,13 +342,18 @@ VARC <- function(y,X,T,As,Ag,mul0,sigl0,tol=1.0e-5,fac=1.5,fit=NULL,iter=500) {
       sigaq <- solve(m*Eqinvs2*diag(2*m)+Eqinvg2*EqZTZ)
       muaq <- as.vector(crossprod(sigaq,Eqinvg2*crossprod(EqZ,y)))
 
+      # update mubq,sigbq #
+      sigbq <- solve(Eqinvg2 * crossprod(Amat) + solve(sigbq))
+      mubq <- as.vector(crossprod(sigbq, crossprod(Amat, (y - EqZ %*% muaq))))
+
       # update Cgq,Csq #
       AA <- EqZ%*%muaq
+      AB <- Amat %*% mubq
       AL <- sigaq+tcrossprod(muaq)
       Csq <- m/2*as.numeric(crossprod(muaq)+tr(sigaq))
-      Cgq <- 0.5*as.numeric(crossprod(y,y-2*AA)+sum(AL*EqZTZ))
+      Cgq <- 0.5*as.numeric(crossprod(y,y-2*(AA+AB))+sum(AL*EqZTZ) +2*crossprod(AB, AA) + crossprod(AB) + tr(sigbq))
 
-      lb <- RLBC(y,X,T,As,Ag,mul0,sigl0,Csq,Cgq,muaq,sigaq,mulq,siglq)$lb
+      lb <- LBC(y,X,T,As,Ag,mul0,sigl0,Csq,Cgq,muaq,sigaq,mulq,siglq)$lb
     }
 
     lbrecord <- rbind(lbrecord,c(count,lb))
@@ -350,3 +367,15 @@ VARC <- function(y,X,T,As,Ag,mul0,sigl0,tol=1.0e-5,fac=1.5,fit=NULL,iter=500) {
 }
 
 
+library(nlme)
+library(Matrix)
+data(Orthodont)
+head(Orthodont)
+y <- as.vector(Orthodont$distance)
+cat_to_num <- function(x) {
+  if (x == 'Male') x <- 0
+  else x <- 1
+}
+temp <- sapply(Orthodont$Sex, cat_to_num)
+X <- as.matrix(cbind(as.vector(rep(1, length(y))), Orthodont$age, temp))
+Z <- kronecker(diag(1, 27), rep(1, 4))

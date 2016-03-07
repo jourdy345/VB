@@ -297,7 +297,7 @@ while ( dif>tol & count<iter ) {
   Csq <- m/2*as.numeric(crossprod(muaq)+tr(sigaq))
   Cgq <- 0.5*as.numeric(crossprod(y,y-2*AA)+sum(AL*EqZTZ))
 
-  lb <- RLBC(y,X,T,As,Ag,mul0,sigl0,Csq,Cgq,muaq,sigaq,mulq,siglq)$lb
+  lb <- LBC(y,X,Amat,T,As,Ag,mul0,sigl0,Csq,Cgq,muaq,sigaq,mulq,siglq)$lb
 
   DIFF <- lb-lbold
   if (count==1 & DIFF<0) {
@@ -336,7 +336,7 @@ while ( dif>tol & count<iter ) {
     Csq <- m/2*as.numeric(crossprod(muaq)+tr(sigaq))
     Cgq <- 0.5*as.numeric(crossprod(y,y-2*AA)+sum(AL*EqZTZ))
 
-    lb <- RLBC(y,X,T,As,Ag,mul0,sigl0,Csq,Cgq,muaq,sigaq,mulq,siglq)$lb
+    lb <- LBC(y,X,Amat,T,As,Ag,mul0,sigl0,Csq,Cgq,muaq,sigaq,mulq,siglq)$lb
   }
 
   lbrecord <- rbind(lbrecord,c(count,lb))
