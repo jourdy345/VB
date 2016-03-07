@@ -212,26 +212,28 @@ VARC <- function(y,X,Amat,T,As,Ag,mul0,sigl0,sigb0,tol=1.0e-5,fac=1.5,fit=NULL,i
     Cgq <- (n/2-1)*vares/4
     Csq <- (m-1)*vares
 
-    # Initialize mulq,siglq #
+    # Initialize mulq,siglq,muaq #
     mulq <- rep(0.5,d)
     siglq <- 0.5*diag(d)
+    muaq <- rep(0.5,2*m)
 
     # initialize mubq, sigbq #
-    sigbq <- solve(Eqinvg2 * crossprod(Amat) + sigb0)
-    mubq <- crossprod(sigbq,crossprod(Amat, y-MZ(n,m,T,mulq,siglq)))
-
-    # initialize muaq,sigaq #
     EqZ <- MZ(n,m,T,mulq,siglq)
     EqZTZ <- MZTZ(n,m,Tm,Tp,mulq,siglq)
     Eqinvs2 <- exp(logH(2*m,Csq,As^2)-logH(2*m-2,Csq,As^2))
     Eqinvg2 <- exp(logH(n,Cgq,Ag^2)-logH(n-2,Cgq,Ag^2))
+    sigbq <- solve(Eqinvg2 * crossprod(Amat) + sigb0)
+    mubq <- crossprod(sigbq,crossprod(Amat, y-(EqZ%*%muaq)))
+
+    # initialize muaq,sigaq #
     sigaq <- solve(m*Eqinvs2*diag(2*m) + Eqinvg2*EqZTZ)
-    muaq <- as.vector(crossprod(sigaq, Eqinvg2*crossprod(EqZ,y-Amat%*%mubq)))
+    muaq <- as.vector(crossprod(sigaq, Eqinvg2*crossprod(EqZ,y-(Amat%*%mubq))))
     lbold <- -10e7
     lbrecord <- NULL
     count <- 0
     a <- 1
     apre <- 1
+    
   } else {
     Cgq <- fit$Cgq
     Csq <- fit$Csq
@@ -266,7 +268,7 @@ VARC <- function(y,X,Amat,T,As,Ag,mul0,sigl0,sigb0,tol=1.0e-5,fac=1.5,fit=NULL,i
     C <- as.vector(AL[(m+1):(2*m),(m+1):(2*m)])
 
     T1 <- T%*%mulq
-    T2 <- rep(-y+Amat%*%muqb,rep(m,n))*exp(-0.5*rowSums((T%*%siglq)*T))
+    T2 <- rep(-y+Amat%*%mubq,rep(m,n))*exp(-0.5*rowSums((T%*%siglq)*T))
     F1 <- -crossprod(as.vector(T2*(muaq[1:m]*cos(T1)+muaq[(m+1):(2*m)]*sin(T1)))*T,T)
     F3 <- 2*colSums(as.vector(T2*(muaq[(m+1):(2*m)]*cos(T1)-muaq[1:m]*sin(T1)))*T)
 
@@ -309,7 +311,7 @@ VARC <- function(y,X,Amat,T,As,Ag,mul0,sigl0,sigb0,tol=1.0e-5,fac=1.5,fit=NULL,i
     Csq <- m/2*as.numeric(crossprod(muaq)+tr(sigaq))
     Cgq <- 0.5*as.numeric(crossprod(y,y-2*(AA+AB))+sum(AL*EqZTZ) + 2*+2*crossprod(AB, AA) + crossprod(AB) + tr(sigbq))
 
-    lb <- LBC(y,X,T,As,Ag,mul0,sigl0,Csq,Cgq,muaq,sigaq,mulq,siglq)$lb
+    lb <- LBC(y,X,Amat,T,Tm,Tp,As,Ag,mul0,sigl0,Csq,Cgq,muaq,sigaq,mulq,siglq,mub0,sigb0,mubq,sigbq)$lb
 
     DIFF <- lb-lbold
     if (count==1 & DIFF<0) {
@@ -353,7 +355,7 @@ VARC <- function(y,X,Amat,T,As,Ag,mul0,sigl0,sigb0,tol=1.0e-5,fac=1.5,fit=NULL,i
       Csq <- m/2*as.numeric(crossprod(muaq)+tr(sigaq))
       Cgq <- 0.5*as.numeric(crossprod(y,y-2*(AA+AB))+sum(AL*EqZTZ) +2*crossprod(AB, AA) + crossprod(AB) + tr(sigbq))
 
-      lb <- LBC(y,X,T,As,Ag,mul0,sigl0,Csq,Cgq,muaq,sigaq,mulq,siglq)$lb
+      lb <- LBC(y,X,Amat,T,Tm,Tp,As,Ag,mul0,sigl0,Csq,Cgq,muaq,sigaq,mulq,siglq,mub0,sigb0,mubq,sigbq)$lb
     }
 
     lbrecord <- rbind(lbrecord,c(count,lb))
@@ -379,3 +381,11 @@ cat_to_num <- function(x) {
 temp <- sapply(Orthodont$Sex, cat_to_num)
 X <- as.matrix(cbind(as.vector(rep(1, length(y))), Orthodont$age, temp))
 Z <- kronecker(diag(1, 27), rep(1, 4))
+
+m = 10
+s = dim(Z)[2]
+d = dim(X)[2]
+S = rmvnorm(m, mean = rep(0, d), sigma = diag(d))
+T = Tfunc(X = X, S = S)$T
+fit = VARC(y = y, X = X, Amat = Z, T = T, As = 25, Ag = 25, mul0 = rep(0, d), sigl0 = 10 * diag(d), sigb0 = 10 * diag(s),  fac = 1.5)
+# y,X,Amat,T,As,Ag,mul0,sigl0,sigb0,tol=1.0e-5,fac=1.5,fit=NULL,iter=500
