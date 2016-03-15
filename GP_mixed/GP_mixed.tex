@@ -430,4 +430,27 @@ Notice that we have not yet come up with the updating algorithm for $\lambda$. T
   &\quad\qquad \qquad\;\; +\left. \nu_{ijr}^{+}\left\{\left(A_{jr}-D_{jr} \right)\cos\left({t_{ijr}^{+}}'\mu_{q\left(\lambda\right)} \right) +2B_{jr}\sin\left({t_{ijr}^{+}}'\mu_{q\left(\lambda\right)} \right) \right\}t_{ijr}^{+}{t_{ijr}^{+}}' \right]\\
   \textcolor{myorange}{\Sigma_{q\left(\lambda\right)}} &\textcolor{myorange}{\leftarrow \left\{\Sigma_{\lambda}^{-1} + F_{1}+F_{2} \right\}^{-1}}
 \end{align*}
+\section{Cosine basis with DP random effects}
+In this section, we discuss various models with random effects appended to an unknown function $f$ of a scalar $x_{i}$. For the approximation of the unknown function, we assign a Gaussian prior and rely on Karhunen-Loève expansion to derive a tractable solution. Instead of using both sine and cosine functions, Victor Meng Hwee Ong et al. showed that cosine basis expansion displays a better performance. We extend it further to mixed models.
+\subsection{Model specifications}
+For a linear model with Dirichlet process random effects, the response variables are denoted by
+$$
+  y_{i} = w_{i}'\beta + f\left(x_{i}\right) + \psi_{i}+\epsilon_{i}, \quad \psi \sim \mathcal{DP}\left(\alpha, H\right)
+$$
+where $f$ is an unknown function of the scalar $x_{i}$. The clustering effect of the Dirichlet process random effects can be represented by an $n \times k$ matrix $\bs{A}$ defined by
+$$
+  \bs{A} = \left(a_{1}', a_{2}', \ldots , a_{n}'\right)'
+$$
+where each $a_{i}$ is a $1 \times k$ vector of all 0s except for a 1 in the position indicating which group the observation is from. The vector of random effects can be recast into
+$$
+  \bs{\psi} = \bs{A\eta}
+$$
+where $\eta_{j} \sim H$ for $j= 1, \ldots , k$. Then the whole equation transforms to
+$$
+  \bs{y} = \bs{W\beta} + \bs{f}_{J} + \bs{A\eta} + \bs{\epsilon}.
+$$
+By definition, the distribution of the data needs marginalizing out the random effects.
+$$
+  f\left(\bs{y}|\bs{\theta}\right) = \int \prod_{i=1}^{n}\frac{1}{\sqrt{\left|2\pi\sigma^{2}I_{n} \right|}}\exp \left\{-\frac{1}{2\sigma^{2}}\left(\bs{y}-\bs{W\beta}-\bs{f}_{J}+\bs{A\eta}\right)'\left(\bs{y}-\bs{W\beta}-\bs{f}_{J}+\bs{A\eta}\right) \right\}\, dH\left(\bs{\eta}\right)
+$$
 \end{document}

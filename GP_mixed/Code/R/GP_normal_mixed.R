@@ -364,7 +364,7 @@ VARC <- function(y,X,Amat,T,As,Ag,mul0,sigl0,sigb0,tol=1.0e-5,fac=1.5,fit=NULL,i
     cat(count,lb,round(mulq,1),Cgq,Csq,dif,DIFF,apre,"\n")
   }
 
-  list(Cgq=Cgq,Csq=Csq,muaq=muaq,sigaq=sigaq,
+  list(Cgq=Cgq,Csq=Csq,muaq=muaq,sigaq=sigaq, mubq = mubq, sigbq = sigbq,
   mulq=mulq,siglq=siglq,lb=lb,lbrecord=lbrecord,apre=apre)
 }
 
@@ -382,10 +382,24 @@ temp <- sapply(Orthodont$Sex, cat_to_num)
 X <- as.matrix(cbind(as.vector(rep(1, length(y))), Orthodont$age, temp))
 Z <- kronecker(diag(1, 27), rep(1, 4))
 
-m = 10
+n = dim(X)[1]
+m = 20
 s = dim(Z)[2]
 d = dim(X)[2]
 S = rmvnorm(m, mean = rep(0, d), sigma = diag(d))
 T = Tfunc(X = X, S = S)$T
-fit = VARC(y = y, X = X, Amat = Z, T = T, As = 25, Ag = 25, mul0 = rep(0, d), sigl0 = 10 * diag(d), sigb0 = 10 * diag(s),  fac = 1.5)
+fit_GPVB = VARC(y = y, X = X, Amat = Z, T = T, As = 25, Ag = 25, mul0 = rep(0, d), sigl0 = 10 * diag(d), sigb0 = 10 * diag(s),  fac = 1.5)
 # y,X,Amat,T,As,Ag,mul0,sigl0,sigb0,tol=1.0e-5,fac=1.5,fit=NULL,iter=500
+
+Zmat = matrix(0, nrow = n, ncol = 2 *m)
+for (r in 1:m) {
+  for (i in 1:n) {
+    Zmat[i, r] = cos(sum((S[r,] * X[i,]) * fit_GPVB$mulq))
+    Zmat[i, r+m] = sin(sum((S[r,] * X[i,]) * fit_GPVB$mulq))
+  }
+}
+
+fitted_GPVB = Zmat %*% fit_GPVB$muaq + Z %*% fit_GPVB$mubq
+residual_GPVB = y - fitted_GPVB
+SSE_GPVB = mean(residual_GPVB^2)
+RMSE_GPVB = sqrt(SSE_GPVB)
