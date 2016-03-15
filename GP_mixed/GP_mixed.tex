@@ -430,6 +430,7 @@ Notice that we have not yet come up with the updating algorithm for $\lambda$. T
   &\quad\qquad \qquad\;\; +\left. \nu_{ijr}^{+}\left\{\left(A_{jr}-D_{jr} \right)\cos\left({t_{ijr}^{+}}'\mu_{q\left(\lambda\right)} \right) +2B_{jr}\sin\left({t_{ijr}^{+}}'\mu_{q\left(\lambda\right)} \right) \right\}t_{ijr}^{+}{t_{ijr}^{+}}' \right]\\
   \textcolor{myorange}{\Sigma_{q\left(\lambda\right)}} &\textcolor{myorange}{\leftarrow \left\{\Sigma_{\lambda}^{-1} + F_{1}+F_{2} \right\}^{-1}}
 \end{align*}
+<<<<<<< HEAD
 \section{Cosine basis with DP random effects}
 In this section, we discuss various models with random effects appended to an unknown function $f$ of a scalar $x_{i}$. For the approximation of the unknown function, we assign a Gaussian prior and rely on Karhunen-Loève expansion to derive a tractable solution. Instead of using both sine and cosine functions, Victor Meng Hwee Ong et al. showed that cosine basis expansion displays a better performance. We extend it further to mixed models.
 \subsection{Model specifications}
@@ -453,4 +454,31 @@ By definition, the distribution of the data needs marginalizing out the random e
 $$
   f\left(\bs{y}|\bs{\theta}\right) = \int \prod_{i=1}^{n}\frac{1}{\sqrt{\left|2\pi\sigma^{2}I_{n} \right|}}\exp \left\{-\frac{1}{2\sigma^{2}}\left(\bs{y}-\bs{W\beta}-\bs{f}_{J}+\bs{A\eta}\right)'\left(\bs{y}-\bs{W\beta}-\bs{f}_{J}+\bs{A\eta}\right) \right\}\, dH\left(\bs{\eta}\right)
 $$
+=======
+\section{Sparse GP Poisson mixed model}
+\subsection{Model specifications}
+\begin{align*}
+  y &= g^{-1}\left(\eta\right) + \epsilon, \quad \epsilon \sim \mathcal{N}\left(0, \gamma^{2}I_{n}\right)\\
+  g\left(\mathbb{E}\left[y\right]\right) &= \eta \\
+  \eta &= f\left(x\right) + A\beta\\
+  g^{-1}\left(x\right) &= e^{x} \\
+  f &\sim \mathcal{GP}\left(m\left(\cdot\right), \kappa\left(\cdot , \cdot \right)\right)
+\end{align*}
+The canonical link function for Poisson regression model is $\log x$. Therefore,
+\begin{align*}
+  y &\sim \opn{Poisson}\left(e^{\eta}\right)\\
+  p\left(y|\alpha, \beta, X\right) &= \exp\left\{y'\left(Z\alpha + A\beta\right) - 1_{n}'\exp\left\{Z\alpha + A\beta \right\} -1_{n}'\log\left(y!\right) \right\}\\
+  \alpha|\sigma &\sim \mathcal{N}\left(0, \frac{\sigma^{2}}{m}I_{2m}\right)\\
+    \beta &\sim \mathcal{N}\left(\mu_{\beta}, \Sigma_{\beta}\right) \\
+    \lambda &\sim \mathcal{N}\left(\mu_{\lambda}, \Sigma_{\lambda}\right) \\
+    \sigma &\sim \opn{half-Cauchy}\left(A_{\sigma}\right)\\
+    \theta &= \left(\alpha, \beta, \lambda, \sigma \right)
+\end{align*}
+\subsection{$\mathbb{E}\left[\log p\left(y|\theta\right) \right] $}
+\begin{align*}
+  \log p\left(y|\theta\right) &= y'\left(Z\alpha + A\beta\right) -1_{n}'\exp\left\{Z\alpha + A\beta \right\} -1_{n}'\log\left(y!\right)\\
+  \mathbb{E}\left[1_{n}'\exp\left\{Z\alpha + A\beta \right\}] &= \sum_{i=1}^{n}\mathbb{E}\left\{\exp\left[\sum_{r=1}^{m}\left(a_{r}\cos\left\{\left(s_{r}\odot x_{i}\right)'\lambda \right\}+b_{r}\sin\left\{\left(s_{r}\odot x_{i}\right)'\lambda \right\} \right) \right]\right\}\mathbb{E}\left\{\exp\left(a_{i}'\beta\right)\right\}\\
+  &= \sum_{i=1}^{n}\mathbb{E}\left[\exp\left\{z_{i}'\mu_{q\left(\alpha\right)}+\frac{1}{2}z_{i}'\Sigma_{q\left(\alpha\right)}z_{i} \right\} \right]\exp\left(a_{i}'\mu_{q\left(\beta\right)}+\frac{1}{2}a_{i}'\Sigma_{q\left(\beta\right)}a_{i} \right)
+\end{align*}
+>>>>>>> origin/master
 \end{document}
