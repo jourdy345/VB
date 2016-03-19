@@ -163,7 +163,7 @@ list(prmean=prmean,prvar=prvar)
 # Lower bound #
 #-------------#
 
-LBC <- function(y,X,A,T,Tm,Tp,As,Ag,mul0,sigl0,Csq,Cgq,muaq,sigaq,mulq,siglq,mub0,sigb0,mubq,sigbq) {
+LBC <- function(y,X,A,T,Tm,Tp,As,Ag,mul0,sigl0,Csq,Cgq,muaq,sigaq,mulq,siglq,sigb0,mubq,sigbq) {
 n <- length(y)
 d <- dim(X)[2]
 m <- dim(T)[1]/n
@@ -172,7 +172,7 @@ t1 <- as.matrix(solve(sigl0,siglq))
 t2 <- as.matrix(solve(sigb0,sigbq))
 mz <- MZ(n,m,T,mulq,siglq) 
 mztz <- MZTZ(n, m, Tm, Tp, mulq, siglq)
-lb = -0.5 * (sum(mztz * siglq) + sum((mztz - crossprod(mz)) * tcrossprod(muaq)) + sum(crossprod(A) * sigbq)) + sum(log((pnorm(mz %*% muaq + A %*% mubq))^y * (1 - pnorm((mz %*% muaq + A %*% mubq)^(1-y))))) + m * log(m) + 0.5 * (determinant(sigaq)$modulus[1] + determinant(t1)$modulus[1] + determinant(t2)$modulus[1]) + m - 0.5 * (tr(t2) + quadinv((mubq - mub0), sigb0) + tr(t1) + quadinv((mulq - mul0), sigl0)) + 0.5 * (s+d)  + log(2 * As) - log(pi) + logH(2*m - 2, Csq, As^2)
+lb = -0.5 * (sum(mztz * sigaq) + sum((mztz - crossprod(mz)) * tcrossprod(muaq)) + sum(crossprod(A) * sigbq)) + sum(log((pnorm(mz %*% muaq + A %*% mubq))^y * (1 - pnorm((mz %*% muaq + A %*% mubq)^(1-y))))) + m * log(m) + 0.5 * (determinant(sigaq)$modulus[1] + determinant(t1)$modulus[1] + determinant(t2)$modulus[1]) + m - 0.5 * (tr(t2) + quadinv(mubq, sigb0) + tr(t1) + quadinv((mulq - mul0), sigl0)) + 0.5 * (s+d)  + log(2 * As) - log(pi) + logH(2*m - 2, Csq, As^2)
 
 # lb <- ( -n/2*log(2*pi)+d/2+m+m*log(m)+0.5*determinant(as.matrix(sigaq))$modulus[1]
 #         +0.5*determinant(t1)$modulus[1]-0.5*quadinv(mulq-mul0,sigl0)-0.5*tr(t1)
@@ -190,7 +190,7 @@ list(lb=lb) }
 # only applicable to small data where n*m*m does not exceed 10^7 #
 #----------------------------------------------------------------#
 
-VARC <- function(y,X,Amat,T,As,Ag,mul0,sigl0,sigb0,tol=1.0e-5,fac=1.5,fit=NULL,iter=500) {
+VARC <- function(y,X,Amat,T,As,mul0,sigl0,sigb0, tol=1.0e-5,fac=1.5,fit=NULL,iter=500) {
 
   n <- length(y)
   d <- dim(X)[2]
@@ -219,12 +219,12 @@ VARC <- function(y,X,Amat,T,As,Ag,mul0,sigl0,sigb0,tol=1.0e-5,fac=1.5,fit=NULL,i
     EqZ <- MZ(n,m,T,mulq,siglq)
     EqZTZ <- MZTZ(n,m,Tm,Tp,mulq,siglq)
     Eqinvs2 <- exp(logH(2*m,Csq,As^2)-logH(2*m-2,Csq,As^2))
-    sigbq <- solve(Eqinvg2 * crossprod(Amat) + sigb0)
+    sigbq <- solve(crossprod(Amat) + solve(sigb0))
     mubq <- crossprod(sigbq,crossprod(Amat, y-(EqZ%*%muaq)))
-    muystar = Z%*%muaq + Amat %*% mubq + rnorm(n)
+    muystar = EqZ%*%muaq + Amat %*% mubq + rnorm(n)
     # initialize muaq,sigaq #
-    sigaq <- solve(m*Eqinvs2*diag(2*m) + Eqinvg2*EqZTZ)
-    muaq <- as.vector(crossprod(sigaq, Eqinvg2*crossprod(EqZ,y-(Amat%*%mubq))))
+    sigaq <- solve(m*Eqinvs2*diag(2*m) + EqZTZ)
+    muaq <- as.vector(crossprod(sigaq, crossprod(EqZ,(muystar - Amat%*%mubq))))
     lbold <- -10e7
     lbrecord <- NULL
     count <- 0
@@ -308,7 +308,7 @@ VARC <- function(y,X,Amat,T,As,Ag,mul0,sigl0,sigb0,tol=1.0e-5,fac=1.5,fit=NULL,i
     AL <- sigaq+tcrossprod(muaq)
     Csq <- m/2*as.numeric(crossprod(muaq)+tr(sigaq))
 
-    lb <- LBC(y,X,Amat,T,Tm,Tp,As,Ag,mul0,sigl0,Csq,Cgq,muaq,sigaq,mulq,siglq,mub0,sigb0,mubq,sigbq)$lb
+    lb <- LBC(y,X,Amat,T,Tm,Tp,As,mul0,sigl0,Csq,Cgq,muaq,sigaq,mulq,siglq,sigb0,mubq,sigbq)$lb
 
     DIFF <- lb-lbold
     if (count==1 & DIFF<0) {
@@ -347,7 +347,7 @@ VARC <- function(y,X,Amat,T,As,Ag,mul0,sigl0,sigb0,tol=1.0e-5,fac=1.5,fit=NULL,i
 
       # update mubq,sigbq #
       sigbq <- solve(crossprod(Amat) + solve(sigbq))
-      mubq <- as.vector(crossprod(sigbq, solve(sigb0, mub0)+crossprod(Amat, muystar-EqZ%*%muaq)))
+      mubq <- as.vector(crossprod(sigbq, crossprod(Amat, muystar-EqZ%*%muaq)))
 
       # update Cgq,Csq #
       AA <- EqZ%*%muaq
@@ -355,7 +355,7 @@ VARC <- function(y,X,Amat,T,As,Ag,mul0,sigl0,sigb0,tol=1.0e-5,fac=1.5,fit=NULL,i
       AL <- sigaq+tcrossprod(muaq)
       Csq <- m/2*as.numeric(crossprod(muaq)+tr(sigaq))
 
-      lb <- LBC(y,X,Amat,T,Tm,Tp,As,Ag,mul0,sigl0,Csq,Cgq,muaq,sigaq,mulq,siglq,mub0,sigb0,mubq,sigbq)$lb
+      lb <- LBC(y,X,Amat,T,Tm,Tp,As,mul0,sigl0,Csq,Cgq,muaq,sigaq,mulq,siglq,sigb0,mubq,sigbq)$lb
     }
 
     lbrecord <- rbind(lbrecord,c(count,lb))
@@ -367,3 +367,49 @@ VARC <- function(y,X,Amat,T,As,Ag,mul0,sigl0,sigb0,tol=1.0e-5,fac=1.5,fit=NULL,i
   list(Csq=Csq,muaq=muaq,sigaq=sigaq, mubq = mubq, sigbq = sigbq,
   mulq=mulq,siglq=siglq,lb=lb,lbrecord=lbrecord,apre=apre)
 }
+
+
+library(mixtools)
+
+#DATA
+set.seed(123)
+n=100 #number of i
+N=500 # i * j
+id=sample(1:n,N,replace=T)
+#id=rep(1:n,each=5)
+#b=rnorm(n,0,sqrt(2)) # normal random effect with sigma=2
+#b=c(rnorm(n/4),rnorm(n/2,0,4),rnorm(n/4,1,2)) # DP random effect
+
+p=c(.2,.5,.3)
+m=c(-2,0,1.5)
+s=c(.5,1,.5)
+b=rnormmix(n,p,m,s)
+xobs=runif(N)
+
+f1=function(x)2*x-1
+f2=function(x)0.5*exp(x*2)-2
+f3=function(x) log(2*x+0.5)
+f4 = function(x) tanh(4*x-2)
+
+plot(xobs,f1(xobs))
+plot(xobs,f2(xobs))
+plot(xobs,f3(xobs))
+plot(xobs,f4(xobs))
+
+y1=rbinom(length(xobs),1,pnorm(f1(xobs)+b[id]))
+y2=rbinom(length(xobs),1,pnorm(f2(xobs)+b[id]))
+y3=rbinom(length(xobs),1,pnorm(f3(xobs)+b[id]))
+y4=rbinom(length(xobs),1,pnorm(f4(xobs)+b[id]))
+
+
+X = cbind(1, xobs)
+Zmat = rep(1, 500)
+d = dim(X)[2]
+n = dim(X)[1]
+m_ = 10
+S = rmvnorm(m_, mean = rep(0, d), sigma = diag(d))
+T = Tfunc(X = X, S = S)$T
+s_ = 1
+fit = VARC(y = y1, X = X, Amat = Zmat, T = T, As = 25, mul0 = rep(0, d), sigl0 = 10 * diag(d), sigb0 = 10 * diag(s_), fac = 1.5)
+
+

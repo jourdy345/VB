@@ -430,55 +430,53 @@ Notice that we have not yet come up with the updating algorithm for $\lambda$. T
   &\quad\qquad \qquad\;\; +\left. \nu_{ijr}^{+}\left\{\left(A_{jr}-D_{jr} \right)\cos\left({t_{ijr}^{+}}'\mu_{q\left(\lambda\right)} \right) +2B_{jr}\sin\left({t_{ijr}^{+}}'\mu_{q\left(\lambda\right)} \right) \right\}t_{ijr}^{+}{t_{ijr}^{+}}' \right]\\
   \textcolor{myorange}{\Sigma_{q\left(\lambda\right)}} &\textcolor{myorange}{\leftarrow \left\{\Sigma_{\lambda}^{-1} + F_{1}+F_{2} \right\}^{-1}}
 \end{align*}
-<<<<<<< HEAD
 \section{Cosine basis with DP random effects}
 In this section, we discuss various models with random effects appended to an unknown function $f$ of a scalar $x_{i}$. For the approximation of the unknown function, we assign a Gaussian prior and rely on Karhunen-Loève expansion to derive a tractable solution. Instead of using both sine and cosine functions, Victor Meng Hwee Ong et al. showed that cosine basis expansion displays a better performance. We extend it further to mixed models.
 \subsection{Model specifications}
 For a linear model with Dirichlet process random effects, the response variables are denoted by
 $$
-  y_{i} = w_{i}'\beta + f\left(x_{i}\right) + \psi_{i}+\epsilon_{i}, \quad \psi \sim \mathcal{DP}\left(\alpha, H\right)
+  y_{i} = w_{i}'\beta + f\left(x_{i}\right) + \xi_{i}+\epsilon_{i}, \quad \xi_{i} \sim G, \quad G \sim \mathcal{DP}\left(\alpha, H\right),\, \epsilon_{i} \sim \mathcal{N}\left(0, \sigma^{2}\right)
 $$
-where $f$ is an unknown function of the scalar $x_{i}$. The clustering effect of the Dirichlet process random effects can be represented by an $n \times k$ matrix $\bs{A}$ defined by
-$$
-  \bs{A} = \left(a_{1}', a_{2}', \ldots , a_{n}'\right)'
-$$
-where each $a_{i}$ is a $1 \times k$ vector of all 0s except for a 1 in the position indicating which group the observation is from. The vector of random effects can be recast into
-$$
-  \bs{\psi} = \bs{A\eta}
-$$
-where $\eta_{j} \sim H$ for $j= 1, \ldots , k$. Then the whole equation transforms to
-$$
-  \bs{y} = \bs{W\beta} + \bs{f}_{J} + \bs{A\eta} + \bs{\epsilon}.
-$$
-By definition, the distribution of the data needs marginalizing out the random effects.
-$$
-  f\left(\bs{y}|\bs{\theta}\right) = \int \prod_{i=1}^{n}\frac{1}{\sqrt{\left|2\pi\sigma^{2}I_{n} \right|}}\exp \left\{-\frac{1}{2\sigma^{2}}\left(\bs{y}-\bs{W\beta}-\bs{f}_{J}+\bs{A\eta}\right)'\left(\bs{y}-\bs{W\beta}-\bs{f}_{J}+\bs{A\eta}\right) \right\}\, dH\left(\bs{\eta}\right)
-$$
-=======
-\section{Sparse GP Poisson mixed model}
-\subsection{Model specifications}
-\begin{align*}
-  y &= g^{-1}\left(\eta\right) + \epsilon, \quad \epsilon \sim \mathcal{N}\left(0, \gamma^{2}I_{n}\right)\\
-  g\left(\mathbb{E}\left[y\right]\right) &= \eta \\
-  \eta &= f\left(x\right) + A\beta\\
-  g^{-1}\left(x\right) &= e^{x} \\
-  f &\sim \mathcal{GP}\left(m\left(\cdot\right), \kappa\left(\cdot , \cdot \right)\right)
+where $f$ is an unknown function of the scalar $x_{i}$. Since we are going to assign both DP and GP, we need this to be more organized.
+\begin{itemize}
+\item \emph{Gaussian process} \begin{align*}
+  f\left(x\right) &\approx \sum_{j=0}^{\infty}\theta_{j}\varphi_{j}\left(x\right), \quad \varphi_{j}\left(x\right) = \sqrt{2}\cos \left(\pi jx\right),\; j\ge 1\\
+  \theta_{j}|\sigma, \tau, \gamma &\sim \mathcal{N}\left(0, \sigma^{2}\tau^{2}\exp \left[-j\gamma\right]\right),\; j \ge 1; \gamma>0\\
+  \bs{\beta}|\sigma^{2} &\sim \mathcal{N}\left(\mu_{\beta}^{0}, \sigma^{2}\Sigma_{\beta}^{0} \right)\\
+  \tau^{2} &\sim \opn{IG}\left(\frac{\gamma_{0,\tau}}{2}, \frac{s_{0,\tau}}{2}\right)\\
+  \gamma &\sim \opn{Exp}\left(\omega_{0}\right)\\
+  \sigma^{2} &\sim \opn{IG}\left(\frac{\gamma_{0,\sigma}}{2}, \frac{s_{0,\sigma}}{2}\right)
 \end{align*}
-The canonical link function for Poisson regression model is $\log x$. Therefore,
-\begin{align*}
-  y &\sim \opn{Poisson}\left(e^{\eta}\right)\\
-  p\left(y|\alpha, \beta, X\right) &= \exp\left\{y'\left(Z\alpha + A\beta\right) - 1_{n}'\exp\left\{Z\alpha + A\beta \right\} -1_{n}'\log\left(y!\right) \right\}\\
-  \alpha|\sigma &\sim \mathcal{N}\left(0, \frac{\sigma^{2}}{m}I_{2m}\right)\\
-    \beta &\sim \mathcal{N}\left(\mu_{\beta}, \Sigma_{\beta}\right) \\
-    \lambda &\sim \mathcal{N}\left(\mu_{\lambda}, \Sigma_{\lambda}\right) \\
-    \sigma &\sim \opn{half-Cauchy}\left(A_{\sigma}\right)\\
-    \theta &= \left(\alpha, \beta, \lambda, \sigma \right)
+\item \emph{Dirichlet process} \begin{align*}
+  \xi_{i} &\sim G, \qquad\qquad\qquad\qquad\qquad\,\, G \sim \mathcal{DP}\left(\alpha, H\right)\\
+  v_{k}|\alpha &\sim \opn{Beta}\left(1, \alpha \right) \quad \quad \quad \quad\quad \quad\quad \eta_{k}^{*} \sim H \\
+   \pi_{k} &= v_{k}\prod_{\ell=1}^{k-1}\left(1-v_{\ell} \right) \quad \quad \quad \quad\quad  \,\,\,\,  G = \sum_{k=1}^{\infty} \pi_{k}\delta_{\eta_{k}^{*}}
 \end{align*}
-\subsection{$\mathbb{E}\left[\log p\left(y|\theta\right) \right] $}
+We will use the following stick-breaking construction of DP.
+\begin{enumerate}
+  \item Draw $v_{k} \sim \opn{Beta}\left(1, \alpha \right)$.
+  \item Draw $\eta_{k}^{*} \sim H$.
+  \item For the $n^{\text{th}}$ random effect $\xi_{n}$:
+    \begin{itemize}
+      \item Draw $Z_{n} \sim \opn{Mult}\left(\pi_{1}, \pi_{2}, \ldots \right)$.
+      \item Draw $\xi_{n} \sim p\left(\xi_{n}|\eta_{z_{n}}^{*} \right) $.
+    \end{itemize}
+\end{enumerate}
+\subsection{Lower bound}
+As written in the original paper, $\gamma$ should be reparameterized as $\psi = \left|\gamma \right|$ for non-identifiability issue. Regarding the DP,
+$$
+  \bs{W} = \left\{\bs{V}, \bs{\eta}^{*}, \bs{Z} \right\}
+$$
+and likewise, regarding the GP,
+$$
+  \bs{\delta} = \left\{\bs{\beta}, \bs{\theta}_{J}, \sigma^{2}, \tau^{2}, \psi \right\}.
+$$
+Let $\Theta$ denote all the parameters involved in this model. Then, the lower bound is as follows
 \begin{align*}
-  \log p\left(y|\theta\right) &= y'\left(Z\alpha + A\beta\right) -1_{n}'\exp\left\{Z\alpha + A\beta \right\} -1_{n}'\log\left(y!\right)\\
-  \mathbb{E}\left[1_{n}'\exp\left\{Z\alpha + A\beta \right\}] &= \sum_{i=1}^{n}\mathbb{E}\left\{\exp\left[\sum_{r=1}^{m}\left(a_{r}\cos\left\{\left(s_{r}\odot x_{i}\right)'\lambda \right\}+b_{r}\sin\left\{\left(s_{r}\odot x_{i}\right)'\lambda \right\} \right) \right]\right\}\mathbb{E}\left\{\exp\left(a_{i}'\beta\right)\right\}\\
-  &= \sum_{i=1}^{n}\mathbb{E}\left[\exp\left\{z_{i}'\mu_{q\left(\alpha\right)}+\frac{1}{2}z_{i}'\Sigma_{q\left(\alpha\right)}z_{i} \right\} \right]\exp\left(a_{i}'\mu_{q\left(\beta\right)}+\frac{1}{2}a_{i}'\Sigma_{q\left(\beta\right)}a_{i} \right)
+  \mathcal{L} &= \mathbb{E}\left[\log p \left(\bs{y}|\Theta\right) \right] + \mathbb{E}\left[\log p\left(\bs{V}|\alpha\right)\right] + \mathbb{E}\left[\log p \left(\bs{\eta}^{*}|\lambda\right)\right] \\
+  &\quad + \sum_{n=1}^{N}\left(\mathbb{E}\left[\log p \left(Z_{n}|\bs{V}\right)\right]+\mathbb{E}\left[\log p\left(\xi_{n}|Z_{n}\right)\right] \right)\\
+  &\quad + \mathbb{E}\left[\log p\left(\bs{\theta}_{J}|\sigma^{2},\tau^{2},\psi\right)\right]+\mathbb{E}\left[\log p\left(\bs{\beta}|\sigma^{2}\right)\right] + \mathbb{E}\left[\log p\left(\tau^{2}\right)\right]\\
+  &\quad +\mathbb{E}\left[\log p\left(\sigma^{2}\right)\right]+\mathbb{E}\left[\log p \left(\psi\right)\right] -\mathbb{E}\left[\log q\left(\bs{\delta}\right)\right]-\mathbb{E}\left[\log q\left(\bs{W}\right)\right].
 \end{align*}
->>>>>>> origin/master
+
 \end{document}
