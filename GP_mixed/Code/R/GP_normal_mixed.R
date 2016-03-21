@@ -203,7 +203,8 @@ VARC <- function(y,X,Amat,T,As,Ag,mul0,sigl0,sigb0,tol=1.0e-5,fac=1.5,fit=NULL,i
     for (r in 1:m) {
       Tm[((i-1)*(m^2)+(r-1)*m+1):((i-1)*(m^2)+r*m),] <- matrix(rep(T[((i-1)*m+r),],m),m,d,byrow=TRUE)-T[((i-1)*m+1):(i*m),]
       Tp[((i-1)*(m^2)+(r-1)*m+1):((i-1)*(m^2)+r*m),] <- matrix(rep(T[((i-1)*m+r),],m),m,d,byrow=TRUE)+T[((i-1)*m+1):(i*m),]
-  }}
+    }
+  }
 
   if (is.null(fit)) {
 
@@ -268,7 +269,7 @@ VARC <- function(y,X,Amat,T,As,Ag,mul0,sigl0,sigb0,tol=1.0e-5,fac=1.5,fit=NULL,i
     C <- as.vector(AL[(m+1):(2*m),(m+1):(2*m)])
 
     T1 <- T%*%mulq
-    T2 <- rep(-y+Amat%*%mubq,rep(m,n))*exp(-0.5*rowSums((T%*%siglq)*T))
+    T2 <- rep(-y+Amat%*%mubq, rep(m,n))*exp(-0.5*rowSums((T%*%siglq)*T))
     F1 <- -crossprod(as.vector(T2*(muaq[1:m]*cos(T1)+muaq[(m+1):(2*m)]*sin(T1)))*T,T)
     F3 <- 2*colSums(as.vector(T2*(muaq[(m+1):(2*m)]*cos(T1)-muaq[1:m]*sin(T1)))*T)
 

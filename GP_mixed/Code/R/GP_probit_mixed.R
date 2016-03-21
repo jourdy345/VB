@@ -117,72 +117,36 @@ logH <- function(p,q,r){
 #--------------------------------------------------------------------#
 
 Es2 <- function(C,m,As){ exp(logH(2*m-4,C,As^2)-logH(2*m-2,C,As^2))}
-Eg2 <- function(C,n,Ag){ exp(logH(n-4,C,Ag^2)-logH(n-2,C,Ag^2))}
 Es <- function(C,m,As){ exp(logH(2*m-3,C,As^2)-logH(2*m-2,C,As^2))}
-Eg <- function(C,n,Ag){ exp(logH(n-3,C,Ag^2)-logH(n-2,C,Ag^2))}
 
 
-
-#----------------------------------------------------------------------#
-# Function to find posterior predictive distribution mean and variance #
-#----------------------------------------------------------------------#
-
-POSTPREDC <- function(npr,Tpr,fit,n,Ag){
-m <- dim(Tpr)[1]/npr
-d <- dim(Tpr)[2]
-
-prmean <- MZ(npr,m,Tpr,fit$mulq,fit$siglq)%*%fit$muaq
-AL <- tcrossprod(fit$muaq)+fit$sigaq
-A <- as.vector(AL[1:m,1:m])
-B <- as.vector(AL[1:m,(m+1):(2*m)])
-C <- as.vector(AL[(m+1):(2*m),(m+1):(2*m)])
-
-Tprm <- matrix(0,npr*m*m,d)
-Tprp <- matrix(0,npr*m*m,d)
-for (i in 1:npr) {
- for (r in 1:m) {
-  Tprm[((i-1)*(m^2)+(r-1)*m+1):((i-1)*(m^2)+r*m),] <- matrix(rep(Tpr[((i-1)*m+r),],m),m,d,byrow=TRUE)-Tpr[((i-1)*m+1):(i*m),]
-  Tprp[((i-1)*(m^2)+(r-1)*m+1):((i-1)*(m^2)+r*m),] <- matrix(rep(Tpr[((i-1)*m+r),],m),m,d,byrow=TRUE)+Tpr[((i-1)*m+1):(i*m),]
-}}
-
-T3m <- matrix(Tprm%*%fit$mulq,npr,m^2,byrow=TRUE)
-T3p <- matrix(Tprp%*%fit$mulq,npr,m^2,byrow=TRUE)
-T4m <- matrix(exp(-0.5*rowSums((Tprm%*%fit$siglq)*Tprm)),npr,m^2,byrow=TRUE)
-T4p <- matrix(exp(-0.5*rowSums((Tprp%*%fit$siglq)*Tprp)),npr,m^2,byrow=TRUE)
-A1 <- T4m*cos(T3m)+T4p*cos(T3p)
-A2 <- T4m*sin(T3m)+T4p*sin(T3p)
-A4 <- T4m*cos(T3m)-T4p*cos(T3p)
-
-prvar <- exp(logH(n-4,fit$Cgq,Ag^2)-logH(n-2,fit$Cgq,Ag^2))+0.5*colSums(A*t(A1)+2*B*t(A2)+C*t(A4))-prmean^2
-
-list(prmean=prmean,prvar=prvar)
-}
 
 
 #-------------#
 # Lower bound #
 #-------------#
 
-LBC <- function(y,X,A,T,Tm,Tp,As,Ag,mul0,sigl0,Csq,Cgq,muaq,sigaq,mulq,siglq,sigb0,mubq,sigbq) {
-n <- length(y)
-d <- dim(X)[2]
-m <- dim(T)[1]/n
-s <- dim(A)[2]
-t1 <- as.matrix(solve(sigl0,siglq))
-t2 <- as.matrix(solve(sigb0,sigbq))
-mz <- MZ(n,m,T,mulq,siglq) 
-mztz <- MZTZ(n, m, Tm, Tp, mulq, siglq)
-lb = -0.5 * (sum(mztz * sigaq) + sum((mztz - crossprod(mz)) * tcrossprod(muaq)) + sum(crossprod(A) * sigbq)) + sum(log((pnorm(mz %*% muaq + A %*% mubq))^y * (1 - pnorm((mz %*% muaq + A %*% mubq)^(1-y))))) + m * log(m) + 0.5 * (determinant(sigaq)$modulus[1] + determinant(t1)$modulus[1] + determinant(t2)$modulus[1]) + m - 0.5 * (tr(t2) + quadinv(mubq, sigb0) + tr(t1) + quadinv((mulq - mul0), sigl0)) + 0.5 * (s+d)  + log(2 * As) - log(pi) + logH(2*m - 2, Csq, As^2)
+LBC <- function(y,X,A,T,Tm,Tp,As,mul0,sigl0,Csq,muaq,sigaq,mulq,siglq,sigb0,mubq,sigbq) {
+  n <- length(y)
+  d <- dim(X)[2]
+  m <- dim(T)[1]/n
+  s <- dim(A)[2]
+  t1 <- as.matrix(solve(sigl0,siglq))
+  t2 <- as.matrix(solve(sigb0,sigbq))
+  mz <- MZ(n,m,T,mulq,siglq) 
+  mztz <- MZTZ(n, m, Tm, Tp, mulq, siglq)
+  lb = -0.5 * (sum(mztz * sigaq) + sum((mztz - crossprod(mz)) * tcrossprod(muaq)) + sum(crossprod(A) * sigbq)) + sum(log((pnorm(mz %*% muaq + A %*% mubq))^y * (1 - pnorm((mz %*% muaq + A %*% mubq)^(1-y))))) + m * log(m) + 0.5 * (determinant(sigaq)$modulus[1] + determinant(t1)$modulus[1] + determinant(t2)$modulus[1]) + m - 0.5 * (tr(t2) + quadinv(mubq, sigb0) + tr(t1) + quadinv((mulq - mul0), sigl0)) + 0.5 * (s+d)  + log(2 * As) - log(pi) + logH(2*m - 2, Csq, As^2)
 
-# lb <- ( -n/2*log(2*pi)+d/2+m+m*log(m)+0.5*determinant(as.matrix(sigaq))$modulus[1]
-#         +0.5*determinant(t1)$modulus[1]-0.5*quadinv(mulq-mul0,sigl0)-0.5*tr(t1)
-#         +log(2*As)+log(2*Ag)-2*log(pi)+logH(2*m-2,Csq,As^2)+logH(n-2,Cgq,Ag^2)
-#         -0.5*m*exp(logH(2*m,Csq,As^2)-logH(2*m-2,Csq,As^2))*(crossprod(muaq)+tr(sigaq))
-#         +Csq*exp(logH(2*m,Csq,As^2)-logH(2*m-2,Csq,As^2))
-#         -0.5*exp(logH(n,Cgq,Ag^2)-logH(n-2,Cgq,Ag^2))*(crossprod(y-2*AA)
-#         +sum(MZTZ(n,m,Tm,Tp,mulq,siglq)*(tcrossprod(muaq)+sigaq)))
-#         +Cgq*exp(logH(n,Cgq,Ag^2)-logH(n-2,Cgq,Ag^2))  )
-list(lb=lb) }
+  # lb <- ( -n/2*log(2*pi)+d/2+m+m*log(m)+0.5*determinant(as.matrix(sigaq))$modulus[1]
+  #         +0.5*determinant(t1)$modulus[1]-0.5*quadinv(mulq-mul0,sigl0)-0.5*tr(t1)
+  #         +log(2*As)+log(2*Ag)-2*log(pi)+logH(2*m-2,Csq,As^2)+logH(n-2,Cgq,Ag^2)
+  #         -0.5*m*exp(logH(2*m,Csq,As^2)-logH(2*m-2,Csq,As^2))*(crossprod(muaq)+tr(sigaq))
+  #         +Csq*exp(logH(2*m,Csq,As^2)-logH(2*m-2,Csq,As^2))
+  #         -0.5*exp(logH(n,Cgq,Ag^2)-logH(n-2,Cgq,Ag^2))*(crossprod(y-2*AA)
+  #         +sum(MZTZ(n,m,Tm,Tp,mulq,siglq)*(tcrossprod(muaq)+sigaq)))
+  #         +Cgq*exp(logH(n,Cgq,Ag^2)-logH(n-2,Cgq,Ag^2))  )
+  list(lb=lb)
+}
 
 
 #----------------------------------------------------------------#
@@ -190,7 +154,7 @@ list(lb=lb) }
 # only applicable to small data where n*m*m does not exceed 10^7 #
 #----------------------------------------------------------------#
 
-VARC <- function(y,X,Amat,T,As,mul0,sigl0,sigb0, tol=1.0e-5,fac=1.5,fit=NULL,iter=500) {
+VARC <- function(y,X,Amat,T,As,mul0,sigl0,sigb0, tol=1.0e-4,fac=1.5,fit=NULL,iter=500) {
 
   n <- length(y)
   d <- dim(X)[2]
@@ -202,7 +166,8 @@ VARC <- function(y,X,Amat,T,As,mul0,sigl0,sigb0, tol=1.0e-5,fac=1.5,fit=NULL,ite
     for (r in 1:m) {
       Tm[((i-1)*(m^2)+(r-1)*m+1):((i-1)*(m^2)+r*m),] <- matrix(rep(T[((i-1)*m+r),],m),m,d,byrow=TRUE)-T[((i-1)*m+1):(i*m),]
       Tp[((i-1)*(m^2)+(r-1)*m+1):((i-1)*(m^2)+r*m),] <- matrix(rep(T[((i-1)*m+r),],m),m,d,byrow=TRUE)+T[((i-1)*m+1):(i*m),]
-  }}
+    }
+  }
 
   if (is.null(fit)) {
 
@@ -303,14 +268,12 @@ VARC <- function(y,X,Amat,T,As,mul0,sigl0,sigb0, tol=1.0e-5,fac=1.5,fit=NULL,ite
     muaq <- as.vector(crossprod(sigaq, crossprod(EqZ,(muystar - Amat%*%mubq))))
 
     # update Csq #
-    AA <- EqZ%*%muaq
-    AB <- Amat %*% mubq
-    AL <- sigaq+tcrossprod(muaq)
+    
     Csq <- m/2*as.numeric(crossprod(muaq)+tr(sigaq))
-
-    lb <- LBC(y,X,Amat,T,Tm,Tp,As,mul0,sigl0,Csq,Cgq,muaq,sigaq,mulq,siglq,sigb0,mubq,sigbq)$lb
+    lb <- LBC(y,X,Amat,T,Tm,Tp,As,mul0,sigl0,Csq,muaq,sigaq,mulq,siglq,sigb0,mubq,sigbq)$lb
 
     DIFF <- lb-lbold
+    print(DIFF)
     if (count==1 & DIFF<0) {
       cat('DIVERGE',"\n")
     break
@@ -350,12 +313,10 @@ VARC <- function(y,X,Amat,T,As,mul0,sigl0,sigb0, tol=1.0e-5,fac=1.5,fit=NULL,ite
       mubq <- as.vector(crossprod(sigbq, crossprod(Amat, muystar-EqZ%*%muaq)))
 
       # update Cgq,Csq #
-      AA <- EqZ%*%muaq
-      AB <- Amat %*% mubq
-      AL <- sigaq+tcrossprod(muaq)
+    
       Csq <- m/2*as.numeric(crossprod(muaq)+tr(sigaq))
 
-      lb <- LBC(y,X,Amat,T,Tm,Tp,As,mul0,sigl0,Csq,Cgq,muaq,sigaq,mulq,siglq,sigb0,mubq,sigbq)$lb
+      lb <- LBC(y,X,Amat,T,Tm,Tp,As,mul0,sigl0,Csq,muaq,sigaq,mulq,siglq,sigb0,mubq,sigbq)$lb
     }
 
     lbrecord <- rbind(lbrecord,c(count,lb))
@@ -364,7 +325,7 @@ VARC <- function(y,X,Amat,T,As,mul0,sigl0,sigb0, tol=1.0e-5,fac=1.5,fit=NULL,ite
     cat(count,lb,round(mulq,1),Csq,dif,DIFF,apre,"\n")
   }
 
-  list(Csq=Csq,muaq=muaq,sigaq=sigaq, mubq = mubq, sigbq = sigbq,
+  list(Csq=Csq,muaq=muaq,sigaq=sigaq, mubq = mubq, sigbq = sigbq, muystar = muystar,
   mulq=mulq,siglq=siglq,lb=lb,lbrecord=lbrecord,apre=apre)
 }
 
@@ -373,28 +334,28 @@ library(mixtools)
 
 #DATA
 set.seed(123)
-n=100 #number of i
-N=500 # i * j
-id=sample(1:n,N,replace=T)
+n_=100 #number of i
+N_=500 # i * j
+id=sample(1:n_,N_,replace=TRUE)
 #id=rep(1:n,each=5)
 #b=rnorm(n,0,sqrt(2)) # normal random effect with sigma=2
 #b=c(rnorm(n/4),rnorm(n/2,0,4),rnorm(n/4,1,2)) # DP random effect
 
-p=c(.2,.5,.3)
-m=c(-2,0,1.5)
-s=c(.5,1,.5)
-b=rnormmix(n,p,m,s)
-xobs=runif(N)
+p_=c(.2,.5,.3)
+m_=c(-2,0,1.5)
+s_=c(.5,1,.5)
+b_=rnormmix(n_,p_,m_,s_)
+xobs=runif(N_)
 
 f1=function(x)2*x-1
 f2=function(x)0.5*exp(x*2)-2
 f3=function(x) log(2*x+0.5)
 f4 = function(x) tanh(4*x-2)
 
-plot(xobs,f1(xobs))
-plot(xobs,f2(xobs))
-plot(xobs,f3(xobs))
-plot(xobs,f4(xobs))
+# plot(xobs,f1(xobs))
+# plot(xobs,f2(xobs))
+# plot(xobs,f3(xobs))
+# plot(xobs,f4(xobs))
 
 y1=rbinom(length(xobs),1,pnorm(f1(xobs)+b[id]))
 y2=rbinom(length(xobs),1,pnorm(f2(xobs)+b[id]))
@@ -403,13 +364,53 @@ y4=rbinom(length(xobs),1,pnorm(f4(xobs)+b[id]))
 
 
 X = cbind(1, xobs)
-Zmat = rep(1, 500)
+Zmat = as.matrix(rep(1, 500))
 d = dim(X)[2]
 n = dim(X)[1]
-m_ = 10
-S = rmvnorm(m_, mean = rep(0, d), sigma = diag(d))
+m = 10
+S = rmvnorm(m, mu = rep(0, d), sigma = diag(d))
 T = Tfunc(X = X, S = S)$T
-s_ = 1
-fit = VARC(y = y1, X = X, Amat = Zmat, T = T, As = 25, mul0 = rep(0, d), sigl0 = 10 * diag(d), sigb0 = 10 * diag(s_), fac = 1.5)
+s = 1
+fit = VARC(y = y1, X = X, Amat = Zmat, T = T, As = 25, mul0 = rep(0, d), sigl0 = 10 * diag(d), sigb0 = 10 * diag(s), fac = 1.5)
 
 
+res = sapply(fit$muystar, categorize)
+
+
+### simulation
+sim_GPprobit = function(FUN, intercept = TRUE) {
+  if (!require('mixtools')) {
+    ans = readline(prompt = "We need to install {mixtools}. Permit installation? (y/n)\n")
+    if (ans == 'y') {
+      install.packages('mixtools')
+      library(mixtools)
+    } else {
+      stop('Cannot proceed without {mixtools}. Aborting...\n')
+    }
+  }
+
+  set.seed(123)
+  n_=100 #number of i
+  N_=500 # i * j
+  id=sample(1:n_,N_,replace=TRUE)
+  p_=c(.2,.5,.3)
+  m_=c(-2,0,1.5)
+  s_=c(.5,1,.5)
+  b_=rnormmix(n_,p_,m_,s_)
+  xobs=runif(N_)
+  y = rbinom(length(xobs),1,pnorm(FUN(xobs)+b[id]))
+  if (intercept == TRUE) {
+    X = cbind(1, xobs)
+  } else {
+    X = as.matrix(xobs)
+  }
+
+  categorize = function(x) {
+    if (x < 0) {
+      x = 0
+    } else {
+      x = 1
+    }
+  }
+
+}
