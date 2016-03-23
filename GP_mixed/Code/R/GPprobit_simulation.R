@@ -1,4 +1,4 @@
-sim_GPprobit = function(FUN, intercept = TRUE) {
+sim_GPprobit = function(FUN, m, intercept = TRUE) {
   #############################################################
 
   ###############     Auxiliary functions     #################
@@ -90,8 +90,9 @@ sim_GPprobit = function(FUN, intercept = TRUE) {
   #--------------------------------------------------------------------#
 
   Es2 <- function(C,m,As){ exp(logH(2*m-4,C,As^2)-logH(2*m-2,C,As^2))}
+  Eg2 <- function(C,n,Ag){ exp(logH(n-4,C,Ag^2)-logH(n-2,C,Ag^2))}
   Es <- function(C,m,As){ exp(logH(2*m-3,C,As^2)-logH(2*m-2,C,As^2))}
-
+  Eg <- function(C,n,Ag){ exp(logH(n-3,C,Ag^2)-logH(n-2,C,Ag^2))}
 
 
 
@@ -330,7 +331,6 @@ sim_GPprobit = function(FUN, intercept = TRUE) {
   Z = as.matrix(rep(1, N_))
   d = dim(X)[2]
   n = dim(X)[1]
-  m = 10
   S = mixtools::rmvnorm(m, mu = rep(0, d), sigma = diag(d))
   T = Tfunc(X = X, S = S)$T
   s = 1
@@ -338,13 +338,26 @@ sim_GPprobit = function(FUN, intercept = TRUE) {
 
   
   categorize = function(x) {
+    y = 0
     if (x < 0) {
-      x = 0
+      y = 0
     } else {
-      x = 1
+      y = 1
+    }
+    y
+  }
+
+  Zmat = matrix(0, nrow = N_, ncol = 2 *m)
+  for (r in 1:m) {
+    for (i in 1:n) {
+      Zmat[i, r] = cos(sum((S[r,] * X[i,]) * fit$mulq))
+      Zmat[i, r+m] = sin(sum((S[r,] * X[i,]) * fit$mulq))
     }
   }
 
+  eta = Zmat %*% fit$muaq + Z %*% fit$mubq  ## linear predictor in GLM
+
   res = sapply(fit$muystar, categorize)
-  list(fit = fit, res = res, y = y, X = X)
+  list(fit = fit, res = res, y = y, X = X, Zmat = Zmat, eta = eta)
 }
+

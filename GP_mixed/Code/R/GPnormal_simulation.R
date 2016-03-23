@@ -1,4 +1,4 @@
-sim_GPnormal = function(FUN, intercept = TRUE, draw = TRUE) {
+sim_GPnormal = function(FUN, m = 10, intercept = TRUE, draw = TRUE) {
   #############################################################
 
   ###############     Auxiliary functions     #################
@@ -309,6 +309,16 @@ sim_GPnormal = function(FUN, intercept = TRUE, draw = TRUE) {
       stop('Cannot proceed without {mixtools}. Aborting...\n')
     }
   }
+  if (!require('Matrix')) {
+    ans = readline(prompt = "We need to install {Matrix}. Permit installation? (y/n)\n")
+    if (ans == 'y') {
+      chooseCRANmirror(ind = 62)
+      install.packages('Matrix')
+      library(Matrix)
+    } else {
+      stop('Cannot proceed without {Matrix}. Aborting...\n')
+    }
+  }
 
   set.seed(123)
   n_=100 #number of i
@@ -319,24 +329,22 @@ sim_GPnormal = function(FUN, intercept = TRUE, draw = TRUE) {
   s_=c(.5,1,.5)
   b_=rnormmix(n_,p_,m_,s_)
   xobs=runif(N_)
-  y = FUN(xobs) + rnorm(N_, 10, 4)
-  # y = FUN(xobs) + b_[id]
-  # y = rbinom(length(xobs),1,pnorm(FUN(xobs)+b_[id]))
+  y = FUN(xobs) + b_ + rnorm(N_, 0, 2)
   if (intercept == TRUE) {
     X = cbind(1, xobs)
   } else {
     X = as.matrix(xobs)
   }
-  Z = as.matrix(rep(1, N_))
+  Z = as.matrix(bdiag(rep(1, N_ * 0.2), rep(1, N_ * .5), rep(1, N_ * 0.3)))
+  # Z = as.matrix(rep(1, N_))
   d = dim(X)[2]
   n = dim(X)[1]
-  m = 20
   S = mixtools::rmvnorm(m, mu = rep(0, d), sigma = diag(d))
   T = Tfunc(X = X, S = S)$T
-  s = 1
+  s = dim(Z)[2]
   fit = VARC(y = y, X = X, Amat = Z, T = T, As = 25, Ag = 25, mul0 = rep(0, d), sigl0 = 10 * diag(d), sigb0 = 10 * diag(s), tol = 1.0e-6,  fac = 1.5)
 
-  Zmat = matrix(0, nrow = n, ncol = 2 *m)
+  Zmat = matrix(0, nrow = n, ncol = 2 * m)
   for (r in 1:m) {
     for (i in 1:n) {
       Zmat[i, r] = cos(sum((S[r,] * X[i,]) * fit$mulq))

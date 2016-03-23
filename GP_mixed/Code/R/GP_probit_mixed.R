@@ -357,10 +357,10 @@ f4 = function(x) tanh(4*x-2)
 # plot(xobs,f3(xobs))
 # plot(xobs,f4(xobs))
 
-y1=rbinom(length(xobs),1,pnorm(f1(xobs)+b[id]))
-y2=rbinom(length(xobs),1,pnorm(f2(xobs)+b[id]))
-y3=rbinom(length(xobs),1,pnorm(f3(xobs)+b[id]))
-y4=rbinom(length(xobs),1,pnorm(f4(xobs)+b[id]))
+y1=rbinom(length(xobs),1,pnorm(f1(xobs)+b_[id]))
+y2=rbinom(length(xobs),1,pnorm(f2(xobs)+b_[id]))
+y3=rbinom(length(xobs),1,pnorm(f3(xobs)+b_[id]))
+y4=rbinom(length(xobs),1,pnorm(f4(xobs)+b_[id]))
 
 
 X = cbind(1, xobs)
@@ -368,49 +368,10 @@ Zmat = as.matrix(rep(1, 500))
 d = dim(X)[2]
 n = dim(X)[1]
 m = 10
-S = rmvnorm(m, mu = rep(0, d), sigma = diag(d))
+S = mixtools::rmvnorm(m, mu = rep(0, d), sigma = diag(d))
 T = Tfunc(X = X, S = S)$T
 s = 1
 fit = VARC(y = y1, X = X, Amat = Zmat, T = T, As = 25, mul0 = rep(0, d), sigl0 = 10 * diag(d), sigb0 = 10 * diag(s), fac = 1.5)
 
 
 res = sapply(fit$muystar, categorize)
-
-
-### simulation
-sim_GPprobit = function(FUN, intercept = TRUE) {
-  if (!require('mixtools')) {
-    ans = readline(prompt = "We need to install {mixtools}. Permit installation? (y/n)\n")
-    if (ans == 'y') {
-      install.packages('mixtools')
-      library(mixtools)
-    } else {
-      stop('Cannot proceed without {mixtools}. Aborting...\n')
-    }
-  }
-
-  set.seed(123)
-  n_=100 #number of i
-  N_=500 # i * j
-  id=sample(1:n_,N_,replace=TRUE)
-  p_=c(.2,.5,.3)
-  m_=c(-2,0,1.5)
-  s_=c(.5,1,.5)
-  b_=rnormmix(n_,p_,m_,s_)
-  xobs=runif(N_)
-  y = rbinom(length(xobs),1,pnorm(FUN(xobs)+b[id]))
-  if (intercept == TRUE) {
-    X = cbind(1, xobs)
-  } else {
-    X = as.matrix(xobs)
-  }
-
-  categorize = function(x) {
-    if (x < 0) {
-      x = 0
-    } else {
-      x = 1
-    }
-  }
-
-}
