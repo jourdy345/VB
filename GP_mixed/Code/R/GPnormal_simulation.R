@@ -321,21 +321,22 @@ sim_GPnormal = function(FUN, m = 10, intercept = TRUE, draw = TRUE) {
   }
 
   set.seed(123)
-  n_=100 #number of i
+  # n_=100 #number of i
   N_=500 # i * j
-  id=sample(1:n_,N_,replace=TRUE)
-  p_=c(.2,.5,.3)
-  m_=c(-2,0,1.5)
-  s_=c(.5,1,.5)
-  b_=rnormmix(n_,p_,m_,s_)
+  # id=sample(1:n_,N_,replace=TRUE)
+  # p_=c(.2,.5,.3)
+  # m_=c(-2,0,1.5)
+  # s_=c(.5,1,.5)
+  # b_=rnormmix(n_,p_,m_,s_)
   xobs=runif(N_)
-  y = FUN(xobs) + b_ + rnorm(N_, 0, 2)
+  y = FUN(xobs) + rnorm(N_, 0, 3) + rnorm(N_, 0, 2)
   if (intercept == TRUE) {
     X = cbind(1, xobs)
   } else {
     X = as.matrix(xobs)
   }
-  Z = as.matrix(bdiag(rep(1, N_ * 0.2), rep(1, N_ * .5), rep(1, N_ * 0.3)))
+  Z = diag(1, N_)
+  # Z = as.matrix(bdiag(rep(1, N_ * 0.2), rep(1, N_ * .5), rep(1, N_ * 0.3)))
   # Z = as.matrix(rep(1, N_))
   d = dim(X)[2]
   n = dim(X)[1]
@@ -344,19 +345,14 @@ sim_GPnormal = function(FUN, m = 10, intercept = TRUE, draw = TRUE) {
   s = dim(Z)[2]
   fit = VARC(y = y, X = X, Amat = Z, T = T, As = 25, Ag = 25, mul0 = rep(0, d), sigl0 = 10 * diag(d), sigb0 = 10 * diag(s), tol = 1.0e-6,  fac = 1.5)
 
-  Zmat = matrix(0, nrow = n, ncol = 2 * m)
-  for (r in 1:m) {
-    for (i in 1:n) {
-      Zmat[i, r] = cos(sum((S[r,] * X[i,]) * fit$mulq))
-      Zmat[i, r+m] = sin(sum((S[r,] * X[i,]) * fit$mulq))
-    }
-  }
+  
+  Zmat = MZ(n,m,T,fit$mulq,fit$siglq)
   fitted_values = Zmat %*% fit$muaq + Z %*% fit$mubq
   if (draw == TRUE) {
     plot(fitted_values ~ X[,2], type = 'p')
     curve(FUN, from = 0, to = 1, add = TRUE)
-    return(list(fit = fit, fitted_values = fitted_values, y = y, X = X))
+    return(list(fit = fit, fitted_values = fitted_values, y = y, X = X, Zmat = Zmat))
   } else {
-    return(list(fit = fit, fitted_values = fitted_values, y = y, X = X))
+    return(list(fit = fit, fitted_values = fitted_values, y = y, X = X, Zmat = Zmat))
   }
 }

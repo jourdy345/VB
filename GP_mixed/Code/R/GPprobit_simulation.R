@@ -314,26 +314,27 @@ sim_GPprobit = function(FUN, m, intercept = TRUE) {
   }
 
   set.seed(123)
-  n_=100 #number of i
+  # n_=100 #number of i
   N_=500 # i * j
-  id=sample(1:n_,N_,replace=TRUE)
-  p_=c(.2,.5,.3)
-  m_=c(-2,0,1.5)
-  s_=c(.5,1,.5)
-  b_=rnormmix(n_,p_,m_,s_)
+  # id=sample(1:n_,N_,replace=TRUE)
+  # p_=c(.2,.5,.3)
+  # m_=c(-2,0,1.5)
+  # s_=c(.5,1,.5)
+  # b_=rnormmix(n_,p_,m_,s_)
   xobs=runif(N_)
-  y = rbinom(length(xobs),1,pnorm(FUN(xobs)+b_[id]))
+  # y = rbinom(length(xobs),1,pnorm(FUN(xobs)+b_[id]))
+  y = rbinom(length(xobs),1,pnorm(FUN(xobs)+rnorm(N_, 0, 3) + rnorm(N_, 0, 2)))
   if (intercept == TRUE) {
     X = cbind(1, xobs)
   } else {
     X = as.matrix(xobs)
   }
-  Z = as.matrix(rep(1, N_))
+  Z = as.matrix(diag(1, N_))
   d = dim(X)[2]
   n = dim(X)[1]
   S = mixtools::rmvnorm(m, mu = rep(0, d), sigma = diag(d))
   T = Tfunc(X = X, S = S)$T
-  s = 1
+  s = dim(Z)[2]
   fit = VARC(y = y, X = X, Amat = Z, T = T, As = 25, mul0 = rep(0, d), sigl0 = 10 * diag(d), sigb0 = 10 * diag(s), fac = 1.5)
 
   
@@ -347,13 +348,7 @@ sim_GPprobit = function(FUN, m, intercept = TRUE) {
     y
   }
 
-  Zmat = matrix(0, nrow = N_, ncol = 2 *m)
-  for (r in 1:m) {
-    for (i in 1:n) {
-      Zmat[i, r] = cos(sum((S[r,] * X[i,]) * fit$mulq))
-      Zmat[i, r+m] = sin(sum((S[r,] * X[i,]) * fit$mulq))
-    }
-  }
+  Zmat = MZ(n,m,T,fit$mulq,fit$siglq)
 
   eta = Zmat %*% fit$muaq + Z %*% fit$mubq  ## linear predictor in GLM
 
