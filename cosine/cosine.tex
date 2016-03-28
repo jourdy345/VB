@@ -1,0 +1,123 @@
+\documentclass[11pt]{article}
+
+% This first part of the file is called the PREAMBLE. It includes
+% customizations and command definitions. The preamble is everything
+% between \documentclass and \begin{document}.
+
+\usepackage[margin=0.6in]{geometry} % set the margins to 1in on all sides
+\usepackage{graphicx} % to include figures
+\usepackage{amsmath} % great math stuff
+\usepackage{amsfonts} % for blackboard bold, etc
+\usepackage{amsthm} % better theorem environments
+% various theorems, numbered by section
+\usepackage{amssymb}
+\usepackage[utf8]{inputenc}
+\usepackage{booktabs}
+\usepackage{array}
+\usepackage{courier}
+\usepackage[usenames, dvipsnames]{color}
+\usepackage{titlesec}
+\usepackage{empheq}
+\usepackage{tikz}
+
+\newcommand\encircle[1]{%
+  \tikz[baseline=(X.base)] 
+    \node (X) [draw, shape=circle, inner sep=0] {\strut #1};}
+ 
+% Command "alignedbox{}{}" for a box within an align environment
+% Source: http://www.latex-community.org/forum/viewtopic.php?f=46&t=8144
+\newlength\dlf  % Define a new measure, dlf
+\newcommand\alignedbox[2]{
+% Argument #1 = before & if there were no box (lhs)
+% Argument #2 = after & if there were no box (rhs)
+&  % Alignment sign of the line
+{
+\settowidth\dlf{$\displaystyle #1$}  
+    % The width of \dlf is the width of the lhs, with a displaystyle font
+\addtolength\dlf{\fboxsep+\fboxrule}  
+    % Add to it the distance to the box, and the width of the line of the box
+\hspace{-\dlf}  
+    % Move everything dlf units to the left, so that & #1 #2 is aligned under #1 & #2
+\boxed{#1 #2}
+    % Put a box around lhs and rhs
+}
+}
+
+
+\newtheorem{thm}{Theorem}[section]
+\newtheorem{lem}[thm]{Lemma}
+\newtheorem{prop}[thm]{Proposition}
+\newtheorem{cor}[thm]{Corollary}
+\newtheorem{conj}[thm]{Conjecture}
+
+\setcounter{secnumdepth}{4}
+
+\titleformat{\paragraph}
+{\normalfont\normalsize\bfseries}{\theparagraph}{1em}{}
+\titlespacing*{\paragraph}
+{0pt}{3.25ex plus 1ex minus .2ex}{1.5ex plus .2ex}
+
+\definecolor{myblue}{RGB}{72, 165, 226}
+\definecolor{myorange}{RGB}{222, 141, 8}
+
+\setlength{\heavyrulewidth}{1.5pt}
+\setlength{\abovetopsep}{4pt}
+
+
+\DeclareMathOperator{\id}{id}
+\DeclareMathOperator{\argmin}{\arg\!\min}
+\DeclareMathOperator{\Tr}{Tr}
+
+\newcommand{\bd}[1]{\mathbf{#1}} % for bolding symbols
+\newcommand{\RR}{\mathbb{R}} % for Real numbers
+\newcommand{\ZZ}{\mathbb{Z}} % for Integers
+\newcommand{\col}[1]{\left[\begin{matrix} #1 \end{matrix} \right]}
+\newcommand{\comb}[2]{\binom{#1^2 + #2^2}{#1+#2}}
+\newcommand{\bs}{\boldsymbol}
+\newcommand{\opn}{\operatorname}
+\begin{document}
+\nocite{*}
+
+\title{Cosine basis}
+
+\author{Daeyoung Lim\thanks{Prof. Taeryon Choi} \\
+Department of Statistics \\
+Korea University}
+
+\maketitle
+
+\section{Model specifications}
+\begin{align*}
+  y_{i} &= w_{i}^{\top}\beta + f\left(x_{i}\right) + \epsilon_{i}, \qquad \epsilon_{i} \sim \mathcal{N}\left(0, \sigma^{2}\right)\\
+  \theta_{j}|\sigma, \tau, \gamma &\sim \mathcal{N}\left(0, \sigma^{2}\tau^{2}\exp\left[-j\gamma\right]\right)\\
+  \tau^{2} &\sim \opn{IG}\left(\frac{r_{0,\tau}}{2}, \frac{s_{0,\tau}}{2}\right)\\
+  \sigma^{2} &\sim \opn{IG}\left(\frac{r_{0,\sigma}}{2}, \frac{s_{0,\sigma}}{2}\right)\\
+  \beta &\sim \mathcal{N}\left(\mu_{\beta}^{0}, \Sigma_{\beta}^{0}\right)\\
+  \gamma &\sim \opn{Exp}\left(\omega_{0}\right)\\
+  \left|\psi\right| &= \gamma, \quad \psi \sim \opn{DE}\left(0, \omega_{0}\right)\\
+  \varphi_{j}\left(x\right) &= \sqrt{2}\cos\left(\pi j x\right)
+\end{align*}
+Joint density:
+\begin{align*}
+  p\left(y,\Theta\right) &= \mathcal{N}\left(y\middle| W\beta + f_{J}, \sigma^{2}I_{n}\right)\left\{\prod_{j=1}^{J}\mathcal{N}\left(\theta_{j}\middle| 0, \sigma^{2}\tau^{2}\exp\left[-j\left|\psi\right|\right]\right)\right\}\opn{IG}\left(\tau^{2}\middle| \frac{r_{0,\tau}}{2}, \frac{s_{0,\tau}}{2}\right) \opn{IG}\left(\sigma^{2}\middle| \frac{r_{0,\sigma}}{2}, \frac{s_{0,\sigma}}{2}\right) \mathcal{N}\left(\beta\middle| \mu_{\beta}^{0},\Sigma_{\beta}^{0}\right)\\
+  &\quad \opn{DE}\left(\psi\middle|0, \omega_{0}\right)
+\end{align*}
+We will use the joint density to derive the LB and updating algorithm. The variational distributions are
+\begin{align*}
+  q_{1}\left(\beta\right) &= \mathcal{N}\left(\mu_{\beta}^{q}, \Sigma_{\beta}^{q}\right)\\
+  q_{2}\left(\theta_{J}\right) &= \mathcal{N}\left(\mu_{\theta}^{q},\Sigma_{\theta}^{q}\right)\\
+  q_{3}\left(\sigma^{2}\right) &= \opn{IG}\left(\frac{r_{q,\sigma}}{2},\frac{s_{q,\sigma}}{2}\right)\\
+  q_{4}\left(\tau^{2}\right) &= \opn{IG}\left(\frac{r_{q,\tau}}{2},\frac{s_{q,\tau}}{2}\right)\\
+  q_{5}\left(\psi\right) &= \text{NCVMP}.
+\end{align*}
+\section{Lower bound}
+\subsection{LB: $\mathsf{E}\left[\ln p\left(y|\Theta\right)\right]$}
+\begin{align*}
+  \mathsf{E}\left[\ln p\left(y|\Theta\right)\right] &= -\frac{n}{2}\ln \left(2\pi\sigma^{2}\right) -\frac{1}{2}\mathsf{E}\left[\left(y-W\beta -\varphi_{J}^{\top}\theta\right)^{\top}\left(y-W\beta -\varphi_{J}^{\top}\theta\right)\right]\\
+  &= -\frac{n}{2}\ln \left(2\pi\sigma^{2}\right) -\frac{1}{2}\left(y - W\mu_{\beta}^{q} - \varphi_{J}^{\top}\mu_{\theta}^{q} \right)^{\top}\left(y - W\mu_{\beta}^{q} - \varphi_{J}^{\top}\mu_{\theta}^{q} \right) - \frac{1}{2}\left(\Tr\left(W^{\top}W\Sigma_{\beta}^{q}\right) + \Tr\left(\varphi_{J}\varphi_{J}^{\top}\Sigma_{\theta}^{q}\right) \right)
+\end{align*}
+\subsection{LB: $\mathsf{E}\left[\ln p\left(\theta_{j}|\sigma, \tau, \psi\right)\right]$}
+\begin{align*}
+  \sum_{j=1}^{J}\mathsf{E}\left[\ln p\left(\theta_{j}|\sigma, \tau, \psi\right)\right] &= \sum_{j=1}^{J}\mathsf{E}\left[-\frac{1}{2}\ln\left(2\pi\right) -\ln \sigma - \ln \tau +\frac{j}{2}\left|\psi\right| -\frac{\theta_{j}^{2}e^{j\left|\psi\right|}}{2\sigma^{2}\tau^{2}} \right]
+\end{align*}
+\end{document}
