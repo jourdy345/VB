@@ -3,7 +3,6 @@
 sim_GP = function(FUN, m, intercept = TRUE, draw = TRUE) {
 
   library(mvtnorm)
-  library(FNN)            # Get k nearest neighbours
   # library(lhs)          # Latin hypercube sampling
   # library(mlegp)        # fit guassian process using max likelihood
   # library(calibrate)    # To label points on scatterplot
@@ -372,7 +371,7 @@ sim_GP = function(FUN, m, intercept = TRUE, draw = TRUE) {
   }
   d = dim(X)[2]
   n = dim(X)[1]
-  S = mixtools::rmvnorm(m, mu = rep(0, d), sigma = diag(d))
+  S = rmvnorm(m, mean = rep(0, d), sigma = diag(d))
   T = Tfunc(X = X, S = S)$T
   fit = VARC(y = y, X = X, T = T, As = 25, Ag = 25, mul0 = rep(0, d), sigl0 = 10 * diag(d), tol = 1.0e-6,  fac = 1.5)
   
@@ -387,37 +386,3 @@ sim_GP = function(FUN, m, intercept = TRUE, draw = TRUE) {
     return(list(fit = fit, fitted_values = fitted_values, y = y, X = X, Zmat = Zmat))
   }
 }
-
-
-h <- function(x,p,q,r) { p*log(x)-q*x^2-log(r+x^(-2)) }
-h1 <- function(x,p,q,r) { p/x-2*q*x+2/(r*x^3+x) } #first derivative of h
-h2 <- function(x,p,q,r) { -p/x^2-2*q-2*(3*r*x^2+1)/(r*x^3+x)^2 } #second derivative of h
-hmaxpt <- function(p,q,r) { sqrt((p*r-2*q+sqrt((p*r-2*q)^2+8*q*r*(p+2)))/(4*q*r)) }
-
-logH <- function(p,q,r){
-mu0 <- hmaxpt(p,q,r)
-sig0 <- (-h2(mu0,p,q,r))^(-0.5)
-hmu0 <- h(mu0,p,q,r)
-sig02 <- sig0*sqrt(2)
-lowerlimit <- (-mu0)/sig02
-integrand <- function(u) {exp(h(mu0+u*sig02,p,q,r)-hmu0)}
-b <- 1
-epsilon <- 1
-while (epsilon > 1.0e-5) {
-b <- 2*b
-if (-b > lowerlimit) {
-epsilon <- max(integrand(b),integrand(-b)) } else {epsilon <- integrand(b)} }
-
-if (-b > lowerlimit) {I0 <- integrate(integrand, lower=-b, upper=b)$value
-} else {I0 <- integrate(integrand, lower=lowerlimit, upper=b)$value}
-hmu0+log(sig02)+log(I0)}
-
-
-#--------------------------------------------------------------------#
-# Function to compute expectation of sigma^2,gamma^2,sigma and gamma #
-#--------------------------------------------------------------------#
-
-Es2 <- function(C,m,As){ exp(logH(2*m-4,C,As^2)-logH(2*m-2,C,As^2))}
-Eg2 <- function(C,n,Ag){ exp(logH(n-4,C,Ag^2)-logH(n-2,C,Ag^2))}
-Es <- function(C,m,As){ exp(logH(2*m-3,C,As^2)-logH(2*m-2,C,As^2))}
-Eg <- function(C,n,Ag){ exp(logH(n-3,C,Ag^2)-logH(n-2,C,Ag^2))}

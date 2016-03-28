@@ -108,7 +108,7 @@ We will use the joint density to derive the LB and updating algorithm. The varia
   q_{2}\left(\theta_{J}\right) &= \mathcal{N}\left(\mu_{\theta}^{q},\Sigma_{\theta}^{q}\right)\\
   q_{3}\left(\sigma^{2}\right) &= \opn{IG}\left(\frac{r_{q,\sigma}}{2},\frac{s_{q,\sigma}}{2}\right)\\
   q_{4}\left(\tau^{2}\right) &= \opn{IG}\left(\frac{r_{q,\tau}}{2},\frac{s_{q,\tau}}{2}\right)\\
-  q_{5}\left(\psi\right) &= \text{NCVMP}.
+  q_{5}\left(\psi\right) &= \mathcal{N}\left(\mu_{\psi}^{q}, {\sigma_{\psi}^{2}}^{q}\right) \quad \text{(NCVMP)}.
 \end{align*}
 \section{Lower bound}
 \subsection{LB: $\mathsf{E}\left[\ln p\left(y|\Theta\right)\right]$}
@@ -118,6 +118,13 @@ We will use the joint density to derive the LB and updating algorithm. The varia
 \end{align*}
 \subsection{LB: $\mathsf{E}\left[\ln p\left(\theta_{j}|\sigma, \tau, \psi\right)\right]$}
 \begin{align*}
-  \sum_{j=1}^{J}\mathsf{E}\left[\ln p\left(\theta_{j}|\sigma, \tau, \psi\right)\right] &= \sum_{j=1}^{J}\mathsf{E}\left[-\frac{1}{2}\ln\left(2\pi\right) -\ln \sigma - \ln \tau +\frac{j}{2}\left|\psi\right| -\frac{\theta_{j}^{2}e^{j\left|\psi\right|}}{2\sigma^{2}\tau^{2}} \right]
+  \sum_{j=1}^{J}\mathsf{E}\left[\ln p\left(\theta_{j}|\sigma, \tau, \psi\right)\right] &= \sum_{j=1}^{J}\mathsf{E}\left[-\frac{1}{2}\ln\left(2\pi\right) +\ln \frac{1}{\sigma} + \ln \frac{1}{\tau} +\frac{j}{2}\left|\psi\right| -\frac{\theta_{j}^{2}e^{j\left|\psi\right|}}{2\sigma^{2}\tau^{2}} \right]
 \end{align*}
+Let's note the following fact: if $X \sim \mathcal{N}\left(\mu, \sigma^{2}\right)$, then $\left|X\right| \sim \text{folded-Normal}\left(\mu, \sigma^{2}\right)$. Then,
+\begin{align*}
+  \mathsf{E}\left|X\right| &= \sigma \sqrt{\frac{2}{\pi}}\exp \left\{-\frac{\mu^{2}}{2\sigma^{2}} \right\} + \mu \left(1-2\Phi\left(\frac{-\mu}{\sigma}\right)\right)\\
+  &= \sigma \sqrt{\frac{2}{\pi}}\exp \left\{-\frac{\mu^{2}}{2\sigma^{2}} \right\} - \mu \opn{erf} \left(\frac{-\mu}{\sqrt{2\sigma^{2}}}\right)\\
+  \mathsf{E}e^{t\left|X\right|} &= \exp\left\{\frac{\sigma^{2}t^{2}}{2} + \mu t \right\} \left[1-\Phi\left(-\frac{\mu}{\sigma}-\sigma t\right) \right] + \exp\left\{\frac{\sigma^{2}t^{2}}{2} -\mu t \right\}\left[1-\Phi\left(\frac{\mu}{\sigma}-\sigma t\right) \right].
+\end{align*}
+
 \end{document}
