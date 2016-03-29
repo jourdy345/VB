@@ -85,8 +85,8 @@ Department of Statistics \\
 Korea University}
 
 \maketitle
-
-\section{Model specifications}
+\section{Normal}
+\subsection{Model specifications}
 \begin{align*}
   y_{i} &= w_{i}^{\top}\beta + f\left(x_{i}\right) + \epsilon_{i}, \qquad \epsilon_{i} \sim \mathcal{N}\left(0, \sigma^{2}\right)\\
   \theta_{j}|\sigma, \tau, \gamma &\sim \mathcal{N}\left(0, \sigma^{2}\tau^{2}\exp\left[-j\gamma\right]\right)\\
@@ -110,11 +110,11 @@ We will use the joint density to derive the LB and updating algorithm. The varia
   q_{4}\left(\tau^{2}\right) &= \opn{IG}\left(\frac{r_{q,\tau}}{2},\frac{s_{q,\tau}}{2}\right)\\
   q_{5}\left(\psi\right) &= \mathcal{N}\left(\mu_{\psi}^{q}, {\sigma_{\psi}^{2}}^{q}\right) \quad \text{(NCVMP)}.
 \end{align*}
-\section{Lower bound}
-\subsection{LB: $\mathsf{E}\left[\ln p\left(y|\Theta\right)\right]$}
+\subsection{Lower bound}
+\subsubsection{LB: $\mathsf{E}\left[\ln p\left(y|\Theta\right)\right]$}
 \begin{align*}
-  \mathsf{E}\left[\ln p\left(y|\Theta\right)\right] &= -\frac{n}{2}\ln \left(2\pi\sigma^{2}\right) -\frac{1}{2}\mathsf{E}\left[\left(y-W\beta -\varphi_{J}^{\top}\theta\right)^{\top}\left(y-W\beta -\varphi_{J}^{\top}\theta\right)\right]\\
-  &= -\frac{n}{2}\ln \left(2\pi\sigma^{2}\right) -\frac{1}{2}\left(y - W\mu_{\beta}^{q} - \varphi_{J}^{\top}\mu_{\theta}^{q} \right)^{\top}\left(y - W\mu_{\beta}^{q} - \varphi_{J}^{\top}\mu_{\theta}^{q} \right) - \frac{1}{2}\left(\Tr\left(W^{\top}W\Sigma_{\beta}^{q}\right) + \Tr\left(\varphi_{J}\varphi_{J}^{\top}\Sigma_{\theta}^{q}\right) \right)
+  \mathsf{E}\left[\ln p\left(y|\Theta\right)\right] &= -\frac{n}{2}\ln \left(2\pi\sigma^{2}\right) -\frac{1}{2}\mathsf{E}\left[\left(y-W\beta -\varphi_{J}\theta\right)^{\top}\left(y-W\beta -\varphi_{J}\theta\right)\right]\\
+  &= -\frac{n}{2}\ln \left(2\pi\sigma^{2}\right) -\frac{1}{2}\left(y - W\mu_{\beta}^{q} - \varphi_{J}\mu_{\theta}^{q} \right)^{\top}\left(y - W\mu_{\beta}^{q} - \varphi_{J}\mu_{\theta}^{q} \right) - \frac{1}{2}\left(\Tr\left(W^{\top}W\Sigma_{\beta}^{q}\right) + \Tr\left(\varphi_{J}^{\top}\varphi_{J}\Sigma_{\theta}^{q}\right) \right)
 \end{align*}
 \subsection{LB: $\mathsf{E}\left[\ln p\left(\theta_{j}|\sigma, \tau, \psi\right)\right]$}
 \begin{align*}
@@ -127,4 +127,59 @@ Let's note the following fact: if $X \sim \mathcal{N}\left(\mu, \sigma^{2}\right
   \mathsf{E}e^{t\left|X\right|} &= \exp\left\{\frac{\sigma^{2}t^{2}}{2} + \mu t \right\} \left[1-\Phi\left(-\frac{\mu}{\sigma}-\sigma t\right) \right] + \exp\left\{\frac{\sigma^{2}t^{2}}{2} -\mu t \right\}\left[1-\Phi\left(\frac{\mu}{\sigma}-\sigma t\right) \right].
 \end{align*}
 
+\section{Probit}
+\subsection{Model specifications}
+\begin{align*}
+  \opn{Pr}\left(y_{i}=1\middle| f, \beta\right) &= \Phi\left(w_{i}^{\top}\beta + f\left(x_{i}\right)\right)\\
+  y_{i}^{*} &= w_{i}^{\top}\beta + f\left(x_{i}\right) + \epsilon_{i}, \qquad \epsilon_{i} \sim \mathcal{N}\left(0,1\right)\\
+  y_{i} &= \begin{cases}1, & \text{if $y_{i}^{*} \geq 0$}\\ 0, & \text{if $y_{i}^{*} <0$}  \end{cases}\\
+  \theta_{j}|\sigma, \tau, \gamma &\sim \mathcal{N}\left(0, \sigma^{2}\tau^{2}\exp\left[-j\gamma\right]\right)\\
+  \tau^{2} &\sim \opn{IG}\left(\frac{r_{0,\tau}}{2}, \frac{s_{0,\tau}}{2}\right)\\
+  \sigma^{2} &\sim \opn{IG}\left(\frac{r_{0,\sigma}}{2}, \frac{s_{0,\sigma}}{2}\right)\\
+  \beta &\sim \mathcal{N}\left(\mu_{\beta}^{0}, \Sigma_{\beta}^{0}\right)\\
+  \gamma &\sim \opn{Exp}\left(\omega_{0}\right)\\
+  \left|\psi\right| &= \gamma, \quad \psi \sim \opn{DE}\left(0, \omega_{0}\right)\\
+  \varphi_{j}\left(x\right) &= \sqrt{2}\cos\left(\pi j x\right)
+\end{align*}
+Joint density:
+\begin{align*}
+  p\left(y, y^{*}, \Theta\right) &= C\left\{\prod_{j=1}^{J}\mathcal{N}\left(\theta_{j}\middle| 0, \sigma^{2}\tau^{2}\exp\left[-j\left|\psi\right|\right]\right) \right\}\opn{IG}\left(\tau^{2}\middle|\frac{r_{0,\tau}}{2},\frac{s_{0,\tau}}{2}\right)\opn{IG}\left(\sigma^{2}\middle|\frac{r_{0,\sigma}}{2},\frac{s_{0,\sigma}}{2}\right)\mathcal{N}\left(\beta\middle|\mu_{\beta}^{0},\Sigma_{\beta}^{0}\right)\\
+  &\quad \opn{DE}\left(\psi\middle|0,\omega_{0}\right)\left\{\prod_{i=1}^{n}\left(1\left[y_{i}^{*}\geq 0\right]1\left[y_{i}=1\right] + 1\left[y_{i}^{*}<0\right]1\left[y_{i}=0\right] \right) \right\}\phi\left(y_{i}^{*}-w_{i}^{\top}\beta - \varphi_{i}^{\top}\theta_{J}\right)
+\end{align*}
+where $C$ is the normalizing constant. The variational distributions are
+\begin{align*}
+  q_{1}\left(\beta\right) &= \mathcal{N}\left(\mu_{\beta}^{q}, \Sigma_{\beta}^{q}\right)\\
+  q_{2}\left(\theta_{J}\right) &= \mathcal{N}\left(\mu_{\theta}^{q},\Sigma_{\theta}^{q}\right)\\
+  q_{3}\left(\sigma^{2}\right) &= \opn{IG}\left(\frac{r_{q,\sigma}}{2},\frac{s_{q,\sigma}}{2}\right)\\
+  q_{4}\left(\tau^{2}\right) &= \opn{IG}\left(\frac{r_{q,\tau}}{2},\frac{s_{q,\tau}}{2}\right)\\
+  q_{5}\left(\psi\right) &= \mathcal{N}\left(\mu_{\psi}^{q}, {\sigma_{\psi}^{2}}^{q}\right) \quad \text{(NCVMP)}\\
+  q_{6}\left(y^{*}\right) &= \mathcal{TN}\left(\mu_{y^{*}}^{q}, I_{n},0\right)
+\end{align*}
+\subsection{Lower bound}
+\subsubsection{LB: $\mathsf{E}\left[\ln p\left(y^{*}\middle|\text{rest}\right)\right]+\mathsf{H}\left[y^{*}\right]$}
+\begin{align*}
+  \mathsf{E}\left[\ln p\left(y^{*}\middle|\text{rest}\right)\right]+\mathsf{H}\left[y^{*}\right] &= \sum_{i=1}^{n}\mathsf{E}\left[\ln \phi\left(y_{i}^{*}-w_{i}^{\top}\beta-\varphi_{i}^{\top}\theta_{J}\right)-\ln \phi\left(y_{i}^{*}-w_{i}^{\top}\mu_{\beta}^{q}-\varphi_{i}^{\top}\mu_{\theta}^{q}\right) \right]\\
+  &\quad +\sum_{i=1}^{n}\ln\left(\left\{\Phi\left(w_{i}^{\top}\mu_{\beta}^{q}+\varphi_{i}^{\top}\mu_{\theta}^{q}\right) \right\}^{y_{i}}\left\{1-\Phi\left(w_{i}^{\top}\mu_{\beta}^{q}+\varphi_{i}^{\top}\mu_{\theta}^{q}\right) \right\}^{1-y_{i}} \right)\\
+  &= -\frac{1}{2}\left(\Tr\left(W^{\top}W\Sigma_{\beta}^{q}\right)+\Tr\left(\varphi_{J}^{\top}\varphi_{J}\Sigma_{\theta}^{q}\right)\right)\\
+  &\quad +\sum_{i=1}^{n}\ln\left(\left\{\Phi\left(w_{i}^{\top}\mu_{\beta}^{q}+\varphi_{i}^{\top}\mu_{\theta}^{q}\right) \right\}^{y_{i}}\left\{1-\Phi\left(w_{i}^{\top}\mu_{\beta}^{q}+\varphi_{i}^{\top}\mu_{\theta}^{q}\right) \right\}^{1-y_{i}} \right)
+\end{align*}
+\subsection{LB: $\mathsf{E}\left[\ln p\left(\theta_{j}|\sigma, \tau, \psi\right)\right]$}
+Let's note the following fact: if $X \sim \mathcal{N}\left(\mu, \sigma^{2}\right)$, then $\left|X\right| \sim \text{folded-Normal}\left(\mu, \sigma^{2}\right)$. Then,
+\begin{align*}
+  \mathsf{E}\left|X\right| &= \sigma \sqrt{\frac{2}{\pi}}\exp \left\{-\frac{\mu^{2}}{2\sigma^{2}} \right\} + \mu \left(1-2\Phi\left(\frac{-\mu}{\sigma}\right)\right)\\
+  &= \sigma \sqrt{\frac{2}{\pi}}\exp \left\{-\frac{\mu^{2}}{2\sigma^{2}} \right\} - \mu \opn{erf} \left(\frac{-\mu}{\sqrt{2\sigma^{2}}}\right)\\
+  \mathsf{E}e^{t\left|X\right|} &= \exp\left\{\frac{\sigma^{2}t^{2}}{2} + \mu t \right\} \left[1-\Phi\left(-\frac{\mu}{\sigma}-\sigma t\right) \right] + \exp\left\{\frac{\sigma^{2}t^{2}}{2} -\mu t \right\}\left[1-\Phi\left(\frac{\mu}{\sigma}-\sigma t\right) \right].
+\end{align*}
+Therefore,
+\begin{align*}
+  \sum_{j=1}^{J}\mathsf{E}\left[\ln p\left(\theta_{j}|\sigma, \tau, \psi\right)\right] +\mathsf{H}\left[\theta_{J}\right]&= \sum_{j=1}^{J}\mathsf{E}\left[-\frac{1}{2}\ln\left(2\pi\right) +\frac{1}{2}\ln \frac{1}{\sigma^{2}} + \frac{1}{2}\ln \frac{1}{\tau^{2}} +\frac{j}{2}\left|\psi\right| -\frac{\theta_{j}^{2}e^{j\left|\psi\right|}}{2\sigma^{2}\tau^{2}} \right]+\mathsf{H}\left[\theta_{J}\right]\\
+  &= -\frac{J}{2}\left\{\ln\left(2\pi\right) -\left( \opn{di}\left(\frac{r_{q,\sigma}}{2}\right)-\ln\left(\frac{s_{q,\sigma}}{2}\right) \right)-\left( \opn{di}\left(\frac{r_{q,\tau}}{2}\right)-\ln\left(\frac{s_{q,\tau}}{2}\right) \right)\right\}\\
+  &\quad +\frac{J\left(J+1\right)}{4}\left\{\sigma_{\psi}^{q}\sqrt{\frac{2}{\pi}}\exp\left(-\frac{{\mu_{\psi}^{q}}^{2}}{2{\sigma_{\psi}^{q}}^{2}}\right)+\mu_{\psi}^{q}\left(1-2\Phi\left(\frac{-\mu_{\psi}^{q}}{\sigma_{\psi}^{q}}\right)\right) \right\}\\
+  &\quad -\frac{1}{2}\frac{r_{q,\sigma}}{s_{q,\sigma}}\frac{r_{q,\tau}}{s_{q,\tau}}\left(\Tr\left(\Sigma_{\theta}^{q}\right)+{\mu_{\theta}^{q}}^{\top}\mu_{\theta}^{q}\right)\sum_{j=1}^{J}Q_{j}\left(\mu_{\psi}^{q},{\sigma_{\psi}^{q}}^{2}\right)+\frac{J}{2}\left(1+\ln\left(2\pi\right)\right)+\frac{1}{2}\ln\left|\Sigma_{\theta}^{q}\right|
+\end{align*}
+where
+\begin{align*}
+  Q_{j}\left(\mu_{\psi}^{q},{\sigma_{\psi}^{q}}^{2}\right) &= \mathsf{E} e^{j\left|\psi\right|} \\
+  &=\exp\left\{\frac{{\sigma_{\psi}^{q}}^{2}j^{2}}{2} + \mu_{\psi}^{q} j \right\} \left[1-\Phi\left(-\frac{\mu_{\psi}^{q}}{\sigma_{\psi}^{q} }-\sigma_{\psi}^{q} j\right) \right] + \exp\left\{\frac{{\sigma_{\psi}^{q}}^{2}j^{2}}{2} -\mu_{\psi}^{q}j \right\}\left[1-\Phi\left(\frac{\mu_{\psi}^{q}}{\sigma_{\psi}^{q}}-\sigma_{\psi}^{q} j\right) \right].
+\end{align*}
 \end{document}
