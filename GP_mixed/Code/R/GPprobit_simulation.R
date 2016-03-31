@@ -1,4 +1,4 @@
-sim_GPprobit = function(FUN, m, intercept = TRUE) {
+sim_GPprobit = function(FUN, m, draw = TRUE, intercept = TRUE) {
   #############################################################
 
   ###############     Auxiliary functions     #################
@@ -353,6 +353,16 @@ sim_GPprobit = function(FUN, m, intercept = TRUE) {
   eta = Zmat %*% fit$muaq + Z %*% fit$mubq  ## linear predictor in GLM
 
   res = sapply(fit$muystar, categorize)
-  list(fit = fit, res = res, y = y, X = X, Zmat = Zmat, eta = eta)
+  if (draw == TRUE) {
+    plot(y-mean(y) ~ xobs, xlab = 'index', ylab = 'observed/fitted', main = 'Simulation result', type = 'p')
+    ord = order(xobs)
+    res = fitted_values - mean(fitted_values)
+    lines(xobs[ord], res[ord], col = 'purple')
+    legend("topright", legend = c('observed data', 'fitted values'), col = c('black', 'purple'), lty = c(1,0), pch = c(-1, 1), bg = 'gray95')
+    
+    return(list(fit = fit, fitted_values = fitted_values, y = y, X = X, Zmat = Zmat))
+  } else {
+    return(list(fit = fit, res = res, y = y, X = X, Zmat = Zmat, eta = eta)
+  }
 }
 

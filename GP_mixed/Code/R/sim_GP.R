@@ -378,9 +378,20 @@ sim_GP = function(FUN, m, intercept = TRUE, draw = TRUE) {
   
   Zmat = MZ(n, m, T, fit$mulq, fit$siglq)
   fitted_values = Zmat %*% fit$muaq
+  # if (draw == TRUE) {
+  #   plot(fitted_values ~ X[,2], type = 'p')
+  #   curve(FUN, from = 0, to = 1, add = TRUE)
+  #   return(list(fit = fit, fitted_values = fitted_values, y = y, X = X, Zmat = Zmat))
+  # } else {
+  #   return(list(fit = fit, fitted_values = fitted_values, y = y, X = X, Zmat = Zmat))
+  # }
   if (draw == TRUE) {
-    plot(fitted_values ~ X[,2], type = 'p')
-    curve(FUN, from = 0, to = 1, add = TRUE)
+    plot(y-mean(y) ~ xobs, xlab = 'index', ylab = 'observed/fitted', main = 'Simulation result', type = 'p')
+    ord = order(xobs)
+    res = fitted_values - mean(fitted_values)
+    lines(xobs[ord], res[ord], col = 'purple')
+    curve(FUN, from = 0, to = 1, col = 'red', lty = 2, add = TRUE)
+    legend("topright", legend = c('observed data', 'fitted values', 'true function'), col = c('black', 'purple', 'red'), lty = c(0,1, 2), pch = c(1, -1, -1), bg = 'gray95')
     return(list(fit = fit, fitted_values = fitted_values, y = y, X = X, Zmat = Zmat))
   } else {
     return(list(fit = fit, fitted_values = fitted_values, y = y, X = X, Zmat = Zmat))

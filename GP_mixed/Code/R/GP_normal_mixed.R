@@ -1,5 +1,5 @@
 library(mvtnorm)
-library(FNN)            # Get k nearest neighbours
+# library(FNN)            # Get k nearest neighbours
 # library(lhs)          # Latin hypercube sampling
 # library(mlegp)        # fit guassian process using max likelihood
 # library(calibrate)    # To label points on scatterplot
@@ -392,13 +392,7 @@ T = Tfunc(X = X, S = S)$T
 fit_GPVB = VARC(y = y, X = X, Amat = Z, T = T, As = 25, Ag = 25, mul0 = rep(0, d), sigl0 = 10 * diag(d), sigb0 = 10 * diag(s),  fac = 1.5)
 # y,X,Amat,T,As,Ag,mul0,sigl0,sigb0,tol=1.0e-5,fac=1.5,fit=NULL,iter=500
 
-Zmat = matrix(0, nrow = n, ncol = 2 *m)
-for (r in 1:m) {
-  for (i in 1:n) {
-    Zmat[i, r] = cos(sum((S[r,] * X[i,]) * fit_GPVB$mulq))
-    Zmat[i, r+m] = sin(sum((S[r,] * X[i,]) * fit_GPVB$mulq))
-  }
-}
+Zmat = MZ(n,m,T,fit_GPVB$mulq,fit_GPVB$siglq)
 
 fitted_GPVB = Zmat %*% fit_GPVB$muaq + Z %*% fit_GPVB$mubq
 residual_GPVB = y - fitted_GPVB

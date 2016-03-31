@@ -59,30 +59,22 @@ sim_GPnormal = function(FUN, m = 10, intercept = TRUE, draw = TRUE) {
   hmaxpt <- function(p,q,r) { sqrt((p*r-2*q+sqrt((p*r-2*q)^2+8*q*r*(p+2)))/(4*q*r)) }
 
   logH <- function(p,q,r){
-    mu0 <- hmaxpt(p,q,r)
-    sig0 <- (-h2(mu0,p,q,r))^(-0.5)
-    hmu0 <- h(mu0,p,q,r)
-    sig02 <- sig0*sqrt(2)
-    lowerlimit <- (-mu0)/sig02
-    integrand <- function(u) {exp(h(mu0+u*sig02,p,q,r)-hmu0)}
-    b <- 1
-    epsilon <- 1
-    while (epsilon > 1.0e-5) {
-      b <- 2*b
-      if (-b > lowerlimit) {
-        epsilon <- max(integrand(b),integrand(-b)) 
-      } else {
-        epsilon <- integrand(b)
-      }
-    }
+  mu0 <- hmaxpt(p,q,r)
+  sig0 <- (-h2(mu0,p,q,r))^(-0.5)
+  hmu0 <- h(mu0,p,q,r)
+  sig02 <- sig0*sqrt(2)
+  lowerlimit <- (-mu0)/sig02
+  integrand <- function(u) {exp(h(mu0+u*sig02,p,q,r)-hmu0)}
+  b <- 1
+  epsilon <- 1
+  while (epsilon > 1.0e-5) {
+  b <- 2*b
+  if (-b > lowerlimit) {
+  epsilon <- max(integrand(b),integrand(-b)) } else {epsilon <- integrand(b)} }
 
-    if (-b > lowerlimit) {
-      I0 <- integrate(integrand, lower=-b, upper=b)$value
-    } else {
-      I0 <- integrate(integrand, lower=lowerlimit, upper=b)$value
-    }
-    hmu0+log(sig02)+log(I0)
-  }
+  if (-b > lowerlimit) {I0 <- integrate(integrand, lower=-b, upper=b)$value
+  } else {I0 <- integrate(integrand, lower=lowerlimit, upper=b)$value}
+  hmu0+log(sig02)+log(I0)}
 
 
   #--------------------------------------------------------------------#
@@ -233,7 +225,7 @@ sim_GPnormal = function(FUN, m = 10, intercept = TRUE, draw = TRUE) {
       AB <- Amat %*% mubq
       AL <- sigaq+tcrossprod(muaq)
       Csq <- m/2*as.numeric(crossprod(muaq)+tr(sigaq))
-      Cgq <- 0.5*as.numeric(crossprod(y,y-2*(AA+AB))+sum(AL*EqZTZ) + 2*+2*crossprod(AB, AA) + crossprod(AB) + tr(sigbq))
+      Cgq <- 0.5*as.numeric(crossprod(y,y-2*(AA+AB))+sum(AL*EqZTZ) +2*crossprod(AB, AA) + crossprod(AB) + tr(sigbq))
 
       lb <- LBC(y,X,Amat,T,Tm,Tp,As,Ag,mul0,sigl0,Csq,Cgq,muaq,sigaq,mulq,siglq,mub0,sigb0,mubq,sigbq)$lb
 
@@ -328,29 +320,35 @@ sim_GPnormal = function(FUN, m = 10, intercept = TRUE, draw = TRUE) {
   # m_=c(-2,0,1.5)
   # s_=c(.5,1,.5)
   # b_=rnormmix(n_,p_,m_,s_)
-  xobs=runif(N_)
-  y = FUN(xobs) + rnorm(N_, 0, 3) + rnorm(N_, 0, 2)
+  xobs= 0.1 + 0.8 * runif(N_)
+  y = FUN(xobs) + 0.1 * rnorm(N_)
   if (intercept == TRUE) {
     X = cbind(1, xobs)
   } else {
     X = as.matrix(xobs)
   }
-  Z = diag(1, N_)
+  Z = diag(N_)
   # Z = as.matrix(bdiag(rep(1, N_ * 0.2), rep(1, N_ * .5), rep(1, N_ * 0.3)))
   # Z = as.matrix(rep(1, N_))
+  print('>')
   d = dim(X)[2]
   n = dim(X)[1]
   S = mixtools::rmvnorm(m, mu = rep(0, d), sigma = diag(d))
   T = Tfunc(X = X, S = S)$T
   s = dim(Z)[2]
   fit = VARC(y = y, X = X, Amat = Z, T = T, As = 25, Ag = 25, mul0 = rep(0, d), sigl0 = 10 * diag(d), sigb0 = 10 * diag(s), tol = 1.0e-6,  fac = 1.5)
-
+  print('>>')
   
   Zmat = MZ(n,m,T,fit$mulq,fit$siglq)
   fitted_values = Zmat %*% fit$muaq + Z %*% fit$mubq
   if (draw == TRUE) {
-    plot(fitted_values ~ X[,2], type = 'p')
-    curve(FUN, from = 0, to = 1, add = TRUE)
+    plot(y-mean(y) ~ xobs, xlab = 'index', ylab = 'observed/fitted', main = 'Simulation result', type = 'p')
+    ord = order(xobs)
+    res = fitted_values - mean(fitted_values)
+    lines(xobs[ord], res[ord], col = 'purple')
+    curve(FUN, from = 0, to = 1, col = 'red', lty = 2, add = TRUE)
+    legend("topright", legend = c('observed data', 'fitted values', 'true function'), col = c('black', 'purple', 'red'), lty = c(0,1, 2), pch = c(1, -1, -1), bg = 'gray95')
+    
     return(list(fit = fit, fitted_values = fitted_values, y = y, X = X, Zmat = Zmat))
   } else {
     return(list(fit = fit, fitted_values = fitted_values, y = y, X = X, Zmat = Zmat))
