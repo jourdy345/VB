@@ -1,5 +1,4 @@
 library(mvtnorm)
-library(FNN)            # Get k nearest neighbours
 # library(lhs)          # Latin hypercube sampling
 # library(mlegp)        # fit guassian process using max likelihood
 # library(calibrate)    # To label points on scatterplot

@@ -313,15 +313,15 @@ sim_GPnormal = function(FUN, m = 10, intercept = TRUE, draw = TRUE) {
   }
 
   set.seed(123)
-  # n_=100 #number of i
+  n_=100 #number of i
   N_=500 # i * j
-  # id=sample(1:n_,N_,replace=TRUE)
-  # p_=c(.2,.5,.3)
-  # m_=c(-2,0,1.5)
-  # s_=c(.5,1,.5)
-  # b_=rnormmix(n_,p_,m_,s_)
-  xobs= 0.1 + 0.8 * runif(N_)
-  y = FUN(xobs) + 0.1 * rnorm(N_)
+  id=sample(1:n_,N_,replace=TRUE)
+  p_=c(.2,.5,.3)
+  m_=c(-2,0,1.5)
+  s_=c(.5,1,.5)
+  b_=rnormmix(n_,p_,m_,s_)
+  xobs= runif(N_)
+  y = FUN(xobs) + b_[id] + 2 * rnorm(N_)
   if (intercept == TRUE) {
     X = cbind(1, xobs)
   } else {
@@ -330,22 +330,23 @@ sim_GPnormal = function(FUN, m = 10, intercept = TRUE, draw = TRUE) {
   Z = diag(N_)
   # Z = as.matrix(bdiag(rep(1, N_ * 0.2), rep(1, N_ * .5), rep(1, N_ * 0.3)))
   # Z = as.matrix(rep(1, N_))
-  print('>')
   d = dim(X)[2]
   n = dim(X)[1]
   S = mixtools::rmvnorm(m, mu = rep(0, d), sigma = diag(d))
   T = Tfunc(X = X, S = S)$T
   s = dim(Z)[2]
   fit = VARC(y = y, X = X, Amat = Z, T = T, As = 25, Ag = 25, mul0 = rep(0, d), sigl0 = 10 * diag(d), sigb0 = 10 * diag(s), tol = 1.0e-6,  fac = 1.5)
-  print('>>')
   
   Zmat = MZ(n,m,T,fit$mulq,fit$siglq)
-  fitted_values = Zmat %*% fit$muaq + Z %*% fit$mubq
+  fixed = Zmat %*% fit$muaq
+  fitted_values = fixed + Z %*% fit$mubq
   if (draw == TRUE) {
-    plot(y-mean(y) ~ xobs, xlab = 'index', ylab = 'observed/fitted', main = 'Simulation result', type = 'p')
+    # plot(y-mean(y) ~ xobs, xlab = 'index', ylab = 'observed/fitted', main = 'Simulation result', type = 'p')
+    plot(y ~ xobs, xlab = 'index', ylab = 'observed/fitted', main = 'Simulation result', type = 'p')
     ord = order(xobs)
-    res = fitted_values - mean(fitted_values)
-    lines(xobs[ord], res[ord], col = 'purple')
+    # res = fitted_values - mean(fitted_values)
+    
+    lines(xobs[ord], fixed[ord], col = 'purple')
     curve(FUN, from = 0, to = 1, col = 'red', lty = 2, add = TRUE)
     legend("topright", legend = c('observed data', 'fitted values', 'true function'), col = c('black', 'purple', 'red'), lty = c(0,1, 2), pch = c(1, -1, -1), bg = 'gray95')
     

@@ -363,7 +363,7 @@ sim_GP = function(FUN, m, intercept = TRUE, draw = TRUE) {
   # s_=c(.5,1,.5)
   # b_=rnormmix(n_,p_,m_,s_)
   xobs=runif(N_)
-  y = FUN(xobs) + rnorm(N_, 0, 3)
+  y = FUN(xobs) + 2 * rnorm(N_)
   if (intercept == TRUE) {
     X = cbind(1, xobs)
   } else {
@@ -386,9 +386,11 @@ sim_GP = function(FUN, m, intercept = TRUE, draw = TRUE) {
   #   return(list(fit = fit, fitted_values = fitted_values, y = y, X = X, Zmat = Zmat))
   # }
   if (draw == TRUE) {
-    plot(y-mean(y) ~ xobs, xlab = 'index', ylab = 'observed/fitted', main = 'Simulation result', type = 'p')
+    # plot(y-mean(y) ~ xobs, xlab = 'index', ylab = 'observed/fitted', main = 'Simulation result', type = 'p')
+    plot(y ~ xobs, xlab = 'index', ylab = 'observed/fitted', main = 'Simulation result', type = 'p')
     ord = order(xobs)
-    res = fitted_values - mean(fitted_values)
+    # res = fitted_values - mean(fitted_values)
+    res = fitted_values
     lines(xobs[ord], res[ord], col = 'purple')
     curve(FUN, from = 0, to = 1, col = 'red', lty = 2, add = TRUE)
     legend("topright", legend = c('observed data', 'fitted values', 'true function'), col = c('black', 'purple', 'red'), lty = c(0,1, 2), pch = c(1, -1, -1), bg = 'gray95')

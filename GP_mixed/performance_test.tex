@@ -5,7 +5,7 @@
 % between \documentclass and \begin{document}.
 
 \usepackage[margin=0.6in]{geometry} % set the margins to 1in on all sides
-\usepackage{graphicx} % to include figures
+\usepackage[demo]{graphicx} % to include figures
 \usepackage{amsmath} % great math stuff
 \usepackage{amsfonts} % for blackboard bold, etc
 \usepackage{amsthm} % better theorem environments
@@ -19,6 +19,9 @@
 \usepackage{titlesec}
 \usepackage{empheq}
 \usepackage{tikz}
+\usepackage{caption}
+\usepackage{subcaption}
+
 
 \newcommand\encircle[1]{%
   \tikz[baseline=(X.base)] 
@@ -89,7 +92,7 @@ Korea University}
 \section{Performance: GPVB}
   The model was initially
   $$
-    y = Z\alpha + A\beta + \epsilon.
+    y = \mathsf{E}\left[Z\right]\alpha + A\beta + \epsilon.
   $$
   Since we are running mean-field variational approximation, we are updating variational parameters of the optimal distributions, thereby enabling the replacement of each parameter with its variational parameter. Therefore, the fitted model will be
   $$
@@ -109,4 +112,40 @@ Korea University}
     $$
     \item $\text{RSSD} = 2.114151$.
   \end{itemize}
+\section{GP normal effect}
+  We present a simple tutorial on simulation.
+  \begin{figure}
+    \centering
+    \begin{subfigure}{.5\textwidth}
+      \centering
+      \includegraphics[width=.4\linewidth]{GP_noRE}
+      \caption{A subfigure}
+      \label{fig:sub1}
+    \end{subfigure}%
+    \begin{subfigure}{.5\textwidth}
+      \centering
+      \includegraphics[width=.4\linewidth]{GP_normalRE_linear}
+      \caption{A subfigure}
+      \label{fig:sub2}
+    \end{subfigure}
+    \caption{A figure with two subfigures}
+    \label{fig:test}
+    \end{figure}
+
+    \begin{figure}
+    \centering
+    \begin{minipage}{.5\textwidth}
+      \centering
+      \includegraphics[width=.4\linewidth]{GP_noRE.png}
+      \captionof{figure}{A figure}
+      \label{fig:test1}
+    \end{minipage}%
+    \begin{minipage}{.5\textwidth}
+      \centering
+      \includegraphics[width=.4\linewidth]{GP_normalRE_linear}
+      \captionof{figure}{Another figure}
+      \label{fig:test2}
+    \end{minipage}
+  \end{figure}
+
 \end{document}

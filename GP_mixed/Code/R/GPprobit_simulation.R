@@ -314,30 +314,28 @@ sim_GPprobit = function(FUN, m, draw = TRUE, intercept = TRUE) {
   }
 
   set.seed(123)
-  # n_=100 #number of i
+  n_=100 #number of i
   N_=500 # i * j
-  # id=sample(1:n_,N_,replace=TRUE)
-  # p_=c(.2,.5,.3)
-  # m_=c(-2,0,1.5)
-  # s_=c(.5,1,.5)
-  # b_=rnormmix(n_,p_,m_,s_)
-  xobs=runif(N_)
-  # y = rbinom(length(xobs),1,pnorm(FUN(xobs)+b_[id]))
-  y = rbinom(length(xobs),1,pnorm(FUN(xobs)+rnorm(N_, 0, 3) + rnorm(N_, 0, 2)))
+  id=sample(1:n_,N_,replace=TRUE)
+  p_=c(.2,.5,.3)
+  m_=c(-2,0,1.5)
+  s_=c(.5,1,.5)
+  b_=rnormmix(n_,p_,m_,s_)
+  xobs=runif(N_, -1, 1)
+  y = rbinom(length(xobs),1,pnorm(FUN(xobs)+b_[id]))
+  # y = rbinom(length(xobs),1,pnorm(FUN(xobs))
   if (intercept == TRUE) {
     X = cbind(1, xobs)
   } else {
     X = as.matrix(xobs)
   }
-  Z = as.matrix(diag(1, N_))
+  Z = diag(N_)
   d = dim(X)[2]
   n = dim(X)[1]
   S = mixtools::rmvnorm(m, mu = rep(0, d), sigma = diag(d))
   T = Tfunc(X = X, S = S)$T
   s = dim(Z)[2]
   fit = VARC(y = y, X = X, Amat = Z, T = T, As = 25, mul0 = rep(0, d), sigl0 = 10 * diag(d), sigb0 = 10 * diag(s), fac = 1.5)
-
-  
   categorize = function(x) {
     y = 0
     if (x < 0) {
@@ -349,20 +347,19 @@ sim_GPprobit = function(FUN, m, draw = TRUE, intercept = TRUE) {
   }
 
   Zmat = MZ(n,m,T,fit$mulq,fit$siglq)
-
-  eta = Zmat %*% fit$muaq + Z %*% fit$mubq  ## linear predictor in GLM
-
+  fixed = Zmat %*% fit$muaq
+  eta = fixed + Z %*% fit$mubq  ## linear predictor in GLM
   res = sapply(fit$muystar, categorize)
   if (draw == TRUE) {
-    plot(y-mean(y) ~ xobs, xlab = 'index', ylab = 'observed/fitted', main = 'Simulation result', type = 'p')
+    # plot(y-mean(y) ~ xobs, xlab = 'index', ylab = 'observed/fitted', main = 'Simulation result', type = 'p')
     ord = order(xobs)
-    res = fitted_values - mean(fitted_values)
-    lines(xobs[ord], res[ord], col = 'purple')
-    legend("topright", legend = c('observed data', 'fitted values'), col = c('black', 'purple'), lty = c(1,0), pch = c(-1, 1), bg = 'gray95')
-    
-    return(list(fit = fit, fitted_values = fitted_values, y = y, X = X, Zmat = Zmat))
+    plot(xobs[ord], fixed[ord], col = 'purple', xlab = 'index', ylab = 'observed/fitted', main = 'Simulation result', ylim = c(-10, 10), type = 'l')
+    # lines(xobs[ord], fixed[ord], col = 'purple')
+    curve(FUN, from = 0, to = 1, col = 'red', lty = 2, add = TRUE)
+    legend("topright", legend = c('fitted values', 'true function'), col = c('purple', 'red'), lty = c(1, 2), bg = 'gray95')
+    return(list(fit = fit, fixed = fixed, res = res, y = y, X = X, Zmat = Zmat, ete = eta))
   } else {
-    return(list(fit = fit, res = res, y = y, X = X, Zmat = Zmat, eta = eta)
+    return(list(fit = fit, fixed = fixed, res = res, y = y, X = X, Zmat = Zmat, eta = eta))
   }
 }
 
