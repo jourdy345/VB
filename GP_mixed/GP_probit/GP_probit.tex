@@ -1,0 +1,143 @@
+\documentclass[11pt]{article}
+
+% This first part of the file is called the PREAMBLE. It includes
+% customizations and command definitions. The preamble is everything
+% between \documentclass and \begin{document}.
+
+\usepackage[margin=0.6in]{geometry} % set the margins to 1in on all sides
+\usepackage{graphicx} % to include figures
+\usepackage{amsmath} % great math stuff
+\usepackage{amsfonts} % for blackboard bold, etc
+\usepackage{amsthm} % better theorem environments
+% various theorems, numbered by section
+\usepackage{amssymb}
+\usepackage[utf8]{inputenc}
+\usepackage{booktabs}
+\usepackage{array}
+\usepackage{courier}
+\usepackage[usenames, dvipsnames]{color}
+\usepackage{titlesec}
+\usepackage{empheq}
+\usepackage{tikz}
+
+\newcommand\encircle[1]{%
+  \tikz[baseline=(X.base)] 
+    \node (X) [draw, shape=circle, inner sep=0] {\strut #1};}
+ 
+% Command "alignedbox{}{}" for a box within an align environment
+% Source: http://www.latex-community.org/forum/viewtopic.php?f=46&t=8144
+\newlength\dlf  % Define a new measure, dlf
+\newcommand\alignedbox[2]{
+% Argument #1 = before & if there were no box (lhs)
+% Argument #2 = after & if there were no box (rhs)
+&  % Alignment sign of the line
+{
+\settowidth\dlf{$\displaystyle #1$}  
+    % The width of \dlf is the width of the lhs, with a displaystyle font
+\addtolength\dlf{\fboxsep+\fboxrule}  
+    % Add to it the distance to the box, and the width of the line of the box
+\hspace{-\dlf}  
+    % Move everything dlf units to the left, so that & #1 #2 is aligned under #1 & #2
+\boxed{#1 #2}
+    % Put a box around lhs and rhs
+}
+}
+
+
+\newtheorem{thm}{Theorem}[section]
+\newtheorem{lem}[thm]{Lemma}
+\newtheorem{prop}[thm]{Proposition}
+\newtheorem{cor}[thm]{Corollary}
+\newtheorem{conj}[thm]{Conjecture}
+
+\setcounter{secnumdepth}{4}
+
+\titleformat{\paragraph}
+{\normalfont\normalsize\bfseries}{\theparagraph}{1em}{}
+\titlespacing*{\paragraph}
+{0pt}{3.25ex plus 1ex minus .2ex}{1.5ex plus .2ex}
+
+\definecolor{myblue}{RGB}{72, 165, 226}
+\definecolor{myorange}{RGB}{222, 141, 8}
+
+\setlength{\heavyrulewidth}{1.5pt}
+\setlength{\abovetopsep}{4pt}
+
+
+\DeclareMathOperator{\id}{id}
+\DeclareMathOperator{\argmin}{\arg\!\min}
+\DeclareMathOperator{\Tr}{Tr}
+
+\newcommand{\bd}[1]{\mathbf{#1}} % for bolding symbols
+\newcommand{\RR}{\mathbb{R}} % for Real numbers
+\newcommand{\ZZ}{\mathbb{Z}} % for Integers
+\newcommand{\col}[1]{\left[\begin{matrix} #1 \end{matrix} \right]}
+\newcommand{\comb}[2]{\binom{#1^2 + #2^2}{#1+#2}}
+\newcommand{\bs}{\boldsymbol}
+\newcommand{\opn}{\operatorname}
+\begin{document}
+\nocite{*}
+
+\title{GP Probit}
+
+\author{Daeyoung Lim\thanks{Prof. Taeryon Choi} \\
+Department of Statistics \\
+Korea University}
+
+\maketitle
+
+\section{GP Probit with sinusoidal basis}
+\begin{align*}
+  \alpha|\sigma &\sim \mathcal{N}\left(0, \frac{\sigma^{2}}{m}I_{2m}\right)\\
+  \lambda &\sim \mathcal{N}\left(\mu_{\lambda}, \Sigma_{\lambda}\right) \\
+  \sigma &\sim \opn{half-Cauchy}\left(A_{\sigma}\right)\\
+  \theta &= \left(\alpha, \lambda, \sigma \right)
+\end{align*}
+$$
+  \pi\left(y, y^{*}, \theta\right) = C\pi\left(\alpha\middle|\sigma\right) \pi\left(\lambda\right)\pi\left(\sigma\right)\prod_{i=1}^{n}\left\{1\left[y_{i}^{*}\geq 0\right]1\left[y_{i}=1\right] +1\left[y_{i}^{*}<0\right]1\left[y_{i}=0\right] \right\}\phi\left(y_{i}^{*}-Z_{i}^{\top}\alpha\right)
+$$
+\subsection{Mean-field update}
+\subsubsection{$q\left(y^{*}\right)$}
+$$
+  \mu_{y^{*}}^{q} \leftarrow Z\mu_{\alpha}^{q} + \frac{\phi\left(Z\mu_{\alpha}^{q}\right)}{\left\{\Phi\left(Z\mu_{\alpha}^{q}\right) \right\}^{y}\left\{\Phi\left(Z\mu_{\alpha}^{q}\right)-1_{n} \right\}^{1_{n}-y}}
+$$
+\subsubsection{$q\left(\alpha\right)$}
+\begin{align*}
+  \Sigma_{\alpha}^{q} &\leftarrow m\opn{E}\left[\frac{1}{\sigma^{2}}\right]I_{2m} +\opn{E}\left[Z^{\top}Z\right]\\
+  \mu_{\alpha}^{q} &\leftarrow \Sigma_{\alpha}^{q}\opn{E}\left[Z\right]^{\top}\mu_{y^{*}}^{q}
+\end{align*}
+\subsubsection{$q\left(\sigma\right)$}
+\begin{align*}
+  q\left(\sigma\right) &\propto \frac{\exp\left(-C_{\sigma}/\sigma^{2}\right)}{\sigma^{2m}\left(A_{\sigma}^{2}+\sigma^{2}\right)}\\
+  C_{\sigma} &\leftarrow \frac{m}{2}\left(\Tr\left(\Sigma_{\alpha}^{q}\right)+{\mu_{\alpha}^{q}}^{\top}\mu_{\alpha}^{q}\right)
+\end{align*}
+\subsection{Lower bound}
+\subsubsection{LB: $\opn{E}\left[\ln p\left(y,y^{*}|\theta\right)\right] + \opn{H}\left[y^{*}\right]$}
+\begin{align*}
+  \opn{E}\left[\ln p\left(y,y^{*}|\theta\right)\right] + \opn{H}\left[y^{*}\right] &= -\frac{1}{2}\left\{\Tr\left(\opn{E}\left[Z^{\top}Z\right]\Sigma_{\alpha}^{q}\right) +{\mu_{\alpha}^{q}}^{\top}\left(\opn{E}\left[Z^{\top}Z\right]-\opn{E}\left[Z\right]^{\top}\opn{E}\left[Z\right]\right)\mu_{\alpha}^{q} \right\}\\
+  &\quad +\sum_{i=1}^{n}\ln\left(\left\{\Phi\left(\opn{E}\left[Z_{i}\right]^{\top}\mu_{\alpha}^{q}\right) \right\}^{y_{i}}\left\{1-\Phi\left(\opn{E}\left[Z_{i}\right]^{\top}\mu_{\alpha}^{q}\right) \right\}^{1-y_{i}} \right)
+\end{align*}
+\subsubsection{LB: $\opn{E}\left[\ln \pi\left(\alpha|\sigma\right)\right] +\opn{H}\left[\alpha\right]$}
+\begin{align*}
+  \opn{E}\left[\ln \pi\left(\alpha|\sigma\right)\right] +\opn{H}\left[\alpha\right] &= -m\left(2\opn{E}\left[\ln \sigma\right] -\ln m\right) -\frac{m}{2}\opn{E}\left[\frac{1}{\sigma^{2}}\right]\left(\Tr\left(\Sigma_{\alpha}^{q}\right)+{\mu_{\alpha}^{q}}^{\top}\mu_{\alpha}^{q}\right) +m + \frac{1}{2}\ln\left|\Sigma_{\alpha}^{q}\right|
+\end{align*}
+\subsubsection{LB: $\opn{E}\left[\ln \pi\left(\lambda\right)\right]+\opn{H}\left[\lambda\right]$}
+\begin{align*}
+  \opn{E}\left[\ln \pi\left(\lambda\right)\right]+\opn{H}\left[\lambda\right] &= \frac{1}{2}\ln\left|\Sigma_{\lambda}^{-1}\Sigma_{\lambda}^{q}\right| -\frac{1}{2}\left\{\Tr\left(\Sigma_{\lambda}^{-1}\Sigma_{\lambda}^{q}\right) +\left(\mu_{\lambda}^{q}-\mu_{\lambda}\right)^{\top}\Sigma_{\lambda}^{-1}\left(\mu_{\lambda}^{q}-\mu_{\lambda}\right) \right\} + \frac{d}{2}
+\end{align*}
+\subsubsection{LB: $\opn{E}\left[\ln \pi\left(\sigma\right)\right]+\opn{H}\left[\sigma\right]$}
+\begin{align*}
+  \opn{E}\left[\ln \pi\left(\sigma\right)\right]+\opn{H}\left[\sigma\right] &= \ln\left(\frac{2A_{\sigma}}{\pi}\right)+C_{\sigma}\frac{\mathcal{H}\left(2m,C_{\sigma},A_{\sigma}^{2}\right)}{\mathcal{H}\left(2m-2,C_{\sigma},A_{\sigma}^{2}\right)}+2m\opn{E}\left[\ln\sigma\right]+\ln \mathcal{H}\left(2m-2,C_{\sigma},A_{\sigma}^{2}\right)
+\end{align*}
+\begin{align*}
+  \mathcal{L} &= -\frac{1}{2}\left\{\Tr\left(\opn{E}\left[Z^{\top}Z\right]\Sigma_{\alpha}^{q}\right)+{\mu_{\alpha}^{q}}^{\top}\left(\opn{E}\left[Z^{\top}Z\right]-\opn{E}\left[Z\right]^{\top}\opn{E}\left[Z\right]\right)\mu_{\alpha}^{q} \right\}\\
+  &\quad +\sum_{i=1}^{n}\ln\left(\left\{\Phi\left(\opn{E}\left[Z_{i}\right]^{\top}\mu_{\alpha}^{q}\right) \right\}^{y_{i}}\left\{1-\Phi\left(\opn{E}\left[Z_{i}\right]^{\top}\mu_{\alpha}^{q}\right) \right\}^{1-y_{i}} \right)\\
+  &\quad +m\ln m -\frac{m}{2}\opn{E}\left[\frac{1}{\sigma^{2}}\right]\left(\Tr\left(\Sigma_{\alpha}^{q}\right)+{\mu_{\alpha}^{q}}^{\top}\mu_{\alpha}^{q}\right) +m + \frac{1}{2}\ln\left|\Sigma_{\alpha}^{q}\right|\\
+  &\quad +\frac{1}{2}\ln\left|\Sigma_{\lambda}^{-1}\Sigma_{\lambda}^{q}\right| -\frac{1}{2}\left\{\Tr\left(\Sigma_{\lambda}^{-1}\Sigma_{\lambda}^{q}\right) +\left(\mu_{\lambda}^{q}-\mu_{\lambda}\right)^{\top}\Sigma_{\lambda}^{-1}\left(\mu_{\lambda}^{q}-\mu_{\lambda}\right) \right\} + \frac{d}{2}\\
+  &\quad +\ln\left(\frac{2A_{\sigma}}{\pi}\right)+C_{\sigma}\frac{\mathcal{H}\left(2m,C_{\sigma},A_{\sigma}^{2}\right)}{\mathcal{H}\left(2m-2,C_{\sigma},A_{\sigma}^{2}\right)}+\ln \mathcal{H}\left(2m-2,C_{\sigma},A_{\sigma}^{2}\right)
+\end{align*}
+\subsection{NCVMP: $\lambda$ update}
+$$
+  S_{a} = -\frac{1}{2}\left\{\Tr\left(\Sigma_{\lambda}^{-1}\Sigma_{\lambda}^{q}\right) +\left(\mu_{\lambda}^{q}-\mu_{\lambda}\right)^{\top}\Sigma_{\lambda}^{-1}\left(\mu_{\lambda}^{q}-\mu_{\lambda}\right) \right\} +{y^{*}}^{\top}\opn{E}\left[Z\right]\mu_{\alpha}^{q}-\frac{1}{2}\left(\opn{E}\left[Z^{\top}Z\right]\left(\Sigma_{\alpha}^{q}+\mu_{\alpha}^{q}{\mu_{\alpha}^{q}}^{\top}\right)\right)
+$$
+\end{document}

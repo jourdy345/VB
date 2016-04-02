@@ -1,4 +1,4 @@
-sim_GPprobitRE = function(FUN, m, draw = TRUE, intercept = TRUE) {
+sim_GPprobit = function(FUN, m, draw = TRUE, intercept = TRUE) {
   #############################################################
 
   ###############     Auxiliary functions     #################
@@ -100,16 +100,15 @@ sim_GPprobitRE = function(FUN, m, draw = TRUE, intercept = TRUE) {
   # Lower bound #
   #-------------#
 
-  LBC <- function(y,X,A,T,Tm,Tp,As,mul0,sigl0,Csq,muaq,sigaq,mulq,siglq,sigb0,mubq,sigbq) {
+  LBC <- function(y,X,T,Tm,Tp,As,mul0,sigl0,Csq,muaq,sigaq,mulq,siglq) {
     n <- length(y)
     d <- dim(X)[2]
     m <- dim(T)[1]/n
-    s <- dim(A)[2]
     t1 <- as.matrix(solve(sigl0,siglq))
-    t2 <- as.matrix(solve(sigb0,sigbq))
     mz <- MZ(n,m,T,mulq,siglq) 
     mztz <- MZTZ(n, m, Tm, Tp, mulq, siglq)
-    lb = -0.5 * (sum(mztz * sigaq) + sum((mztz - crossprod(mz)) * tcrossprod(muaq)) + sum(crossprod(A) * sigbq)) + sum(log((pnorm(mz %*% muaq + A %*% mubq))^y * (1 - pnorm((mz %*% muaq + A %*% mubq)^(1-y))))) + m * log(m) + 0.5 * (determinant(sigaq)$modulus[1] + determinant(t1)$modulus[1] + determinant(t2)$modulus[1]) + m - 0.5 * (tr(t2) + quadinv(mubq, sigb0) + tr(t1) + quadinv((mulq - mul0), sigl0)) + 0.5 * (s+d)  + log(2 * As) - log(pi) + logH(2*m - 2, Csq, As^2)
+    Eqinvs2 <- exp(logH(2*m,Csq,As^2)-logH(2*m-2,Csq,As^2))
+    lb = -0.5 * (sum(mztz * sigaq) + sum((mztz - crossprod(mz)) * tcrossprod(muaq))) + sum(log((pnorm(mz %*% muaq)^y)*(1 - pnorm(mz %*% muaq))^(1-y))) + m * log(m) - 0.5 * m * Eqinvs2 * (tr(sigaq) + sum(muaq * muaq)) + m + 0.5 * (determinant(sigaq)$modulus[1] + determinant(t1)$modulus[1] -tr(t1) - quadinv(mulq - mul0, sigl0) + d) + log(2*As/pi) + Csq *  exp(logH(2*m, Csq, As^2) - logH(2*m-2, Csq, As^2)) + logH(2*m-2, Csq, As^2)
     list(lb=lb)
   }
 
@@ -119,12 +118,11 @@ sim_GPprobitRE = function(FUN, m, draw = TRUE, intercept = TRUE) {
   # only applicable to small data where n*m*m does not exceed 10^7 #
   #----------------------------------------------------------------#
 
-  VARC <- function(y,X,Amat,T,As,mul0,sigl0,sigb0, tol=1.0e-4,fac=1.5,fit=NULL,iter=500) {
+  VARC <- function(y,X,T,As,mul0,sigl0, tol=1.0e-4,fac=1.5,fit=NULL,iter=500) {
 
     n <- length(y)
     d <- dim(X)[2]
     m <- dim(T)[1]/n
-    s <- dim(Amat)[2]
     Tm <- matrix(0,(n*m*m),d)
     Tp <- matrix(0,(n*m*m),d)
     for (i in 1:n) {
@@ -149,12 +147,11 @@ sim_GPprobitRE = function(FUN, m, draw = TRUE, intercept = TRUE) {
       EqZ <- MZ(n,m,T,mulq,siglq)
       EqZTZ <- MZTZ(n,m,Tm,Tp,mulq,siglq)
       Eqinvs2 <- exp(logH(2*m,Csq,As^2)-logH(2*m-2,Csq,As^2))
-      sigbq <- solve(crossprod(Amat) + solve(sigb0))
-      mubq <- crossprod(sigbq,crossprod(Amat, y-(EqZ%*%muaq)))
-      muystar = EqZ%*%muaq + Amat %*% mubq + rnorm(n)
+      temp_muystar = EqZ%*%muaq
+      muystar = temp_muystar + dnorm(temp_muystar) / ((pnorm(temp_muystar)^y)*(pnorm(temp_muystar)-1)^{1-y})
       # initialize muaq,sigaq #
       sigaq <- solve(m*Eqinvs2*diag(2*m) + EqZTZ)
-      muaq <- as.vector(crossprod(sigaq, crossprod(EqZ,(muystar - Amat%*%mubq))))
+      muaq <- as.vector(crossprod(sigaq, crossprod(EqZ,muystar)))
       lbold <- -10e7
       lbrecord <- NULL
       count <- 0
@@ -167,8 +164,6 @@ sim_GPprobitRE = function(FUN, m, draw = TRUE, intercept = TRUE) {
       siglq <- fit$siglq
       muaq <- fit$muaq
       sigaq <- fit$sigaq
-      mubq <- fit$mubq
-      sigbq <- fit$sigbq
       lbold <- fit$lb
       lbrecord <- fit$lbrecord
       count <- dim(fit$lbrecord)[1]
@@ -192,7 +187,7 @@ sim_GPprobitRE = function(FUN, m, draw = TRUE, intercept = TRUE) {
       C <- as.vector(AL[(m+1):(2*m),(m+1):(2*m)])
 
       T1 <- T%*%mulq
-      T2 <- rep(-muystar+Amat%*%mubq,rep(m,n))*exp(-0.5*rowSums((T%*%siglq)*T))
+      T2 <- rep(-muystar,rep(m,n))*exp(-0.5*rowSums((T%*%siglq)*T))
       F1 <- -crossprod(as.vector(T2*(muaq[1:m]*cos(T1)+muaq[(m+1):(2*m)]*sin(T1)))*T,T)
       F3 <- 2*colSums(as.vector(T2*(muaq[(m+1):(2*m)]*cos(T1)-muaq[1:m]*sin(T1)))*T)
 
@@ -225,17 +220,17 @@ sim_GPprobitRE = function(FUN, m, draw = TRUE, intercept = TRUE) {
       EqZTZ <- MZTZ(n,m,Tm,Tp,mulq,siglq)
 
       # update muystar
-      muystar_temp = EqZ %*% muaq + Amat %*% mubq
+      muystar_temp = EqZ %*% muaq
       muystar = muystar_temp + dnorm(muystar_temp)/(((pnorm(muystar_temp))^y)*((pnorm(muystar_temp)-1)^(1-y)))
       
       # update muaq,sigaq #
       sigaq <- solve(m * Eqinvs2 * diag(2*m) + EqZTZ)
-      muaq <- as.vector(crossprod(sigaq, crossprod(EqZ,(muystar - Amat%*%mubq))))
+      muaq <- as.vector(crossprod(sigaq, crossprod(EqZ, muystar)))
 
       # update Csq #
       
       Csq <- m/2*as.numeric(crossprod(muaq)+tr(sigaq))
-      lb <- LBC(y,X,Amat,T,Tm,Tp,As,mul0,sigl0,Csq,muaq,sigaq,mulq,siglq,sigb0,mubq,sigbq)$lb
+      lb <- LBC(y,X,T,Tm,Tp,As,mul0,sigl0,Csq,muaq,sigaq,mulq,siglq)$lb
 
       DIFF <- lb-lbold
       print(DIFF)
@@ -266,22 +261,18 @@ sim_GPprobitRE = function(FUN, m, draw = TRUE, intercept = TRUE) {
         EqZTZ <- MZTZ(n,m,Tm,Tp,mulq,siglq)
 
         # update muystar
-        muystar_temp = EqZ %*% muaq + Amat %*% mubq
+        muystar_temp = EqZ %*% muaq
         muystar = muystar_temp + dnorm(muystar_temp)/(((pnorm(muystar_temp))^y)*((pnorm(muystar_temp)-1)^(1-y)))
       
         # update muaq,sigaq #
         sigaq <- solve(m * Eqinvs2 * diag(2*m) + EqZTZ)
-        muaq <- as.vector(crossprod(sigaq, crossprod(EqZ,(muystar - Amat%*%mubq))))
-
-        # update mubq,sigbq #
-        sigbq <- solve(crossprod(Amat) + solve(sigbq))
-        mubq <- as.vector(crossprod(sigbq, crossprod(Amat, muystar-EqZ%*%muaq)))
+        muaq <- as.vector(crossprod(sigaq, crossprod(EqZ, muystar)))
 
         # update Cgq,Csq #
       
         Csq <- m/2*as.numeric(crossprod(muaq)+tr(sigaq))
 
-        lb <- LBC(y,X,Amat,T,Tm,Tp,As,mul0,sigl0,Csq,muaq,sigaq,mulq,siglq,sigb0,mubq,sigbq)$lb
+        lb <- LBC(y,X,T,Tm,Tp,As,mul0,sigl0,Csq,muaq,sigaq,mulq,siglq)$lb
       }
 
       lbrecord <- rbind(lbrecord,c(count,lb))
@@ -290,7 +281,7 @@ sim_GPprobitRE = function(FUN, m, draw = TRUE, intercept = TRUE) {
       cat(count,lb,round(mulq,1),Csq,dif,DIFF,apre,"\n")
     }
 
-    list(Csq=Csq,muaq=muaq,sigaq=sigaq, mubq = mubq, sigbq = sigbq, muystar = muystar,
+    list(Csq=Csq,muaq=muaq,sigaq=sigaq, muystar = muystar,
     mulq=mulq,siglq=siglq,lb=lb,lbrecord=lbrecord,apre=apre)
   }
 
@@ -314,28 +305,20 @@ sim_GPprobitRE = function(FUN, m, draw = TRUE, intercept = TRUE) {
   }
 
   set.seed(123)
-  n_=100 #number of i
   N_=500 # i * j
-  id=sample(1:n_,N_,replace=TRUE)
-  p_=c(.2,.5,.3)
-  m_=c(-2,0,1.5)
-  s_=c(.5,1,.5)
-  b_=rnormmix(n_,p_,m_,s_)
-  xobs=runif(N_, -1, 1)
-  y = rbinom(length(xobs),1,pnorm(FUN(xobs)+b_[id]))
+  xobs=runif(N_, 0, 1)
+  y = rbinom(length(xobs),1,pnorm(FUN(xobs)))
   # y = rbinom(length(xobs),1,pnorm(FUN(xobs))
   if (intercept == TRUE) {
     X = cbind(1, xobs)
   } else {
     X = as.matrix(xobs)
   }
-  Z = diag(N_)
   d = dim(X)[2]
   n = dim(X)[1]
   S = mixtools::rmvnorm(m, mu = rep(0, d), sigma = diag(d))
   T = Tfunc(X = X, S = S)$T
-  s = dim(Z)[2]
-  fit = VARC(y = y, X = X, Amat = Z, T = T, As = 25, mul0 = rep(0, d), sigl0 = 10 * diag(d), sigb0 = 10 * diag(s), fac = 1.5)
+  fit = VARC(y = y, X = X, T = T, As = 25, mul0 = rep(0, d), sigl0 = 10 * diag(d), fac = 1.5)
   categorize = function(x) {
     y = 0
     if (x < 0) {
@@ -347,19 +330,18 @@ sim_GPprobitRE = function(FUN, m, draw = TRUE, intercept = TRUE) {
   }
 
   Zmat = MZ(n,m,T,fit$mulq,fit$siglq)
-  fixed = Zmat %*% fit$muaq
-  eta = fixed + Z %*% fit$mubq  ## linear predictor in GLM
+  eta = Zmat %*% fit$muaq
   res = sapply(fit$muystar, categorize)
   if (draw == TRUE) {
     # plot(y-mean(y) ~ xobs, xlab = 'index', ylab = 'observed/fitted', main = 'Simulation result', type = 'p')
     ord = order(xobs)
-    plot(xobs[ord], fixed[ord], col = 'purple', xlab = 'index', ylab = 'observed/fitted', main = 'Simulation result', ylim = c(-10, 10), type = 'l')
+    plot(xobs[ord], eta[ord], col = 'purple', xlab = 'index', ylab = 'observed/fitted', main = 'Simulation result', ylim = c(-10, 10), type = 'l')
     # lines(xobs[ord], fixed[ord], col = 'purple')
     curve(FUN, from = 0, to = 1, col = 'red', lty = 2, add = TRUE)
     legend("topright", legend = c('fitted values', 'true function'), col = c('purple', 'red'), lty = c(1, 2), bg = 'gray95')
-    return(list(fit = fit, fixed = fixed, res = res, y = y, X = X, Zmat = Zmat, ete = eta))
+    return(list(fit = fit, res = res, y = y, X = X, Zmat = Zmat, ete = eta))
   } else {
-    return(list(fit = fit, fixed = fixed, res = res, y = y, X = X, Zmat = Zmat, eta = eta))
+    return(list(fit = fit, res = res, y = y, X = X, Zmat = Zmat, eta = eta))
   }
 }
 
