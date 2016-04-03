@@ -74,7 +74,7 @@ VB = function(y, x, W, mub0, sigb0, w0, rs0, ss0, rt0, st0, mupsi0, J, tol = 1.0
   rsoverssq = rsq / ssq
   mubq = mub0
   mupsiq = mupsi0
-  sigpsiq2 = mupsi0^2 / 100
+  sigpsiq2 = mupsi0^2 / 10
   sigpsiq = sqrt(sigpsiq2)
   mutq = rnorm(J, 0, st0_half/(rt0_half - 1) * ss0_half/(rs0_half - 1) * exp(-(1:J) * abs(mupsi0)))
   muystar = W %*% mubq + varphi %*% mutq

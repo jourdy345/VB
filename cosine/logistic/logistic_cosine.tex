@@ -1,0 +1,120 @@
+\documentclass[11pt]{article}
+
+% This first part of the file is called the PREAMBLE. It includes
+% customizations and command definitions. The preamble is everything
+% between \documentclass and \begin{document}.
+
+\usepackage[margin=0.6in]{geometry} % set the margins to 1in on all sides
+\usepackage{graphicx} % to include figures
+\usepackage{amsmath} % great math stuff
+\usepackage{amsfonts} % for blackboard bold, etc
+\usepackage{amsthm} % better theorem environments
+% various theorems, numbered by section
+\usepackage{amssymb}
+\usepackage[utf8]{inputenc}
+\usepackage{booktabs}
+\usepackage{array}
+\usepackage{courier}
+\usepackage[usenames, dvipsnames]{color}
+\usepackage{titlesec}
+\usepackage{empheq}
+\usepackage{tikz}
+
+\newcommand\encircle[1]{%
+  \tikz[baseline=(X.base)] 
+    \node (X) [draw, shape=circle, inner sep=0] {\strut #1};}
+ 
+% Command "alignedbox{}{}" for a box within an align environment
+% Source: http://www.latex-community.org/forum/viewtopic.php?f=46&t=8144
+\newlength\dlf  % Define a new measure, dlf
+\newcommand\alignedbox[2]{
+% Argument #1 = before & if there were no box (lhs)
+% Argument #2 = after & if there were no box (rhs)
+&  % Alignment sign of the line
+{
+\settowidth\dlf{$\displaystyle #1$}  
+    % The width of \dlf is the width of the lhs, with a displaystyle font
+\addtolength\dlf{\fboxsep+\fboxrule}  
+    % Add to it the distance to the box, and the width of the line of the box
+\hspace{-\dlf}  
+    % Move everything dlf units to the left, so that & #1 #2 is aligned under #1 & #2
+\boxed{#1 #2}
+    % Put a box around lhs and rhs
+}
+}
+
+
+\newtheorem{thm}{Theorem}[section]
+\newtheorem{lem}[thm]{Lemma}
+\newtheorem{prop}[thm]{Proposition}
+\newtheorem{cor}[thm]{Corollary}
+\newtheorem{conj}[thm]{Conjecture}
+
+\setcounter{secnumdepth}{4}
+
+\titleformat{\paragraph}
+{\normalfont\normalsize\bfseries}{\theparagraph}{1em}{}
+\titlespacing*{\paragraph}
+{0pt}{3.25ex plus 1ex minus .2ex}{1.5ex plus .2ex}
+
+\definecolor{myblue}{RGB}{72, 165, 226}
+\definecolor{myorange}{RGB}{222, 141, 8}
+
+\setlength{\heavyrulewidth}{1.5pt}
+\setlength{\abovetopsep}{4pt}
+
+
+\DeclareMathOperator{\id}{id}
+\DeclareMathOperator{\argmin}{\arg\!\min}
+\DeclareMathOperator{\Tr}{Tr}
+
+\newcommand{\bd}[1]{\mathbf{#1}} % for bolding symbols
+\newcommand{\RR}{\mathbb{R}} % for Real numbers
+\newcommand{\ZZ}{\mathbb{Z}} % for Integers
+\newcommand{\col}[1]{\left[\begin{matrix} #1 \end{matrix} \right]}
+\newcommand{\comb}[2]{\binom{#1^2 + #2^2}{#1+#2}}
+\newcommand{\bs}{\boldsymbol}
+\newcommand{\opn}{\operatorname}
+\begin{document}
+\nocite{*}
+
+\title{Cosine Basis Logistic}
+
+\author{Daeyoung Lim\thanks{Prof. Taeryon Choi} \\
+Department of Statistics \\
+Korea University}
+
+\maketitle
+\section{Logistic}
+\subsection{Model}
+  \begin{align*}
+    y &\sim \opn{Ber}\left(\opn{logit}^{-1}\left(\varphi_{J}\theta_{J}\right)\right)\\
+    \theta_{j}| \tau, \psi &\sim \mathcal{N}\left(0, \tau^{2}\exp\left[-j\left|\psi\right|\right]\right)\\
+    \tau^{2} &\sim \opn{IG}\left(\frac{r_{0,\tau}}{2}, \frac{s_{0,\tau}}{2}\right)\\
+    \psi &\sim \opn{DE}\left(0,\omega_{0}\right)
+  \end{align*}
+\subsection{Likelihood}
+  \begin{align*}
+    \ln p\left(y, \Theta\right) &= y^{\top}\varphi_{J}\theta_{J} - 1_{n}^{\top}\ln \left(1_{n} + \exp\left(\varphi_{j}\theta_{J}\right)\right)\\
+    &\quad -\frac{1}{2}\sum_{j=1}^{J}\ln\left(2\pi\tau^{2}\right) - j\left|\psi\right| - \frac{\theta_{j}^{2}e^{j\left|\psi\right|}}{\tau^{2}}\\
+    &\quad +\frac{r_{0,\tau}}{2}\ln\left(\frac{s_{0,\tau}}{2}\right) - \ln\Gamma\left(\frac{r_{0,\tau}}{2}\right) + \left(\frac{r_{0,\tau}}{2}+1\right)\ln\frac{1}{\tau^{2}} -\frac{s_{0,\tau}}{2}\frac{1}{\tau^{2}}\\
+    &\quad -\ln\frac{\omega_{0}}{2} -\omega_{0}\left|\psi\right|
+  \end{align*}
+\subsection{Getting around the intractability}
+\begin{align*}
+  -\ln\left(1+e^{x}\right) &= \max_{\xi \in \mathbb{R}}\left\{\lambda\left(\xi\right)x^{2} - \frac{1}{2}x+\Psi\left(\xi\right) \right\}, \quad \forall x \in \mathbb{R}\\
+  \lambda\left(\xi\right) &= -\tanh\left(\xi/2\right)/\left(4\xi\right)\\
+  \Psi\left(\xi\right) &= \xi/2 - \ln\left(1+e^{\xi}\right) + \xi\tanh\left(\xi/2\right)/4
+\end{align*}
+then
+\begin{align*}
+  -1_{n}^{\top}\ln\left(1_{n}+\exp\left(\varphi_{J}\theta_{J}\right)\right) &\geq 1_{n}^{\top}\left\{\lambda\left(\xi\right) \odot \left(\varphi_{J}\theta_{J}\right)^{2} -\frac{1}{2}\varphi_{J}\theta_{J} + \Psi\left(\xi\right) \right\}\\
+  &= \theta_{J}^{\top}\varphi_{J}^{\top}\opn{Dg}\left\{\lambda\left(\xi\right) \right\}\varphi_{J}\theta_{J} -\frac{1}{2}1_{n}^{\top}\varphi_{J}\theta_{J} + 1_{n}^{\top}\Psi\left(\xi\right)
+\end{align*}
+\begin{align*}
+  \ln \underline{p}\left(y,\Theta;\xi\right) &= y^{\top}\varphi_{J}\theta_{J} -\frac{1}{2}1_{n}^{\top}\varphi_{J}\theta_{J} +\theta_{J}^{\top}\varphi_{J}^{\top}\opn{Dg}\left\{\lambda\left(\xi\right) \right\}\varphi_{J}\theta_{J} +1_{n}^{\top}\Psi\left(\xi\right) \\
+    &\quad -\frac{1}{2}\sum_{j=1}^{J}\ln\left(2\pi\tau^{2}\right) - j\left|\psi\right| - \frac{\theta_{j}^{2}e^{j\left|\psi\right|}}{\tau^{2}}\\
+    &\quad +\frac{r_{0,\tau}}{2}\ln\left(\frac{s_{0,\tau}}{2}\right) - \ln\Gamma\left(\frac{r_{0,\tau}}{2}\right) + \left(\frac{r_{0,\tau}}{2}+1\right)\ln\frac{1}{\tau^{2}} -\frac{s_{0,\tau}}{2}\frac{1}{\tau^{2}}\\
+    &\quad -\ln\frac{\omega_{0}}{2} -\omega_{0}\left|\psi\right|
+\end{align*}
+\end{document}
