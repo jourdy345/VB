@@ -96,7 +96,7 @@ Korea University}
 \subsection{Likelihood}
   \begin{align*}
     \ln p\left(y, \Theta\right) &= y^{\top}\varphi_{J}\theta_{J} - 1_{n}^{\top}\ln \left(1_{n} + \exp\left(\varphi_{j}\theta_{J}\right)\right)\\
-    &\quad -\frac{1}{2}\sum_{j=1}^{J}\ln\left(2\pi\tau^{2}\right) - j\left|\psi\right| - \frac{\theta_{j}^{2}e^{j\left|\psi\right|}}{\tau^{2}}\\
+    &\quad -\frac{1}{2}\left\{\sum_{j=1}^{J}\ln\left(2\pi\tau^{2}\right) - j\left|\psi\right| + \frac{\theta_{j}^{2}e^{j\left|\psi\right|}}{\tau^{2}}\right\}\\
     &\quad +\frac{r_{0,\tau}}{2}\ln\left(\frac{s_{0,\tau}}{2}\right) - \ln\Gamma\left(\frac{r_{0,\tau}}{2}\right) + \left(\frac{r_{0,\tau}}{2}+1\right)\ln\frac{1}{\tau^{2}} -\frac{s_{0,\tau}}{2}\frac{1}{\tau^{2}}\\
     &\quad -\ln\frac{\omega_{0}}{2} -\omega_{0}\left|\psi\right|
   \end{align*}
@@ -113,8 +113,37 @@ then
 \end{align*}
 \begin{align*}
   \ln \underline{p}\left(y,\Theta;\xi\right) &= y^{\top}\varphi_{J}\theta_{J} -\frac{1}{2}1_{n}^{\top}\varphi_{J}\theta_{J} +\theta_{J}^{\top}\varphi_{J}^{\top}\opn{Dg}\left\{\lambda\left(\xi\right) \right\}\varphi_{J}\theta_{J} +1_{n}^{\top}\Psi\left(\xi\right) \\
-    &\quad -\frac{1}{2}\sum_{j=1}^{J}\ln\left(2\pi\tau^{2}\right) - j\left|\psi\right| - \frac{\theta_{j}^{2}e^{j\left|\psi\right|}}{\tau^{2}}\\
+    &\quad -\frac{1}{2}\left\{\sum_{j=1}^{J}\ln\left(2\pi\tau^{2}\right) - j\left|\psi\right| + \frac{\theta_{j}^{2}e^{j\left|\psi\right|}}{\tau^{2}}\right\}\\
     &\quad +\frac{r_{0,\tau}}{2}\ln\left(\frac{s_{0,\tau}}{2}\right) - \ln\Gamma\left(\frac{r_{0,\tau}}{2}\right) + \left(\frac{r_{0,\tau}}{2}+1\right)\ln\frac{1}{\tau^{2}} -\frac{s_{0,\tau}}{2}\frac{1}{\tau^{2}}\\
     &\quad -\ln\frac{\omega_{0}}{2} -\omega_{0}\left|\psi\right|
+\end{align*}
+\subsection{Update}
+\subsubsection{$\theta_{J}$}
+\begin{align*}
+  \Sigma_{\theta;\xi}^{q} &= \left(\varphi_{J}^{\top}\opn{Dg}\left\{\lambda\left(\xi\right) \right\}\varphi_{J}-\frac{1}{2}\frac{r_{q,\tau}}{s_{q,\tau}}\opn{Dg}\left(Q_{1:j}\right)\right)^{-1}\\
+  \mu_{\theta;\xi}^{q} &= \Sigma_{\theta;\xi}^{q}\varphi_{J}^{\top}\left(-2y +1_{n}\right)
+\end{align*}
+\subsubsection{$\tau^{2}$}
+\begin{align*}
+  r_{q,\tau} &= r_{0,\tau} + J\\
+  s_{q,\tau} &= s_{0,\tau} + \sum_{j=1}^{J}\left(\Sigma_{\theta;\xi,jj}^{q} + {\mu_{\theta;\xi,jj}^{q}}^{2}\right)Q_{j}\left(\mu_{\psi}^{q},{\sigma_{\psi}^{q}}^{2}\right)
+\end{align*}
+\subsubsection{$\psi$}
+\begin{align*}
+  {\sigma_{\psi}^{q}}^{2} &= -\frac{1}{2}\left\{\frac{\partial S_{1}}{\partial {\sigma_{\psi}^{q}}^{2}} +\frac{\partial S_{2}}{\partial {\sigma_{\psi}^{q}}^{2}}  \right\}^{-1}\\
+  \mu_{\psi}^{q} &= \mu_{\psi}^{q} + {\sigma_{\psi}^{q}}^{2}\left\{\frac{\partial S_{1}}{\partial \mu_{\psi}^{q}} + \frac{\partial S_{2}}{\partial \mu_{\psi}^{q}}\right\}
+\end{align*}
+\subsubsection{$\xi$}
+\begin{align*}
+  \xi^{\text{new}} &= \sqrt{\opn{dg}\left\{\varphi_{J}\left(\Sigma_{\theta;\xi}^{q}+\mu_{\theta;\xi}^{q}{\mu_{\theta;\xi}^{q}}^{\top}\right)\varphi_{J}^{\top} \right\}}
+\end{align*}
+where $\opn{dg}$ results in a vector with the diagonal entries of the argument matrix. On the other hand, $\opn{Dg}$ results in a diagonal matrix with its diagonal entries being the input vector.
+\subsection{LB}
+\begin{align*}
+  \mathcal{L} &= {\mu_{\theta;\xi}^{q}}^{\top}\varphi_{J}^{\top}\left(y -\frac{1}{2}1_{n}\right) + \Tr\left(\varphi_{J}^{\top}\opn{Dg}\left\{\lambda\left(\xi\right) \right\}\varphi_{J}\left(\Sigma_{\theta;\xi}^{q}+\mu_{\theta;\xi}^{q}{\mu_{\theta;\xi}^{q}}^{\top}\right)\right) + 1_{n}^{\top}\Psi\left(\xi\right)\\
+  &\quad +\frac{J}{2}\left(\opn{di}\left(\frac{r_{q,\tau}}{2}\right)-\ln\left(\frac{s_{q,\tau}}{2}\right)-\ln\left(2\pi\right)\right) +S_{1}+S_{2}\\
+  &\quad +\frac{r_{0,\tau}}{2}\ln\left(\frac{s_{0,\tau}}{2}\right)-\ln\Gamma\left(\frac{r_{0,\tau}}{2}\right) + \frac{r_{0,\tau}}{2}\left(\opn{di}\left(\frac{r_{q,\tau}}{2}\right)-\ln\left(\frac{s_{q,\tau}}{2}\right)\right) - \frac{s_{0,\tau}}{2}\frac{r_{q,\tau}}{s_{q,\tau}} -\ln\frac{\omega_{0}}{2}\\
+  &\quad +\frac{r_{q,\tau}}{2} + \ln\Gamma\left(\frac{r_{q,\tau}}{2}\right) -\frac{r_{q,\tau}}{2}\opn{di}\left(\frac{r_{q,\tau}}{2}\right) + \frac{J}{2}\left(1+\ln\left(2\pi\right)\right) + \frac{1}{2}\ln\left|\Sigma_{\theta;\xi}^{q}\right|\\
+  &\quad + \frac{1}{2}\left(\ln\left(2\pi{\sigma_{\psi}^{q}}^{2}\right)+1\right)
 \end{align*}
 \end{document}
