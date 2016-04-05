@@ -6,12 +6,11 @@ sim_cosine_probit = function(FUN, J, draw = TRUE, intercept = TRUE) {
   MGF_foldedNormal = function(sigma2, sigma, mu, t) {
     (exp( (0.5 * sigma2 * t^2) + (mu * t)) * (1 - pnorm(-mu/sigma - (sigma * t)))) + (exp((0.5 * sigma2 * t^2) - (mu * t)) * (1 - pnorm(mu/sigma - (sigma * t))))
   }
-
   der_Qj_mu = function(sigma2, sigma, mu, j) {
     (exp((0.5 * sigma2 * j^2) + (mu * j)) * dnorm(-mu/sigma - sigma * j) / sigma) + (j * exp((0.5 * sigma2 * j^2) + (mu * j)) * (1 - pnorm((-mu/sigma) - (sigma * j)))) - (exp(0.5 * sigma2 * j^2 - mu * j) * dnorm(mu/sigma - sigma * j) / sigma) - (j * exp((0.5 * sigma2 * j^2) - (mu * j)) * (1 - pnorm(mu/sigma - sigma * j)))
   }
   der_Qj_sigma2 = function(sigma2, sigma, mu, j) {
-    (-exp(0.5 * sigma2 * j^2 + mu * j) * dnorm(-mu/sigma - sigma * j) * ((mu/(2 * sigma^3)) - (j / (2 * sigma)))) + (0.5 * j^2 * exp(0.5 * sigma2 * j^2 + mu * j) * (1 - pnorm(-mu/sigma - (sigma * j)))) + (exp((0.5 * sigma2 * j^2) - (mu * j)) * dnorm(mu/sigma - (sigma * j)) * ((mu/(2 * sigma^2)) + (j/(2 * sigma)))) + (0.5 * j^2 * exp((0.5 * sigma2 * j^2) - (mu * j)) * (1 - pnorm(mu/sigma - sigma * j)))
+    (-exp(0.5 * sigma2 * j^2 + mu * j) * dnorm(-mu/sigma - sigma * j) * ((mu/(2 * sigma^3)) - (j / (2 * sigma2)))) + (0.5 * j^2 * exp(0.5 * sigma2 * j^2 + mu * j) * (1 - pnorm(-mu/sigma - (sigma * j)))) + (exp((0.5 * sigma2 * j^2) - (mu * j)) * dnorm(mu/sigma - (sigma * j)) * ((mu/(2 * sigma^3)) + (j/(2 * sigma2)))) + (0.5 * j^2 * exp((0.5 * sigma2 * j^2) - (mu * j)) * (1 - pnorm(mu/sigma - sigma * j)))
   }
 
   der_S1_mu = function(sigma2, sigma, mu, w0) {
@@ -19,15 +18,15 @@ sim_cosine_probit = function(FUN, J, draw = TRUE, intercept = TRUE) {
   }
 
   der_S1_sigma2 = function(sigma2, sigma, mu, w0) {
-    -w0 * (((1/(2 * sigma)) + (0.5 * mu^2 / sigma^3) * sqrt(2/pi) * exp(mu^2 / (2 * sigma2))) - (mu^2 / sigma^3 * dnorm(-mu/sigma)))
+    -w0 * (((1/(2 * sigma)) + (0.5 * mu^2 / sigma^3) * sqrt(2/pi) * exp(-mu^2 / (2 * sigma2))) - (mu^2 / sigma^3 * dnorm(-mu/sigma)))
   }
 
   der_S2_mu = function(sigma2, sigma, sigtq, mutq, mu, rsoverssq, rtoverstq, w0, J) {
-    ((-0.25 * J * (J + 1) / w0) * der_S1_mu(sigma2, sigma, mu, w0)) - (0.5 * rsoverssq * rtoverstq * sum((diag(sigtq) + mutq^2) * der_Qj_mu(sigma2, sigma, mu, (1:J))))
+    ((-0.25 * J * (J + 1) / w0) * der_S1_mu(sigma2, sigma, mu, w0)) - (0.5 * rsoverssq * rtoverstq * sum(((diag(sigtq) + mutq^2) * der_Qj_mu(sigma2, sigma, mu, (1:J)))))
   }
 
   der_S2_sigma2 = function(sigma2, sigma, sigtq, mutq, mu, rsoverssq, rtoverstq, w0, J) {
-    ((-0.25 * J * (J + 1) / w0) * der_S1_sigma2(sigma2, sigma, mu, w0)) - (0.5 * rsoverssq * rtoverstq * sum((diag(sigtq) + mutq^2) * der_Qj_sigma2(sigma2, sigma, mu, (1:J))))
+    ((-0.25 * J * (J + 1) / w0) * der_S1_sigma2(sigma2, sigma, mu, w0)) - (0.5 * rsoverssq * rtoverstq * sum(((diag(sigtq) + mutq^2) * der_Qj_sigma2(sigma2, sigma, mu, (1:J)))))
   }
 
 
@@ -83,9 +82,28 @@ sim_cosine_probit = function(FUN, J, draw = TRUE, intercept = TRUE) {
     sigtq = solve((rsoverssq * varphitvarphi) + (rsoverssq * rtoverstq * diag(MGF_foldedNormal(sigpsiq2, sigpsiq, mupsiq, (1:J)))))
     count = 0
     lbold = LB(y, x, W, sigbq, varphi, sigtq, mubq, mutq, sigpsiq2, mupsiq, rsq, ssq, rtq, stq, rs0, ss0, rt0, st0, sigb0, mub0, w0)
+    lbnew = 0
     lbrecord = c(lbold)
     while (dif > tol) {
       count = count + 1
+      a = 1
+      # Update psi
+      sigpsiq2_old = sigpsiq2
+      mupsiq_old = mupsiq
+      sigpsiq2_new = -0.5 / (der_S1_sigma2(sigpsiq2, sigpsiq, mupsiq, w0) + der_S2_sigma2(sigpsiq2, sigpsiq, sigtq, mutq, mupsiq, rsoverssq, rtoverstq, w0, J))
+      temp2 = sigpsiq2_new
+      mupsiq_old = mupsiq
+
+      # print(der_S2_mu(sigpsiq2, sigpsiq, sigtq, mutq, mupsiq, rsoverssq, rtoverstq, w0, J) == der_S1_mu(sigpsiq2, sigpsiq, mupsiq, w0))
+      temp = der_S1_mu(sigpsiq2, sigpsiq, mupsiq, w0) + der_S2_mu(sigpsiq2, sigpsiq, sigtq, mutq, mupsiq, rsoverssq, rtoverstq, w0, J)
+      while (sigpsiq2_new < 0) {
+        a = 2/3 * a
+        sigpsiq2_new = 1/(1/sigpsiq2_old + a * (1/sigpsiq2_new - 1/sigpsiq2_old))
+      }
+      sigpsiq2 = sigpsiq2_new
+      sigpsiq = sqrt(sigpsiq2)
+      mupsiq = mupsiq + a * sigpsiq2 * temp
+
       # Update theta
       sigtq = solve((rsoverssq * varphitvarphi) + (rsoverssq * rtoverstq * diag(MGF_foldedNormal(sigpsiq2, sigpsiq, mupsiq, (1:J)))))
       mutq = sigtq %*% crossprod(varphi, muystar - W %*% mubq)
@@ -102,44 +120,49 @@ sim_cosine_probit = function(FUN, J, draw = TRUE, intercept = TRUE) {
       # Update beta
       sigbq = solve(rsoverssq * (WtW + sigb0_inv))
       mubq = rsoverssq * sigbq %*% (sigb0_inv_sigbq + crossprod(W, muystar - varphi %*% mutq))
-      lbtmp = LB(y, x, W, sigbq, varphi, sigtq, mubq, mutq, sigpsiq2, mupsiq, rsq, ssq, rtq, stq, rs0, ss0, rt0, st0, sigb0, mub0, w0)
-      cat('lbtmp:', lbtmp, '\n')
-      # Reserve psi for step-halving
-      sigpsi2_old = sigpsiq2
-      mupsiq_old = mupsiq
 
-      # Update psi
-      sigpsiq2 = -0.5 / (der_S1_sigma2(sigpsiq2, sigpsiq, mupsiq, w0) + der_S2_sigma2(sigpsiq2, sigpsiq, sigtq, mutq, mupsiq, rsoverssq, rtoverstq, w0, J))
-      cat('sigpsiq2: ', sigpsiq2, '\n')
-      cat('der_S1_mu: ', der_S1_mu(sigpsiq2, sigpsiq, mupsiq, w0), '\n')
-      cat('der_S2_mu: ', der_S2_mu(sigpsiq2, sigpsiq, sigtq, mutq, mupsiq, rsoverssq, rtoverstq, w0, J), '\n')
-      print(der_S2_mu(sigpsiq2, sigpsiq, sigtq, mutq, mupsiq, rsoverssq, rtoverstq, w0, J) == der_S1_mu(sigpsiq2, sigpsiq, mupsiq, w0))
-      mupsiq = mupsiq + sigpsiq2 * (der_S1_mu(sigpsiq2, sigpsiq, mupsiq, w0) + der_S2_mu(sigpsiq2, sigpsiq, sigtq, mutq, mupsiq, rsoverssq, rtoverstq, w0, J))
-      cat('mupsiq: ', mupsiq, '\n')
-      sigpsiq = sqrt(sigpsiq2)
       lbnew = LB(y, x, W, sigbq, varphi, sigtq, mubq, mutq, sigpsiq2, mupsiq, rsq, ssq, rtq, stq, rs0, ss0, rt0, st0, sigb0, mub0, w0)
-      cat('lbnew: ', lbnew, '\n')
-      dif = lbnew - lbtmp
-      if (dif < 0) {
-        step = 1
-        dif_try = dif
-        while (dif_try < 0) {
-          step = 0.5 * step
-          sigpsiq2_try = 1/(1/sigpsiq2_old + step * (1/sigpsiq2 - 1/sigpsiq2_old))
-          sigpsiq_try = sqrt(sigpsiq2_try)
-          mupsiq_try = sigpsiq2_try * (mupsiq_old/sigpsiq2_old + step*(mupsiq/sigpsiq2 - mupsiq_old/sigpsiq2_old))
-          lbnew = LB(y, x, W, sigbq, varphi, sigtq, mubq, mutq, sigpsiq2_try, mupsiq_try, rsq, ssq, rtq, stq, rs0, ss0, rt0, st0, sigb0, mub0, w0)
-          dif_try = lbnew - lbtmp
-          cat('sigpsiq2_try: ', sigpsiq2_try, ', mupsiq_try: ', mupsiq_try, '\n')
+      diff = lbnew - lbold
+      if (diff < 0) {
+        a = 1
+        sigpsiq2_new = temp2
+        while (sigpsiq2_new < 0) {
+          a = 2/3 * a
+          sigpsiq2_new = 1/(1/sigpsiq2 + a * (1/temp2 - 1/sigpsiq2))
+          # sigpsiq2_try = 1/(1/sigpsiq2_old + step * (1/sigpsiq2 - 1/sigpsiq2_old))
+          # sigpsiq_try = sqrt(sigpsiq2_try)
+          # mupsiq_try = sigpsiq2_try * (mupsiq_old/sigpsiq2_old + step*(mupsiq/sigpsiq2 - mupsiq_old/sigpsiq2_old))
+          # lbnew = LB(y, x, W, sigbq, varphi, sigtq, mubq, mutq, sigpsiq2_try, mupsiq_try, rsq, ssq, rtq, stq, rs0, ss0, rt0, st0, sigb0, mub0, w0)
+          # dif_try = lbnew - lbtmp
+          # cat('sigpsiq2_try: ', sigpsiq2_try, ', mupsiq_try: ', mupsiq_try, '\n')
         }
-        sigpsiq2 = sigpsiq2_try
-        sigpsiq = sigpsiq_try
-        mupsiq = mupsiq_try
+        sigpsiq2 = sigpsiq2_new
+        sigpsiq = sqrt(sigpsiq2)
+        mupsiq = mupsiq_old + a * sigpsiq2 * temp
+
+        # Update theta
+        sigtq = solve((rsoverssq * varphitvarphi) + (rsoverssq * rtoverstq * diag(MGF_foldedNormal(sigpsiq2, sigpsiq, mupsiq, (1:J)))))
+        mutq = sigtq %*% crossprod(varphi, muystar - W %*% mubq)
+
+        # Update tau^2
+        stq = st0 + (rtoverstq * (tr((sigtq + tcrossprod(mutq)) %*% diag(MGF_foldedNormal(sigpsiq2, sigpsiq, mupsiq, (1:J))))))
+        stq_half = stq / 2
+        rtoverstq = rtq / stq
+
+        # Update sigma^2
+        sigb0_inv_sigbq = solve(sigb0, sigbq)
+        ssq = ss0 + (rtoverstq * (tr((sigtq + tcrossprod(mutq)) %*% diag(MGF_foldedNormal(sigpsiq2, sigpsiq, mupsiq, (1:J)))))) + tr(sigb0_inv_sigbq) + sum((mubq - mub0) * solve(sigb0, (mubq-mub0)))
+
+        # Update beta
+        sigbq = solve(rsoverssq * (WtW + sigb0_inv))
+        mubq = rsoverssq * sigbq %*% (sigb0_inv_sigbq + crossprod(W, muystar - varphi %*% mutq))
+        lbnew = LB(y, x, W, sigbq, varphi, sigtq, mubq, mutq, sigpsiq2, mupsiq, rsq, ssq, rtq, stq, rs0, ss0, rt0, st0, sigb0, mub0, w0)
+        diff = lbnew - lbold
       }
 
       dif = (lbnew - lbold)/abs(lbnew)
       lbold = lbnew
-      lbrecord = c(lbrecord, lbold)
+      lbrecord = c(lbrecord, lbnew)
       cat("count: ", count, ", lbnew: ", lbnew, ", dif: ", dif, "\n")
     }
     list(mutq = mutq, sigtq = sigtq, mubq = mubq, sigbq = sigbq, rtq = rtq, stq = stq, rsq = rsq, ssq = ssq, muystar = muystar, lbrecord = lbrecord)
@@ -159,7 +182,7 @@ sim_cosine_probit = function(FUN, J, draw = TRUE, intercept = TRUE) {
   mub0 = 0
   y = rbinom(length(x),1,pnorm(FUN(x) + W))
   sigb0 = matrix(1,nrow=1,ncol=1)
-  fit = VB(y, x, W, mub0, sigb0, w0 = 1, rs0 = 0.01, ss0 = 0.01, rt0 = 0.01, st0 = 0.01, mupsi0 = 1, J = 30, tol = 1.0e-06)
+  fit = VB(y, x, W, mub0, sigb0, w0 = 1, rs0 = 0.01, ss0 = 0.01, rt0 = 0.01, st0 = 0.01, mupsi0 = 1, J = J, tol = 1.0e-06)
   categorize = function(x) {
     y = 0
     if (x < 0) {

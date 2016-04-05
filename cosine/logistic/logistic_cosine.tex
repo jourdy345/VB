@@ -120,8 +120,8 @@ then
 \subsection{Update}
 \subsubsection{$\theta_{J}$}
 \begin{align*}
-  \Sigma_{\theta;\xi}^{q} &= \left(\varphi_{J}^{\top}\opn{Dg}\left\{\lambda\left(\xi\right) \right\}\varphi_{J}-\frac{1}{2}\frac{r_{q,\tau}}{s_{q,\tau}}\opn{Dg}\left(Q_{1:j}\right)\right)^{-1}\\
-  \mu_{\theta;\xi}^{q} &= \Sigma_{\theta;\xi}^{q}\varphi_{J}^{\top}\left(-2y +1_{n}\right)
+  \Sigma_{\theta;\xi}^{q} &= \left(-2\varphi_{J}^{\top}\opn{Dg}\left\{\lambda\left(\xi\right) \right\}\varphi_{J}+\frac{r_{q,\tau}}{s_{q,\tau}}\opn{Dg}\left(Q_{1:J}\right)\right)^{-1}\\
+  \mu_{\theta;\xi}^{q} &= \Sigma_{\theta;\xi}^{q}\varphi_{J}^{\top}\left(y -\frac{1}{2}1_{n}\right)
 \end{align*}
 \subsubsection{$\tau^{2}$}
 \begin{align*}
