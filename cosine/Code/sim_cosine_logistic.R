@@ -1,13 +1,6 @@
 sim_cosine_logistic = function(FUN, J) {
   lambda_xi = function(x) -tanh(x/2)/(4*x)
   Psi_xi = function(x) x/2 - log(1 + exp(x)) + x*tanh(x/2)/4
-  tr = function(X) sum(diag(X))
-  E_foldedNormal = function(mu, sigma2, sigma) {
-    (sigma * sqrt(2 / pi) * exp(-mu^2/(2 * sigma2))) + (mu * (1 - 2 * pnorm(-mu / sigma)))
-  }
-  MGF_foldedNormal = function(sigma2, sigma, mu, t) {
-    (exp( (0.5 * sigma2 * t^2) + (mu * t)) * (1 - pnorm(-mu/sigma - (sigma * t)))) + (exp((0.5 * sigma2 * t^2) - (mu * t)) * (1 - pnorm(mu/sigma - (sigma * t))))
-  }
 
   der_Qj_mu = function(sigma2, sigma, mu, j) {
     (exp((0.5 * sigma2 * j^2) + (mu * j)) * dnorm(-mu/sigma - sigma * j) / sigma) + (j * exp((0.5 * sigma2 * j^2) + (mu * j)) * (1 - pnorm((-mu/sigma) - (sigma * j)))) - (exp(0.5 * sigma2 * j^2 - mu * j) * dnorm(mu/sigma - sigma * j) / sigma) - (j * exp((0.5 * sigma2 * j^2) - (mu * j)) * (1 - pnorm(mu/sigma - sigma * j)))
@@ -52,7 +45,7 @@ sim_cosine_logistic = function(FUN, J) {
     # varphi = sqrt(2)*cos(outer(x,pi*(1:J)))
     crossprod(t1, y - 0.5) + sum(lambda * diag(varphi %*% tcrossprod(sigtq, varphi))) + sum(t1^2 * lambda) + sum(Psi_xi(xi))
     + 0.5 * J * (digamma(half_rtq) - log(half_stq) - log(2*pi)) + S1(mupsiq, sigpsiq2, w0) + S2(mupsiq, sigpsiq2, w0, J, rtq, stq, sigtq, mutq)
-    + half_rt0 * log(half_st0) - lgamma(half_rt0) + half_rt0 * (digamma(half_rtq) - log(half_stq)) - half_st0 * ratioq - log(w0/2)
+    + half_rt0 * log(half_st0) - lgamma(half_rt0) + half_rt0 * (digamma(half_rtq) - log(half_stq)) - half_st0 * ratioq + log(w0/2)
     + half_rtq + lgamma(half_rtq) - half_rtq * digamma(half_rtq) + 0.5 * (J * (1 + log(2*pi)) + determinant(sigtq)$modulus[1] + log(2*pi*sigpsiq2) + 1)
   }
 

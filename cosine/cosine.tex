@@ -205,18 +205,18 @@ where
 \subsection{Update}
 \subsubsection{$\theta_{j}$}
 \begin{align*}
-  \Sigma_{\theta}^{q} &\leftarrow \left(\frac{r_{q,\sigma}}{s_{q,\sigma}}\varphi^{\top}_{J}\varphi_{J} +\frac{r_{q,\sigma}}{s_{q,\sigma}}\frac{r_{q,\tau}}{s_{q,\tau}}\opn{dg}\left(\mathsf{E}\left[\Gamma^{-1}\right]\right) \right)^{-1}\\
+  \Sigma_{\theta}^{q} &\leftarrow \left(\varphi^{\top}_{J}\varphi_{J} +\frac{r_{q,\sigma}}{s_{q,\sigma}}\frac{r_{q,\tau}}{s_{q,\tau}}\opn{Dg}\left(Q_{1:J}\right) \right)^{-1}\\
   \mu_{\theta}^{q} &\leftarrow \Sigma_{\theta}^{q}\varphi_{J}^{\top}\left(\mu_{y^{*}}^{q}-W\mu_{\beta}^{q}\right)
 \end{align*}
 \subsubsection{$\tau^{2}$}
 \begin{align*}
   r_{q,\tau} &\leftarrow r_{0,\tau} +J\\
-  s_{q,\tau} &\leftarrow s_{0,\tau} + \frac{r_{q,\tau}}{s_{q,\tau}}\Tr\left(\left(\Sigma_{\theta}^{q}+\mu_{\theta}^{q}{\mu_{\theta}^{q}}^{\top}\right)\opn{dg}\left(\mathsf{E}\left[\Gamma^{-1}\right]\right) \right)
+  s_{q,\tau} &\leftarrow s_{0,\tau} + \frac{r_{q,\sigma}}{s_{q,\sigma}}\sum_{j=1}^{J}\left(\Sigma_{\theta, jj}^{q}+{\mu_{\theta, j}^{q}}^{2}\right)Q_{j}
 \end{align*}
 \subsubsection{$\sigma^{2}$}
 \begin{align*}
   r_{q,\sigma} &\leftarrow r_{0,\sigma} + J + p + 1\\
-  s_{q,\sigma} &\leftarrow s_{0,\sigma} +\frac{r_{q,\tau}}{s_{q,\tau}}\Tr\left(\left(\Sigma_{\theta}^{q}+\mu_{\theta}^{q}{\mu_{\theta}^{q}}^{\top}\right)\opn{dg}\left(\mathsf{E}\left[\Gamma^{-1}\right]\right) \right) + \Tr\left({\Sigma_{\beta}^{0}}^{-1}\Sigma_{\beta}^{q}\right) +\left(\mu_{\beta}^{q}-\mu_{\beta}^{0}\right)^{\top}{\Sigma_{\beta}^{0}}^{-1}\left(\mu_{\beta}^{q}-\mu_{\beta}^{0}\right)
+  s_{q,\sigma} &\leftarrow s_{0,\sigma} +\frac{r_{q,\tau}}{s_{q,\tau}}\sum_{j=1}^{J}\left(\Sigma_{\theta, jj}^{q}+{\mu_{\theta, j}^{q}}^{2}\right)Q_{j} + \Tr\left({\Sigma_{\beta}^{0}}^{-1}\Sigma_{\beta}^{q}\right) +\left(\mu_{\beta}^{q}-\mu_{\beta}^{0}\right)^{\top}{\Sigma_{\beta}^{0}}^{-1}\left(\mu_{\beta}^{q}-\mu_{\beta}^{0}\right)
 \end{align*}
 \subsubsection{$\beta$}
 \begin{align*}
