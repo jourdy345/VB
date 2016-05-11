@@ -33,6 +33,7 @@ sim_cosine_logistic = function(FUN, J) {
   }
   S1 = function(mu, sigma2, w0) -w0 * ((sqrt(sigma2 * 2 / pi) * exp(-mu^2 / (2 * sigma2))) + (mu * (1 - 2 * pnorm(-mu/sqrt(sigma2)))))
   S2 = function(mupsiq, sigpsiq2, w0, J, rtq, stq, sigtq, mutq) (-0.5 * rtq/stq * sum((diag(sigtq) + mutq^2) * Qj(mupsiq, sigpsiq2, 1:J))) - (J*(J+1)/(4*w0) * S1(mupsiq, sigpsiq2, w0))
+  
   LB = function(mutq, varphi, xi, sigtq, rtq, stq, rt0, st0, w0, mupsiq, sigpsiq2) {
     J = dim(varphi)[2]
     t1 = as.vector(varphi %*% mutq)

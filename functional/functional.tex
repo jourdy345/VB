@@ -1,0 +1,140 @@
+\documentclass[11pt]{article}
+
+% This first part of the file is called the PREAMBLE. It includes
+% customizations and command definitions. The preamble is everything
+% between \documentclass and \begin{document}.
+
+\usepackage[margin=0.6in]{geometry} % set the margins to 1in on all sides
+\usepackage{graphicx} % to include figures
+\usepackage{amsmath} % great math stuff
+\usepackage{amsfonts} % for blackboard bold, etc
+\usepackage{amsthm} % better theorem environments
+% various theorems, numbered by section
+\usepackage{amssymb}
+\usepackage[utf8]{inputenc}
+\usepackage{booktabs}
+\usepackage{array}
+\usepackage{courier}
+\usepackage[usenames, dvipsnames]{color}
+\usepackage{titlesec}
+\usepackage{empheq}
+\usepackage{tikz}
+
+\newcommand\encircle[1]{%
+  \tikz[baseline=(X.base)] 
+    \node (X) [draw, shape=circle, inner sep=0] {\strut #1};}
+ 
+% Command "alignedbox{}{}" for a box within an align environment
+% Source: http://www.latex-community.org/forum/viewtopic.php?f=46&t=8144
+\newlength\dlf  % Define a new measure, dlf
+\newcommand\alignedbox[2]{
+% Argument #1 = before & if there were no box (lhs)
+% Argument #2 = after & if there were no box (rhs)
+&  % Alignment sign of the line
+{
+\settowidth\dlf{$\displaystyle #1$}  
+    % The width of \dlf is the width of the lhs, with a displaystyle font
+\addtolength\dlf{\fboxsep+\fboxrule}  
+    % Add to it the distance to the box, and the width of the line of the box
+\hspace{-\dlf}  
+    % Move everything dlf units to the left, so that & #1 #2 is aligned under #1 & #2
+\boxed{#1 #2}
+    % Put a box around lhs and rhs
+}
+}
+
+
+\newtheorem{thm}{Theorem}[section]
+\newtheorem{lem}[thm]{Lemma}
+\newtheorem{prop}[thm]{Proposition}
+\newtheorem{cor}[thm]{Corollary}
+\newtheorem{conj}[thm]{Conjecture}
+
+\setcounter{secnumdepth}{4}
+
+\titleformat{\paragraph}
+{\normalfont\normalsize\bfseries}{\theparagraph}{1em}{}
+\titlespacing*{\paragraph}
+{0pt}{3.25ex plus 1ex minus .2ex}{1.5ex plus .2ex}
+
+\definecolor{myblue}{RGB}{72, 165, 226}
+\definecolor{myorange}{RGB}{222, 141, 8}
+
+\setlength{\heavyrulewidth}{1.5pt}
+\setlength{\abovetopsep}{4pt}
+
+
+\DeclareMathOperator{\id}{id}
+\DeclareMathOperator{\argmin}{\arg\!\min}
+\DeclareMathOperator{\Tr}{Tr}
+
+\newcommand{\bd}[1]{\mathbf{#1}} % for bolding symbols
+\newcommand{\RR}{\mathbb{R}} % for Real numbers
+\newcommand{\ZZ}{\mathbb{Z}} % for Integers
+\newcommand{\col}[1]{\left[\begin{matrix} #1 \end{matrix} \right]}
+\newcommand{\comb}[2]{\binom{#1^2 + #2^2}{#1+#2}}
+\newcommand{\bs}{\boldsymbol}
+\newcommand{\opn}{\operatorname}
+\begin{document}
+\nocite{*}
+
+\title{Functional regression paper review}
+
+\author{Daeyoung Lim\thanks{Prof. Taeryon Choi} \\
+Department of Statistics \\
+Korea University}
+
+\maketitle
+\section{Functional Principal Components Analysis}
+\subsection{Connection to the conventional PCA}
+There are two approaches to PCA: SVA and eigendecomposition of the covariance matrix. These are equivalent after centering the columns of design matrix $X$. The centering is essential because $\left(n-1\right)^{-1}X^{\top}X$ is not the covariance matrix otherwise. SVD states the identity $X = U\Sigma V^{\top}$. Then, $X^{\top}X = V\Sigma U^{\top}U \Sigma V^{\top}$. $U$ and $V$ are orthogonal matrices, forcing $U^{\top}$ and $U$ to cancel each other out. Hence, $X^{\top}X=V\Sigma^{2} V^{\top}$, which resembles the eigendecomposition of $X^{\top}X$. \par
+The functional analog of PCA uses the covariance function instead and defines the covariance function $v\left(s,t\right)$ by
+\begin{equation}
+  v\left(s,t\right) = \frac{1}{n-1}\sum_{i=1}^{n}x_{i}\left(s\right)x_{i}\left(t\right).
+\end{equation}
+The eigenequation $A\vec{v}=\lambda\vec{v}$ becomes an integral
+\begin{equation}\label{feigenequation}
+  \int v\left(s,t\right)\xi\left(t\right)\,dt = \rho \xi\left(s\right)
+\end{equation}
+where $\xi\left(\cdot\right)$ works as the eigenvector; hence the name \emph{eigenfunction}. It corresponds to an \emph{integral transform} and is often written with the operator notation
+\begin{equation}
+  V\xi = \rho \xi
+\end{equation}
+making it seem identical to the matrix eigenequation.
+\subsection{Computation}
+The above introduction is useful in facilitating the understanding of fPCA. However, it does not tell us how to actually do it. The most intuitive way of doing it is to discretize the design function $X_{i}\left(t\right)$ into a design matrix. However in Jeff Goldsmith's paper, basis function expansion technique was adopted to address the computation. Suppose each design function $X_{i}\left(t\right)$ has basis expansion
+\begin{equation}
+  X_{i}\left(t\right) = \sum_{k=1}^{K}c_{ik}\phi_{k}\left(t\right).
+\end{equation}
+The notation simplies upon defining vector-valued functions $\bs{X}\left(t\right)$ and $\bs{\phi}\left(t\right)$ as
+\begin{equation}
+  \bs{X}=\bs{C\phi},
+\end{equation}
+where the coefficient matrix $\bs{C}$ is $n \times K$. Then the covariance matrix is
+\begin{equation}
+  v\left(s,t\right) = \frac{1}{n-1}\bs{\phi}\left(s\right)^{\top}\bs{C}^{\top}\bs{C\phi}\left(t\right).
+\end{equation}
+Introducing another matrix $\bs{W}=\int \bs{\phi}\bs{\phi}^{\top}$, we can now say that
+\begin{align}
+  \int v\left(s,t\right)\xi\left(t\right)\,dt &= \frac{1}{n-1}\int \bs{\phi}\left(s\right)^{\top}\bs{C}^{\top}\bs{C}\bs{\phi}\left(t\right)\bs{\phi}\left(t\right)^{\top}\bs{b}\,dt\\
+  &= \bs{\phi}\left(s\right)^{\top}\frac{1}{n-1}\bs{C}^{\top}\bs{CWb}
+\end{align}
+where the vector $\bs{b}$ comes from the expansion of the eigenfunction $\xi\left(s\right)$:
+\begin{align}
+  \xi\left(s\right) &= \sum_{k=1}^{K}b_{k}\phi_{k}\left(s\right)\\
+  &= \bs{\phi}\left(s\right)^{\top}\bs{b}.
+\end{align}
+The eigenequation \ref{feigenequation} reduces to a matrix equation
+\begin{equation}
+  \bs{\phi}\left(s\right)^{\top}\frac{1}{n-1}\bs{C}^{\top}\bs{CWb} = \rho \bs{\phi}\left(s\right)^{\top}\bs{b}.
+\end{equation}
+We can do without $\bs{\phi}$ since the equation must hold for all $s$:
+\begin{equation}
+  \frac{1}{n-1}\bs{C}^{\top}\bs{CWb} =\rho \bs{b}.
+\end{equation}
+However, $\left\| \xi \right\| =1$ indicates $\bs{b}^{\top}\bs{Wb} = 1$. Furthermore, by the definition of \emph{orthogonality} of functions, $\xi_{1}$ and $\xi_{2}$ are orthogonal if and only if $\bs{b}_{1}^{\top}\bs{Wb}_{2} = 0$. Since the equation is not straightforward and does not look like an eigenequation, we define $\bs{u} = \bs{W}^{1/2}\bs{b}$ and solve
+\begin{equation}
+  \frac{1}{n-1}\bs{W}^{1/2}\bs{C}^{\top}\bs{CW}^{1/2}\bs{u} = \rho \bs{u}
+\end{equation}
+and revert it by $\bs{b}=\bs{W}^{-1/2}\bs{u}$. Note that if the basis functions are orthonormal, $\bs{W}$ reduces to an identity matrix.
+\end{document}
