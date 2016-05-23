@@ -137,4 +137,11 @@ However, $\left\| \xi \right\| =1$ indicates $\bs{b}^{\top}\bs{Wb} = 1$. Further
   \frac{1}{n-1}\bs{W}^{1/2}\bs{C}^{\top}\bs{CW}^{1/2}\bs{u} = \rho \bs{u}
 \end{equation}
 and revert it by $\bs{b}=\bs{W}^{-1/2}\bs{u}$. Note that if the basis functions are orthonormal, $\bs{W}$ reduces to an identity matrix.
+\section{Paper Review}
+The author's model is as follows:
+\begin{align}
+  Y_{i} &= \bs{z}_{i}\bs{\beta} + \int_{0}^{1} X_{i}\left(t\right)\gamma\left(t\right)\,dt + \epsilon_{i}^{Y}\\
+  \epsilon_{i}^{Y} &\sim \opn{N}\left(0,\sigma_{Y}^{2}\right).
+\end{align}
+The reason why there is an integral is because we have always defined a model with respect to the inner product of a covariate vector and the coefficient vector. Since the covariate is a function, i.e., a stochastic process, the inner product should be defined in terms of the integral. Although $X_{i}\left(t\right)$ is a function defined on a continuum, we cannot observe it on every single point mass on the domain since it will be uncountable. Instead, it is, in practice, observed on a discrete grid, often with error(but fairly small). We will make another matrix that contains all the observed functional covariates and name it $W_{i}\left(t_{ij}\right)$.
 \end{document}
