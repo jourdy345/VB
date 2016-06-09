@@ -127,7 +127,7 @@ Let's note the following fact: if $X \sim \mathcal{N}\left(\mu, \sigma^{2}\right
   \mathsf{E}e^{t\left|X\right|} &= \exp\left\{\frac{\sigma^{2}t^{2}}{2} + \mu t \right\} \left[1-\Phi\left(-\frac{\mu}{\sigma}-\sigma t\right) \right] + \exp\left\{\frac{\sigma^{2}t^{2}}{2} -\mu t \right\}\left[1-\Phi\left(\frac{\mu}{\sigma}-\sigma t\right) \right].
 \end{align*}
 
-\section{Probit}
+\section{Probit: No Restriction}
 \subsection{Model specifications}
 \begin{align*}
   \opn{Pr}\left(y_{i}=1\middle| f, \beta\right) &= \Phi\left(w_{i}^{\top}\beta + f\left(x_{i}\right)\right)\\
@@ -236,4 +236,78 @@ where
   {\sigma_{\psi}^{q}}^{2} &\leftarrow -\frac{1}{2}\left\{\frac{\partial S_{1}}{\partial {\sigma_{\psi}^{q}}^{2}}+\frac{\partial S_{2}}{\partial {\sigma_{\psi}^{q}}^{2}} \right\}^{-1}\\
   \mu_{\psi}^{q} &\leftarrow \mu_{\psi}^{q} +{\sigma_{\psi}^{q}}^{2}\left\{\frac{\partial S_{1}}{\partial \mu_{\psi}^{q}}+\frac{\partial S_{2}}{\partial \mu_{\psi}^{q}} \right\}
 \end{align*}
+
+\section{Probit: Monotone Shape Restriction}
+\subsection{Model}
+  \begin{align*}
+    \opn{P}\left(y_{i}=1|\beta, \theta_{J}\right) &= \Phi\left(w_{i}^{\top}\beta + \delta\theta_{J}^{\top}\varphi_{J}^{a}\left(x_{i}\right)\theta_{J}\right)\\
+    y_{i}^{*} &= w_{i}^{\top}\beta + \delta \theta_{J}^{\top}\varphi_{J}^{a}\left(x_{i}\right)\theta_{J} + \epsilon_{i}, \quad \epsilon_{i} \sim \mathcal{N}\left(0,1\right)\\
+    y_{i} &= \begin{cases}1, & \text{if $y_{i}^{*} \geq 0$}\\ 0, & \text{if $y_{i}^{*} < 0$} \end{cases}\\
+    \theta_{j}|\sigma, \tau, \gamma &\sim \mathcal{N}\left(0, \sigma\tau^{2}\exp\left[-j\gamma\right]\right), \quad \text{for $j\geq 2$}\\
+    \theta_{0}|\sigma &\sim \mathcal{N}\left(0, \sigma\sigma_{0}^{2}\right)\\
+    \tau^{2} &\sim \opn{IG}\left(\frac{r_{0,\tau}}{2}, \frac{s_{0,\tau}}{2}\right)\\
+    \sigma^{2} &\sim \opn{IG}\left(\frac{r_{0,\sigma}}{2}, \frac{s_{0,\sigma}}{2}\right)\\
+    \beta &\sim \mathcal{N}\left(\mu_{\beta}^{0}, \sigma^{2}\Sigma_{\beta}^{0}\right)\qquad \left(p\times 1\right)\\
+    \gamma &\sim \opn{Exp}\left(\omega_{0}\right)\\
+    \left|\psi\right| &= \gamma, \quad \psi \sim \opn{DE}\left(0,\omega_{0}\right)\\
+    \varphi_{0,0}^{a}\left(x\right) &= x-0.5\\
+    \varphi_{0,j}^{a}\left(x\right) &= \varphi_{j,0}^{a}\left(x\right)=\frac{\sqrt{2}}{\pi j}\sin\left(\pi jx\right) - \frac{\sqrt{2}}{\left(\pi j\right)^{2}}\left[1-\cos\left(\pi j\right)\right] \; \text{for } j \geq 1,\\
+    \varphi_{j,j}^{a}\left(x\right) &= \frac{\sin\left(2\pi jx\right)}{2\pi j} + x - 0.5 \; \text{for } j \geq 1,\\
+    \varphi_{j,k}^{a}\left(x\right) &= \frac{\sin\left[\pi\left(j + k\right)x\right]}{\pi\left(j+k\right)} + \frac{\sin\left[\pi\left(j-k\right)x\right]}{\pi\left(j-k\right)}\\
+    &\quad -\frac{1-\cos\left[\pi\left(j+k\right)\right]}{\left[\pi\left(j+k\right)\right]^{2}} -\frac{1-\cos\left[\pi\left(j-k\right)\right]}{\left[\pi\left(j-k\right)\right]^{2}}\\
+    &\quad \text{for $j\neq k$ and $j, k \geq 1$}.
+  \end{align*}
+Joint density:
+  \begin{align*}
+    p\left(y,y^{*}, \Theta\right) &\propto  \mathcal{N}\left(\theta_{0}|0,\sigma\sigma_{0}^{2} \right)\left\{\prod_{j=1}^{J}\mathcal{N}\left(\theta_{j}|0,\sigma\tau^{2}\exp\left[-j\left|\psi\right|\right]\right) \right\}\opn{IG}\left(\tau^{2}\middle| \frac{r_{0,\tau}}{2}, \frac{s_{0,\tau}}{2}\right)\opn{IG}\left(\sigma^{2}\middle| \frac{r_{0,\sigma}}{2}, \frac{s_{0,\sigma}}{2}\right)\mathcal{N}\left(\beta|\mu_{\beta}^{0}, \sigma^{2}\Sigma_{\beta}^{0}\right)\\
+    &\quad \times \opn{DE}\left(\psi|0,\omega_{0}\right)\left\{\prod_{i=1}^{n}\left(1\left[y_{i}^{*}\geq 0\right]1\left[y_{i}=1\right] + 1\left[y_{i}^{*}<0\right]1\left[y_{i}=0\right]\right)\phi\left(y_{i}^{*}-w_{i}^{\top}\beta-\delta\theta_{J}^{\top}\varphi_{J}^{a}\left(x_{i}\right)\theta_{J}\right) \right\}
+  \end{align*}
+\subsection{Update}
+\subsubsection{$y_{i}^{*}$}
+  \begin{align*}
+    \ln q\left(y_{i}^{*}\right) &\propto -\frac{1}{2}\opn{E}_{-y_{i}^{*}}\left({y_{i}^{*}}^{2} -2y_{i}^{*}\left(w_{i}^{\top}\beta +\delta\theta_{J}^{\top}\varphi_{J}^{a}\left(x_{i}\right)\theta_{J}\right)+\left(w_{i}^{\top}\beta + \delta\theta_{J}^{\top}\varphi_{J}^{a}\left(x_{i}\right)\theta_{J}\right)^{2}\right)\\
+    &\propto -\frac{1}{2}\left({y_{i}^{*}}^{2} -2y_{i}^{*}\left(w_{i}^{\top}\mu_{\beta}^{q} +\delta\left(\Tr\left(\varphi_{J}^{a}\left(x_{i}\right)\Sigma_{\theta}^{q}\right)+{\mu_{\theta}^{q}}^{\top}\varphi_{J}^{a}\left(x_{i}\right)\mu_{\theta}^{q}\right)\right)\right.\\
+    &\quad  +\Tr\left(w_{i}w_{i}^{\top}\Sigma_{\beta}^{q}\right) + {\mu_{\beta}^{q}}^{\top}w_{i}w_{i}^{\top}\mu_{\beta}^{q} + 2\delta w_{i}^{\top}\mu_{\beta}^{q}\left(\Tr\left(\varphi_{J}^{a}\left(x_{i}\right)\Sigma_{\theta}^{q}\right)+ {\mu_{\theta}^{q}}^{\top}\varphi_{J}^{a}\left(x_{i}\right)\mu_{\theta}^{q}\right)\\
+    &\quad \left. +2\delta^{2}\Tr\left(\varphi_{J}^{a}\left(x_{i}\right)\Sigma_{\theta}^{q}\right)^{2} + 4\delta^{2}{\mu_{\theta}^{q}}^{\top}\varphi_{J}^{a}\left(x_{i}\right)\Sigma_{\theta}^{q}\varphi_{J}^{a}\left(x_{i}\right)\mu_{\theta}^{q} + \delta^{2}\left(\Tr\left(\varphi_{J}^{a}\left(x_{i}\right)\Sigma_{\theta}^{q}\right)+ {\mu_{\theta}^{q}}^{\top}\varphi_{J}^{a}\left(x_{i}\right)\mu_{\theta}^{q}\right)^{2}\right)\\
+    &\propto -\frac{1}{2}\left(y_{i}^{*} - w_{i}^{\top}\mu_{\beta}^{q} - \delta\left(\Tr\left(\varphi_{J}\left(x_{i}\right)\Sigma_{\theta}^{q}\right)+{\mu_{\theta}^{q}}^{\top}\varphi_{J}^{a}\left(x_{i}\right)\mu_{\theta}\right)\right)^{2}
+  \end{align*}
+Therefore,
+  \begin{align*}
+    q\left(y_{i}^{*}\right) &\sim \mathcal{TN}\left(\mu_{y_{i}^{*}}, 1\right)
+  \end{align*}
+truncated at zero where
+  $$
+    \mu_{y_{i}^{*}} = w_{i}^{\top}\mu_{\beta}^{q} + \delta\Tr\left(\varphi_{J}\left(x_{i}\right)\Sigma_{\theta}^{q}\right)+\delta{\mu_{\theta}^{q}}^{\top}\varphi_{J}^{a}\left(x_{i}\right)\mu_{\theta}.
+  $$
+To distinguish the mean of the normal distribution and the mean of the truncated normal distribution, the latter will be denoted $\mu_{y_{i}^{*}}^{q}$ where
+  $$
+    \opn{E}\left(y_{i}^{*}\right) = \mu_{y_{i}^{*}}^{q} = \mu_{y_{i}^{*}} + \frac{\phi\left(\mu_{y_{i}^{*}}\right)}{\Phi\left(\mu_{y_{i}^{*}}\right)^{y_{i}}\left(\Phi\left(\mu_{y_{i}^{*}}\right)-1\right)^{1-y_{i}}}.
+  $$
+\subsubsection{$\theta$}
+  \begin{align*}
+    \ln q\left(\theta\right) &\propto \opn{E}_{-\theta}\left[-\frac{1}{2}\sum_{j=1}^{J}\frac{e^{j\left|\psi\right|}\theta_{j}^{2}}{\sigma^{2}\tau^{2}} -\frac{1}{2}\sum_{i=1}^{n}\left(y_{i}^{*}-w_{i}^{\top}\beta -\theta_{J}^{\top}\varphi_{J}^{a}\left(x_{i}\right)\theta_{J}\right)^{2} \right]\\
+    &\propto -\frac{1}{2}\opn{E}\left(\frac{1}{\sigma_{2}}\right)\opn{E}\left(\frac{1}{\tau^{2}}\right)\theta_{J}^{\top}\opn{Dg}\left(Q_{1:J}\right)\theta_{J}\\
+    &\quad  -\frac{1}{2}\sum_{i=1}^{n}\opn{E}\left(\left(w_{i}^{\top}\beta + \theta_{J}^{\top}\varphi_{J}^{a}\left(x_{i}\right)\theta_{J} \right)^{2} -2y_{i}^{*}\left(w_{i}^{\top}\beta + \theta_{J}^{\top}\varphi_{J}^{a}\left(x_{i}\right)\theta_{J}\right) \right)
+  \end{align*}
+Seems like the authors of the original paper used NCVMP.
+\subsubsection{$\beta$}
+  \begin{align*}
+    \ln q\left(\beta\right)&\propto \opn{E}_{-\beta}\left(-\frac{1}{2\sigma^{2}}\left(\beta-\mu_{\beta}^{0}\right)^{\top}{\Sigma_{\beta}^{0}}^{-1}\left(\beta-\mu_{\beta}^{0}\right)-\frac{1}{2}\sum_{i=1}^{n}\left(y_{i}^{*}-w_{i}^{\top}\beta -\delta\theta_{J}^{\top}\varphi_{J}^{a}\left(x_{i}\right)\theta_{J}\right)^{2} \right)\\
+    &\propto -\frac{1}{2}\left(\beta^{\top}\left(\opn{E}\left(\frac{1}{\sigma^{2}}\right){\Sigma_{\beta}^{0}}^{-1} + W^{\top}W\right)\beta \right.\\
+    &\quad  \left. -2\left(\opn{E}\left(\frac{1}{\sigma^{2}}\right)\beta^{\top}{\Sigma_{\beta}^{0}}^{-1}\mu_{\beta}^{0} +\beta^{\top}W^{\top}\mu_{y^{*}}^{q}-\beta^{\top}\delta\sum_{i=1}^{n}w_{i}\left(\Tr\left(\varphi_{J}^{a}\left(x_{i}\right)\Sigma_{\theta}^{q}\right)+{\mu_{\theta}^{q}}^{\top}\varphi_{J}^{a}\left(x_{i}\right)\mu_{\theta}^{q}\right)\right)\right)
+  \end{align*}
+Therefore, $q\left(\beta\right) = \mathcal{N}\left(\mu_{\beta}^{q}, \Sigma_{\beta}^{q}\right)$ where
+\begin{align*}
+  \Sigma_{\beta}^{q} &= \left(\opn{E}\left(\frac{1}{\sigma^{2}}\right){\Sigma_{\beta}^{0}}^{-1} + W^{\top}W\right)^{-1}\\
+  \mu_{\beta}^{q} &= \Sigma_{\beta}^{q}\left(\opn{E}\left(\frac{1}{\sigma^{2}}\right) {\Sigma_{\beta}^{0}}^{-1}\mu_{\beta}^{0} +W^{\top}\mu_{y^{*}}^{q} -\delta\sum_{i=1}^{n}w_{i}\left(\Tr\left(\varphi_{J}^{a}\left(x_{i}\right)\Sigma_{\theta}^{q}\right) + {\mu_{\theta}^{q}}^{\top}\varphi_{J}^{a}\left(x_{i}\right)\mu_{\theta}^{q}\right)\right)
+\end{align*}
+\subsubsection{$\tau^{2}$}
+  \begin{align*}
+    r_{q,\tau} &= r_{0,\tau} + J\\
+    s_{q,\tau} &= s_{0,\tau} + \opn{E}\left(\frac{1}{\sigma}\right)\Tr\left(\left(\Sigma_{\theta}^{q*} + \mu_{\theta}^{q*}{\mu_{\theta}^{q*}}^{\top}\right)\opn{Dg}\left(Q_{1:J}\right)\right)
+  \end{align*}
+\subsubsection{$\sigma^{2}$}
+  \begin{align*}
+    \ln q\left(\sigma^{2}\right) &\propto -\frac{J}{2}\ln \sigma -\frac{1}{2}
+  \end{align*}
 \end{document}
