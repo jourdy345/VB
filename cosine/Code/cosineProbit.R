@@ -62,7 +62,7 @@ VB = function(y, x, W, mub0, sigb0, w0, rs0, ss0, rt0, st0, mupsi0, J, tol = 1.0
   sigb0_inv = solve(sigb0)
   sigb0_inv_mub0 = solve(sigb0, mub0)
   # Initialize variational parameters
-  rsq = rs0 + J + p
+  rsq = rs0 + J + p + 1
   ssq = ss0
   rtq = rt0 + J
   stq = st0
@@ -87,7 +87,7 @@ VB = function(y, x, W, mub0, sigb0, w0, rs0, ss0, rt0, st0, mupsi0, J, tol = 1.0
   while (dif > tol) {
     count = count + 1
     # Update theta
-    sigtq = solve((rsoverssq * varphitvarphi) + (rsoverssq * rtoverstq * diag(MGF_foldedNormal(sigpsiq2, sigpsiq, mupsiq, (1:J)))))
+    sigtq = solve(varphitvarphi + (rsoverssq * rtoverstq * diag(MGF_foldedNormal(sigpsiq2, sigpsiq, mupsiq, (1:J)))))
     mutq = sigtq %*% crossprod(varphi, muystar - W %*% mubq)
 
     # Update tau^2
