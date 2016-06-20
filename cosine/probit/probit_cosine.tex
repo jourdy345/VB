@@ -111,20 +111,20 @@ We will use the joint density to derive the LB and updating algorithm. The varia
   q_{5}\left(\psi\right) &= \mathcal{N}\left(\mu_{\psi}^{q}, {\sigma_{\psi}^{2}}^{q}\right) \quad \text{(NCVMP)}.
 \end{align*}
 \subsection{Lower bound}
-\subsubsection{LB: $\mathsf{E}\left[\ln p\left(y|\Theta\right)\right]$}
+\subsubsection{LB: $\opn{E}\left[\ln p\left(y|\Theta\right)\right]$}
 \begin{align*}
-  \mathsf{E}\left[\ln p\left(y|\Theta\right)\right] &= -\frac{n}{2}\ln \left(2\pi\sigma^{2}\right) -\frac{1}{2}\mathsf{E}\left[\left(y-W\beta -\varphi_{J}\theta\right)'\left(y-W\beta -\varphi_{J}\theta\right)\right]\\
+  \opn{E}\left[\ln p\left(y|\Theta\right)\right] &= -\frac{n}{2}\ln \left(2\pi\sigma^{2}\right) -\frac{1}{2}\opn{E}\left[\left(y-W\beta -\varphi_{J}\theta\right)'\left(y-W\beta -\varphi_{J}\theta\right)\right]\\
   &= -\frac{n}{2}\ln \left(2\pi\sigma^{2}\right) -\frac{1}{2}\left(y - W\mu_{\beta}^{q} - \varphi_{J}\mu_{\theta}^{q} \right)'\left(y - W\mu_{\beta}^{q} - \varphi_{J}\mu_{\theta}^{q} \right) - \frac{1}{2}\left(\Tr\left(W'W\Sigma_{\beta}^{q}\right) + \Tr\left(\varphi_{J}'\varphi_{J}\Sigma_{\theta}^{q}\right) \right)
 \end{align*}
-\subsection{LB: $\mathsf{E}\left[\ln p\left(\theta_{j}|\sigma, \tau, \psi\right)\right]$}
+\subsection{LB: $\opn{E}\left[\ln p\left(\theta_{j}|\sigma, \tau, \psi\right)\right]$}
 \begin{align*}
-  \sum_{j=1}^{J}\mathsf{E}\left[\ln p\left(\theta_{j}|\sigma, \tau, \psi\right)\right] &= \sum_{j=1}^{J}\mathsf{E}\left[-\frac{1}{2}\ln\left(2\pi\right) +\ln \frac{1}{\sigma} + \ln \frac{1}{\tau} +\frac{j}{2}\left|\psi\right| -\frac{\theta_{j}^{2}e^{j\left|\psi\right|}}{2\sigma^{2}\tau^{2}} \right]
+  \sum_{j=1}^{J}\opn{E}\left[\ln p\left(\theta_{j}|\sigma, \tau, \psi\right)\right] &= \sum_{j=1}^{J}\opn{E}\left[-\frac{1}{2}\ln\left(2\pi\right) +\ln \frac{1}{\sigma} + \ln \frac{1}{\tau} +\frac{j}{2}\left|\psi\right| -\frac{\theta_{j}^{2}e^{j\left|\psi\right|}}{2\sigma^{2}\tau^{2}} \right]
 \end{align*}
 Let's note the following fact: if $X \sim \mathcal{N}\left(\mu, \sigma^{2}\right)$, then $\left|X\right| \sim \text{folded-Normal}\left(\mu, \sigma^{2}\right)$. Then,
 \begin{align*}
-  \mathsf{E}\left|X\right| &= \sigma \sqrt{\frac{2}{\pi}}\exp \left\{-\frac{\mu^{2}}{2\sigma^{2}} \right\} + \mu \left(1-2\Phi\left(\frac{-\mu}{\sigma}\right)\right)\\
+  \opn{E}\left|X\right| &= \sigma \sqrt{\frac{2}{\pi}}\exp \left\{-\frac{\mu^{2}}{2\sigma^{2}} \right\} + \mu \left(1-2\Phi\left(\frac{-\mu}{\sigma}\right)\right)\\
   &= \sigma \sqrt{\frac{2}{\pi}}\exp \left\{-\frac{\mu^{2}}{2\sigma^{2}} \right\} - \mu \opn{erf} \left(\frac{-\mu}{\sqrt{2\sigma^{2}}}\right)\\
-  \mathsf{E}e^{t\left|X\right|} &= \exp\left\{\frac{\sigma^{2}t^{2}}{2} + \mu t \right\} \left[1-\Phi\left(-\frac{\mu}{\sigma}-\sigma t\right) \right] + \exp\left\{\frac{\sigma^{2}t^{2}}{2} -\mu t \right\}\left[1-\Phi\left(\frac{\mu}{\sigma}-\sigma t\right) \right].
+  \opn{E}e^{t\left|X\right|} &= \exp\left\{\frac{\sigma^{2}t^{2}}{2} + \mu t \right\} \left[1-\Phi\left(-\frac{\mu}{\sigma}-\sigma t\right) \right] + \exp\left\{\frac{\sigma^{2}t^{2}}{2} -\mu t \right\}\left[1-\Phi\left(\frac{\mu}{\sigma}-\sigma t\right) \right].
 \end{align*}
 
 \section{Probit: No Restriction}
@@ -156,50 +156,50 @@ where $C$ is the normalizing constant. The variational distributions are
   q_{6}\left(y^{*}\right) &= \mathcal{TN}\left(\mu_{y^{*}}^{q}, I_{n},0\right)
 \end{align*}
 \subsection{Lower bound}
-\subsubsection{LB: $\mathsf{E}\left[\ln p\left(y^{*}\middle|\text{rest}\right)\right]+\mathsf{H}\left[y^{*}\right]$}
+\subsubsection{LB: $\opn{E}\left[\ln p\left(y^{*}\middle|\text{rest}\right)\right]+\opn{H}\left[y^{*}\right]$}
 \begin{align*}
-  \mathsf{E}\left[\ln p\left(y^{*}\middle|\text{rest}\right)\right]+\mathsf{H}\left[y^{*}\right] &= \sum_{i=1}^{n}\mathsf{E}\left[\ln \phi\left(y_{i}^{*}-w_{i}'\beta-\varphi_{i}'\theta_{J}\right)-\ln \phi\left(y_{i}^{*}-w_{i}'\mu_{\beta}^{q}-\varphi_{i}'\mu_{\theta}^{q}\right) \right]\\
+  \opn{E}\left[\ln p\left(y^{*}\middle|\text{rest}\right)\right]+\opn{H}\left[y^{*}\right] &= \sum_{i=1}^{n}\opn{E}\left[\ln \phi\left(y_{i}^{*}-w_{i}'\beta-\varphi_{i}'\theta_{J}\right)-\ln \phi\left(y_{i}^{*}-w_{i}'\mu_{\beta}^{q}-\varphi_{i}'\mu_{\theta}^{q}\right) \right]\\
   &\quad +\sum_{i=1}^{n}\ln\left(\left\{\Phi\left(w_{i}'\mu_{\beta}^{q}+\varphi_{i}'\mu_{\theta}^{q}\right) \right\}^{y_{i}}\left\{1-\Phi\left(w_{i}'\mu_{\beta}^{q}+\varphi_{i}'\mu_{\theta}^{q}\right) \right\}^{1-y_{i}} \right)\\
   &= -\frac{1}{2}\left(\Tr\left(W'W\Sigma_{\beta}^{q}\right)+\Tr\left(\varphi_{J}'\varphi_{J}\Sigma_{\theta}^{q}\right)\right)\\
   &\quad +\sum_{i=1}^{n}\ln\left(\left\{\Phi\left(w_{i}'\mu_{\beta}^{q}+\varphi_{i}'\mu_{\theta}^{q}\right) \right\}^{y_{i}}\left\{1-\Phi\left(w_{i}'\mu_{\beta}^{q}+\varphi_{i}'\mu_{\theta}^{q}\right) \right\}^{1-y_{i}} \right)
 \end{align*}
-\subsubsection{LB: $\mathsf{E}\left[\ln p\left(\theta_{j}|\sigma, \tau, \psi\right)\right]$}
+\subsubsection{LB: $\opn{E}\left[\ln p\left(\theta_{j}|\sigma, \tau, \psi\right)\right]$}
 Let's note the following fact: if $X \sim \mathcal{N}\left(\mu, \sigma^{2}\right)$, then $\left|X\right| \sim \text{folded-Normal}\left(\mu, \sigma^{2}\right)$. Then,
 \begin{align*}
-  \mathsf{E}\left|X\right| &= \sigma \sqrt{\frac{2}{\pi}}\exp \left\{-\frac{\mu^{2}}{2\sigma^{2}} \right\} + \mu \left(1-2\Phi\left(\frac{-\mu}{\sigma}\right)\right)\\
+  \opn{E}\left|X\right| &= \sigma \sqrt{\frac{2}{\pi}}\exp \left\{-\frac{\mu^{2}}{2\sigma^{2}} \right\} + \mu \left(1-2\Phi\left(\frac{-\mu}{\sigma}\right)\right)\\
   &= \sigma \sqrt{\frac{2}{\pi}}\exp \left\{-\frac{\mu^{2}}{2\sigma^{2}} \right\} - \mu \opn{erf} \left(\frac{-\mu}{\sqrt{2\sigma^{2}}}\right)\\
-  \mathsf{E}e^{t\left|X\right|} &= \exp\left\{\frac{\sigma^{2}t^{2}}{2} + \mu t \right\} \left[1-\Phi\left(-\frac{\mu}{\sigma}-\sigma t\right) \right] + \exp\left\{\frac{\sigma^{2}t^{2}}{2} -\mu t \right\}\left[1-\Phi\left(\frac{\mu}{\sigma}-\sigma t\right) \right].
+  \opn{E}e^{t\left|X\right|} &= \exp\left\{\frac{\sigma^{2}t^{2}}{2} + \mu t \right\} \left[1-\Phi\left(-\frac{\mu}{\sigma}-\sigma t\right) \right] + \exp\left\{\frac{\sigma^{2}t^{2}}{2} -\mu t \right\}\left[1-\Phi\left(\frac{\mu}{\sigma}-\sigma t\right) \right].
 \end{align*}
 Therefore,
 \begin{align*}
-  \sum_{j=1}^{J}\mathsf{E}\left[\ln p\left(\theta_{j}|\sigma, \tau, \psi\right)\right] +\mathsf{H}\left[\theta_{J}\right]&= \sum_{j=1}^{J}\mathsf{E}\left[-\frac{1}{2}\ln\left(2\pi\right) +\frac{1}{2}\ln \frac{1}{\sigma^{2}} + \frac{1}{2}\ln \frac{1}{\tau^{2}} +\frac{j}{2}\left|\psi\right| -\frac{\theta_{j}^{2}e^{j\left|\psi\right|}}{2\sigma^{2}\tau^{2}} \right]+\mathsf{H}\left[\theta_{J}\right]\\
+  \sum_{j=1}^{J}\opn{E}\left[\ln p\left(\theta_{j}|\sigma, \tau, \psi\right)\right] +\opn{H}\left[\theta_{J}\right]&= \sum_{j=1}^{J}\opn{E}\left[-\frac{1}{2}\ln\left(2\pi\right) +\frac{1}{2}\ln \frac{1}{\sigma^{2}} + \frac{1}{2}\ln \frac{1}{\tau^{2}} +\frac{j}{2}\left|\psi\right| -\frac{\theta_{j}^{2}e^{j\left|\psi\right|}}{2\sigma^{2}\tau^{2}} \right]+\opn{H}\left[\theta_{J}\right]\\
   &= -\frac{J}{2}\left\{\ln\left(2\pi\right) -\left( \opn{di}\left(\frac{r_{q,\sigma}}{2}\right)-\ln\left(\frac{s_{q,\sigma}}{2}\right) \right)-\left( \opn{di}\left(\frac{r_{q,\tau}}{2}\right)-\ln\left(\frac{s_{q,\tau}}{2}\right) \right)\right\}\\
   &\quad +\frac{J\left(J+1\right)}{4}\left\{\sigma_{\psi}^{q}\sqrt{\frac{2}{\pi}}\exp\left(-\frac{{\mu_{\psi}^{q}}^{2}}{2{\sigma_{\psi}^{q}}^{2}}\right)+\mu_{\psi}^{q}\left(1-2\Phi\left(\frac{-\mu_{\psi}^{q}}{\sigma_{\psi}^{q}}\right)\right) \right\}\\
   &\quad -\frac{1}{2}\frac{r_{q,\sigma}}{s_{q,\sigma}}\frac{r_{q,\tau}}{s_{q,\tau}}\left(\Tr\left(\Sigma_{\theta}^{q}\right)+{\mu_{\theta}^{q}}'\mu_{\theta}^{q}\right)\sum_{j=1}^{J}Q_{j}\left(\mu_{\psi}^{q},{\sigma_{\psi}^{q}}^{2}\right)+\frac{J}{2}\left(1+\ln\left(2\pi\right)\right)+\frac{1}{2}\ln\left|\Sigma_{\theta}^{q}\right|
 \end{align*}
 where
 \begin{align*}
-  Q_{j}\left(\mu_{\psi}^{q},{\sigma_{\psi}^{q}}^{2}\right) &= \mathsf{E} e^{j\left|\psi\right|} \\
+  Q_{j}\left(\mu_{\psi}^{q},{\sigma_{\psi}^{q}}^{2}\right) &= \opn{E} e^{j\left|\psi\right|} \\
   &=\exp\left\{\frac{{\sigma_{\psi}^{q}}^{2}j^{2}}{2} + \mu_{\psi}^{q} j \right\} \left[1-\Phi\left(-\frac{\mu_{\psi}^{q}}{\sigma_{\psi}^{q} }-\sigma_{\psi}^{q} j\right) \right] + \exp\left\{\frac{{\sigma_{\psi}^{q}}^{2}j^{2}}{2} -\mu_{\psi}^{q}j \right\}\left[1-\Phi\left(\frac{\mu_{\psi}^{q}}{\sigma_{\psi}^{q}}-\sigma_{\psi}^{q} j\right) \right].
 \end{align*}
-\subsubsection{LB: $\mathsf{E}\left[\ln p\left(\tau^{2}\right)\right]+\mathsf{H}\left[\tau^{2}\right]$}
+\subsubsection{LB: $\opn{E}\left[\ln p\left(\tau^{2}\right)\right]+\opn{H}\left[\tau^{2}\right]$}
 \begin{align*}
-  \mathsf{E}\left[\ln p\left(\tau^{2}\right)\right]+\mathsf{H}\left[\tau^{2}\right] &= \frac{r_{0,\tau}}{2}\ln \frac{s_{0,\tau}}{2} -\ln\Gamma\left(\frac{r_{0,\tau}}{2}\right) +\left(\frac{r_{0,\tau}}{2}+1\right)\left\{\opn{di}\left(\frac{r_{q,\tau}}{2}\right)-\ln\left(\frac{s_{q,\tau}}{2}\right) \right\} -\frac{s_{0,\tau}}{2}\frac{r_{q,\tau}}{s_{q,\tau}}\\
+  \opn{E}\left[\ln p\left(\tau^{2}\right)\right]+\opn{H}\left[\tau^{2}\right] &= \frac{r_{0,\tau}}{2}\ln \frac{s_{0,\tau}}{2} -\ln\Gamma\left(\frac{r_{0,\tau}}{2}\right) +\left(\frac{r_{0,\tau}}{2}+1\right)\left\{\opn{di}\left(\frac{r_{q,\tau}}{2}\right)-\ln\left(\frac{s_{q,\tau}}{2}\right) \right\} -\frac{s_{0,\tau}}{2}\frac{r_{q,\tau}}{s_{q,\tau}}\\
   &\quad +\frac{r_{q,\tau}}{2} +\ln\frac{s_{q,\tau}}{2} +\ln\Gamma\left(\frac{r_{q,\tau}}{2}\right) -\left(1+\frac{r_{q,\tau}}{2}\right)\opn{di}\left(\frac{r_{q,\tau}}{2}\right)
 \end{align*}
-\subsubsection{LB: $\mathsf{E}\left[\ln p\left(\sigma^{2}\right)\right]+\mathsf{H}\left[\sigma^{2}\right]$}
+\subsubsection{LB: $\opn{E}\left[\ln p\left(\sigma^{2}\right)\right]+\opn{H}\left[\sigma^{2}\right]$}
 \begin{align*}
-  \mathsf{E}\left[\ln p\left(\sigma^{2}\right)\right]+\mathsf{H}\left[\sigma^{2}\right] &= \frac{r_{0,\sigma}}{2}\ln \frac{s_{0,\sigma}}{2} -\ln\Gamma\left(\frac{r_{0,\sigma}}{2}\right) +\left(\frac{r_{0,\sigma}}{2}+1\right)\left\{\opn{di}\left(\frac{r_{q,\sigma}}{2}\right)-\ln\left(\frac{s_{q,\sigma}}{2}\right) \right\} -\frac{s_{0,\sigma}}{2}\frac{r_{q,\sigma}}{s_{q,\sigma}}\\
+  \opn{E}\left[\ln p\left(\sigma^{2}\right)\right]+\opn{H}\left[\sigma^{2}\right] &= \frac{r_{0,\sigma}}{2}\ln \frac{s_{0,\sigma}}{2} -\ln\Gamma\left(\frac{r_{0,\sigma}}{2}\right) +\left(\frac{r_{0,\sigma}}{2}+1\right)\left\{\opn{di}\left(\frac{r_{q,\sigma}}{2}\right)-\ln\left(\frac{s_{q,\sigma}}{2}\right) \right\} -\frac{s_{0,\sigma}}{2}\frac{r_{q,\sigma}}{s_{q,\sigma}}\\
   &\quad +\frac{r_{q,\sigma}}{2} +\ln\frac{s_{q,\sigma}}{2} +\ln\Gamma\left(\frac{r_{q,\sigma}}{2}\right) -\left(1+\frac{r_{q,\sigma}}{2}\right)\opn{di}\left(\frac{r_{q,\sigma}}{2}\right)
 \end{align*}
-\subsubsection{LB: $\mathsf{E}\left[\ln p\left(\beta\right)\right]+\mathsf{H}\left[\beta\right] $}
+\subsubsection{LB: $\opn{E}\left[\ln p\left(\beta\right)\right]+\opn{H}\left[\beta\right] $}
 \begin{align*}
-  \mathsf{E}\left[\ln p\left(\beta\right)\right]+\mathsf{H}\left[\beta\right] &= \frac{p+1}{2} +\frac{1}{2}\left(\opn{di}\left(\frac{r_{q,\sigma}}{2}\right)-\ln\left(\frac{s_{q,\sigma}}{2}\right)\right) +\frac{1}{2}\ln\left|{\Sigma_{\beta}^{0}}^{-1}\Sigma_{\beta}^{q}\right|\\
+  \opn{E}\left[\ln p\left(\beta\right)\right]+\opn{H}\left[\beta\right] &= \frac{p+1}{2} +\frac{1}{2}\left(\opn{di}\left(\frac{r_{q,\sigma}}{2}\right)-\ln\left(\frac{s_{q,\sigma}}{2}\right)\right) +\frac{1}{2}\ln\left|{\Sigma_{\beta}^{0}}^{-1}\Sigma_{\beta}^{q}\right|\\
   &\quad -\frac{1}{2}\frac{r_{q,\sigma}}{s_{q,\sigma}}\left\{\Tr\left({\Sigma_{\beta}^{0}}^{-1}\Sigma_{\beta}^{q}\right)+\left(\mu_{\beta}^{q}-\mu_{\beta}^{0}\right)'{\Sigma_{\beta}^{0}}^{-1}\left(\mu_{\beta}^{q}-\mu_{\beta}^{0}\right) \right\}
 \end{align*}
-\subsubsection{LB: $\mathsf{E}\left[\ln p\left(\psi\right)\right] +\mathsf{H}\left[\psi\right]$}
+\subsubsection{LB: $\opn{E}\left[\ln p\left(\psi\right)\right] +\opn{H}\left[\psi\right]$}
 \begin{align*}
-  \mathsf{E}\left[\ln p\left(\psi\right)\right] +\mathsf{H}\left[\psi\right] &= \ln\frac{\omega_{0}}{2} -\omega_{0}\left\{\sigma_{\psi}^{q}\sqrt{\frac{2}{\pi}} \exp\left(-\frac{{\mu_{\psi}^{q}}^{2}}{2{\sigma_{\psi}^{q}}^{2}}\right) + \mu_{\psi}^{q}\left(1-2\Phi\left(-\frac{\mu_{\psi}^{q}}{\sigma_{\psi}^{q}}\right)\right) \right\}\\
+  \opn{E}\left[\ln p\left(\psi\right)\right] +\opn{H}\left[\psi\right] &= \ln\frac{\omega_{0}}{2} -\omega_{0}\left\{\sigma_{\psi}^{q}\sqrt{\frac{2}{\pi}} \exp\left(-\frac{{\mu_{\psi}^{q}}^{2}}{2{\sigma_{\psi}^{q}}^{2}}\right) + \mu_{\psi}^{q}\left(1-2\Phi\left(-\frac{\mu_{\psi}^{q}}{\sigma_{\psi}^{q}}\right)\right) \right\}\\
   &\quad +\frac{1}{2}\ln\left(2\pi {\sigma_{\psi}^{q}}^{2}\right) -\frac{1}{2}
 \end{align*}
 \subsection{Update}
@@ -220,7 +220,7 @@ where
 \end{align*}
 \subsubsection{$\beta$}
 \begin{align*}
-  \Sigma_{\beta}^{q} &\leftarrow \frac{s_{q,\sigma}}{r_{q,\sigma}}\left(W'W + {\Sigma_{\beta}^{0}}^{-1}\right)^{-1}\\
+  \Sigma_{\beta}^{q} &\leftarrow \left(\frac{r_{q,\sigma}}{s_{q,\sigma}}{\Sigma_{\beta}^{0}}^{-1}+W'W \right)^{-1}\\
   \mu_{\beta}^{q} &\leftarrow \frac{r_{q,\sigma}}{s_{q,\sigma}}\Sigma_{\beta}^{q}\left({\Sigma_{\beta}^{0}}^{-1}\mu_{\beta}^{0}+W'\left(\mu_{y^*}^{q}-\varphi_{J}\mu_{\theta}^{q}\right)\right)
 \end{align*}
 \subsubsection{$\psi$}
@@ -237,6 +237,114 @@ where
   \mu_{\psi}^{q} &\leftarrow \mu_{\psi}^{q} +{\sigma_{\psi}^{q}}^{2}\left\{\frac{\partial S_{1}}{\partial \mu_{\psi}^{q}}+\frac{\partial S_{2}}{\partial \mu_{\psi}^{q}} \right\}
 \end{align*}
 
+\section{Probit: No restriction, with normal random effects}
+\subsection{Model}
+  \begin{align*}
+    \opn{P}\left(y_{i}=1|f,\beta\right) &= \Phi\left(w_{i}^{\top}\beta + Zu + f\left(x_{i}\right)\right)\\
+    y_{i}^{*} &= w_{i}^{\top}\beta + Zu + f\left(x_{i}\right) + \epsilon_{i}, \quad \epsilon_{i} \sim \mathcal{N}\left(0,1\right)\\
+    y_{i} &= \begin{cases}1, & \text{if $y_{i}^{*} \geq 0$}\\ 0, & \text{if $y_{i}^{*}<0$}  \end{cases}\\
+    \theta_{j}|\sigma, \tau, \gamma &\sim \mathcal{N}\left(0,\sigma^{2}\tau^{2}\exp\left[-j\gamma\right]\right)\\
+    \tau^{2} &\sim \opn{IG}\left(\frac{r_{0,\tau}}{2}, \frac{s_{0,\tau}}{2}\right)\\
+    \sigma^{2} &\sim \opn{IG}\left(\frac{r_{0,\sigma}}{2}, \frac{s_{0,\sigma}}{2}\right)\\
+    \beta &\sim \mathcal{N}\left(\mu_{\beta}^{0}, \sigma^{2}\Sigma_{\beta}^{0}\right) \quad \left(p\times 1\right)\\
+    u &\sim \mathcal{N}\left(\mu_{u}^{0}, \Sigma_{u}^{0}\right), \quad \left(s\times 1\right)\\
+    \gamma &\sim \opn{Exp}\left(\omega_{0}\right)\\
+    \left|\psi\right| &= \gamma, \quad \psi \sim \opn{DE}\left(0,\omega_{0}\right)\\
+    \varphi_{j}\left(x\right) &= \sqrt{2}\cos\left(\pi jx\right)
+  \end{align*}
+Joint density:
+\begin{align*}
+  p\left(y, y^{*}, \Theta\right) &= C\left\{\prod_{j=1}^{J}\mathcal{N}\left(\theta_{j}\middle| 0, \sigma^{2}\tau^{2}\exp\left[-j\left|\psi\right|\right]\right) \right\}\opn{IG}\left(\tau^{2}\middle|\frac{r_{0,\tau}}{2},\frac{s_{0,\tau}}{2}\right)\opn{IG}\left(\sigma^{2}\middle|\frac{r_{0,\sigma}}{2},\frac{s_{0,\sigma}}{2}\right)\mathcal{N}\left(\beta\middle|\mu_{\beta}^{0},\sigma^{2}\Sigma_{\beta}^{0}\right)\\
+  &\quad \mathcal{N}\left(u|\mu_{u}^{0}, \Sigma_{u}^{0}\right)\opn{DE}\left(\psi\middle|0,\omega_{0}\right)\left\{\prod_{i=1}^{n}\left(1\left[y_{i}^{*}\geq 0\right]1\left[y_{i}=1\right] + 1\left[y_{i}^{*}<0\right]1\left[y_{i}=0\right] \right)\phi\left(y_{i}^{*}-w_{i}'\beta - z_{i}'u- \varphi_{i}'\theta_{J}\right)\right\}
+\end{align*}
+where $C$ is the normalizing constant.
+\subsection{Lower Bound}
+\subsubsection{LB: $\opn{E}\left(\ln p\left(y^{*}|\text{rest}\right)\right) + \opn{H}\left(y^{*}\right)$}
+\begin{align*}
+  \opn{E}\left(\ln p\left(y^{*}|\text{rest}\right)\right) + \opn{H}\left(y^{*}\right) &= \sum_{i=1}^{n}\opn{E}\left(\ln \phi\left(y_{i}^{*} -w_{i}'\beta - z_{i}'u - \varphi_{i}'\theta_{J}\right) -\ln \phi\left(y_{i}^{*}-w_{i}'\mu_{\beta}^{q}-z_{i}'\mu_{u}^{q}-\varphi_{i}'\mu_{\theta}^{q}\right)\right)\\
+  &\quad +\sum_{i=1}^{n}\ln\left(\left\{\Phi\left(w_{i}'\mu_{\beta}^{q}+z_{i}'\mu_{u}^{q}+\varphi_{i}'\mu_{\theta}^{q}\right) \right\}^{y_{i}}\left\{1-\Phi\left(w_{i}'\mu_{\beta}^{q}+z_{i}'\mu_{u}^{q}+\varphi_{i}'\mu_{\theta}^{q}\right) \right\}^{1-y_{i}}\right)\\
+  &= -\frac{1}{2}\left(\Tr\left(W'W\Sigma_{\beta}^{q}\right)+ \Tr\left(Z'Z\Sigma_{u}^{q}\right)+\Tr\left(\varphi_{J}'\varphi_{J}\Sigma_{\theta}^{q}\right)\right)\\
+  &\quad +\sum_{i=1}^{n}\ln\left(\left\{\Phi\left(w_{i}'\mu_{\beta}^{q}+z_{i}'\mu_{u}^{q}+\varphi_{i}'\mu_{\theta}^{q}\right) \right\}^{y_{i}}\left\{1-\Phi\left(w_{i}'\mu_{\beta}^{q}+z_{i}'\mu_{u}^{q}+\varphi_{i}'\mu_{\theta}^{q}\right) \right\}^{1-y_{i}}\right)
+\end{align*}
+\subsubsection{LB: $\opn{E}\left(\ln p\left(u\right)\right) + \opn{H}\left(u\right)$}
+\begin{align*}
+  \opn{E}\left(\ln p\left(u\right)\right) + \opn{H}\left(u\right) &= \frac{1}{2}\ln\left|{\Sigma_{u}^{0}}^{-1}\Sigma_{u}^{q}\right|
+\end{align*}
+Everything else is the same as the one without random effects.
+
+\subsubsection{LB: $\opn{E}\left[\ln p\left(\theta_{j}|\sigma, \tau, \psi\right)\right]$}
+\begin{align*}
+  \sum_{j=1}^{J}\opn{E}\left[\ln p\left(\theta_{j}|\sigma, \tau, \psi\right)\right] +\opn{H}\left[\theta_{J}\right]&= \sum_{j=1}^{J}\opn{E}\left[-\frac{1}{2}\ln\left(2\pi\right) +\frac{1}{2}\ln \frac{1}{\sigma^{2}} + \frac{1}{2}\ln \frac{1}{\tau^{2}} +\frac{j}{2}\left|\psi\right| -\frac{\theta_{j}^{2}e^{j\left|\psi\right|}}{2\sigma^{2}\tau^{2}} \right]+\opn{H}\left[\theta_{J}\right]\\
+  &= -\frac{J}{2}\left\{\ln\left(2\pi\right) -\left( \opn{di}\left(\frac{r_{q,\sigma}}{2}\right)-\ln\left(\frac{s_{q,\sigma}}{2}\right) \right)-\left( \opn{di}\left(\frac{r_{q,\tau}}{2}\right)-\ln\left(\frac{s_{q,\tau}}{2}\right) \right)\right\}\\
+  &\quad +\frac{J\left(J+1\right)}{4}\left\{\sigma_{\psi}^{q}\sqrt{\frac{2}{\pi}}\exp\left(-\frac{{\mu_{\psi}^{q}}^{2}}{2{\sigma_{\psi}^{q}}^{2}}\right)+\mu_{\psi}^{q}\left(1-2\Phi\left(\frac{-\mu_{\psi}^{q}}{\sigma_{\psi}^{q}}\right)\right) \right\}\\
+  &\quad -\frac{1}{2}\frac{r_{q,\sigma}}{s_{q,\sigma}}\frac{r_{q,\tau}}{s_{q,\tau}}\left(\Tr\left(\Sigma_{\theta}^{q}\right)+{\mu_{\theta}^{q}}'\mu_{\theta}^{q}\right)\sum_{j=1}^{J}Q_{j}\left(\mu_{\psi}^{q},{\sigma_{\psi}^{q}}^{2}\right)+\frac{J}{2}\left(1+\ln\left(2\pi\right)\right)+\frac{1}{2}\ln\left|\Sigma_{\theta}^{q}\right|
+\end{align*}
+where
+\begin{align*}
+  Q_{j}\left(\mu_{\psi}^{q},{\sigma_{\psi}^{q}}^{2}\right) &= \opn{E} e^{j\left|\psi\right|} \\
+  &=\exp\left\{\frac{{\sigma_{\psi}^{q}}^{2}j^{2}}{2} + \mu_{\psi}^{q} j \right\} \left[1-\Phi\left(-\frac{\mu_{\psi}^{q}}{\sigma_{\psi}^{q} }-\sigma_{\psi}^{q} j\right) \right] + \exp\left\{\frac{{\sigma_{\psi}^{q}}^{2}j^{2}}{2} -\mu_{\psi}^{q}j \right\}\left[1-\Phi\left(\frac{\mu_{\psi}^{q}}{\sigma_{\psi}^{q}}-\sigma_{\psi}^{q} j\right) \right].
+\end{align*}
+\subsubsection{LB: $\opn{E}\left[\ln p\left(\tau^{2}\right)\right]+\opn{H}\left[\tau^{2}\right]$}
+\begin{align*}
+  \opn{E}\left[\ln p\left(\tau^{2}\right)\right]+\opn{H}\left[\tau^{2}\right] &= \frac{r_{0,\tau}}{2}\ln \frac{s_{0,\tau}}{2} -\ln\Gamma\left(\frac{r_{0,\tau}}{2}\right) +\left(\frac{r_{0,\tau}}{2}+1\right)\left\{\opn{di}\left(\frac{r_{q,\tau}}{2}\right)-\ln\left(\frac{s_{q,\tau}}{2}\right) \right\} -\frac{s_{0,\tau}}{2}\frac{r_{q,\tau}}{s_{q,\tau}}\\
+  &\quad +\frac{r_{q,\tau}}{2} +\ln\frac{s_{q,\tau}}{2} +\ln\Gamma\left(\frac{r_{q,\tau}}{2}\right) -\left(1+\frac{r_{q,\tau}}{2}\right)\opn{di}\left(\frac{r_{q,\tau}}{2}\right)
+\end{align*}
+\subsubsection{LB: $\opn{E}\left[\ln p\left(\sigma^{2}\right)\right]+\opn{H}\left[\sigma^{2}\right]$}
+\begin{align*}
+  \opn{E}\left[\ln p\left(\sigma^{2}\right)\right]+\opn{H}\left[\sigma^{2}\right] &= \frac{r_{0,\sigma}}{2}\ln \frac{s_{0,\sigma}}{2} -\ln\Gamma\left(\frac{r_{0,\sigma}}{2}\right) +\left(\frac{r_{0,\sigma}}{2}+1\right)\left\{\opn{di}\left(\frac{r_{q,\sigma}}{2}\right)-\ln\left(\frac{s_{q,\sigma}}{2}\right) \right\} -\frac{s_{0,\sigma}}{2}\frac{r_{q,\sigma}}{s_{q,\sigma}}\\
+  &\quad +\frac{r_{q,\sigma}}{2} +\ln\frac{s_{q,\sigma}}{2} +\ln\Gamma\left(\frac{r_{q,\sigma}}{2}\right) -\left(1+\frac{r_{q,\sigma}}{2}\right)\opn{di}\left(\frac{r_{q,\sigma}}{2}\right)
+\end{align*}
+\subsubsection{LB: $\opn{E}\left[\ln p\left(\beta\right)\right]+\opn{H}\left[\beta\right] $}
+\begin{align*}
+  \opn{E}\left[\ln p\left(\beta\right)\right]+\opn{H}\left[\beta\right] &= \frac{p+1}{2} +\frac{1}{2}\left(\opn{di}\left(\frac{r_{q,\sigma}}{2}\right)-\ln\left(\frac{s_{q,\sigma}}{2}\right)\right) +\frac{1}{2}\ln\left|{\Sigma_{\beta}^{0}}^{-1}\Sigma_{\beta}^{q}\right|\\
+  &\quad -\frac{1}{2}\frac{r_{q,\sigma}}{s_{q,\sigma}}\left\{\Tr\left({\Sigma_{\beta}^{0}}^{-1}\Sigma_{\beta}^{q}\right)+\left(\mu_{\beta}^{q}-\mu_{\beta}^{0}\right)'{\Sigma_{\beta}^{0}}^{-1}\left(\mu_{\beta}^{q}-\mu_{\beta}^{0}\right) \right\}
+\end{align*}
+\subsubsection{LB: $\opn{E}\left[\ln p\left(\psi\right)\right] +\opn{H}\left[\psi\right]$}
+\begin{align*}
+  \opn{E}\left[\ln p\left(\psi\right)\right] +\opn{H}\left[\psi\right] &= \ln\frac{\omega_{0}}{2} -\omega_{0}\left\{\sigma_{\psi}^{q}\sqrt{\frac{2}{\pi}} \exp\left(-\frac{{\mu_{\psi}^{q}}^{2}}{2{\sigma_{\psi}^{q}}^{2}}\right) + \mu_{\psi}^{q}\left(1-2\Phi\left(-\frac{\mu_{\psi}^{q}}{\sigma_{\psi}^{q}}\right)\right) \right\}\\
+  &\quad +\frac{1}{2}\ln\left(2\pi {\sigma_{\psi}^{q}}^{2}\right) -\frac{1}{2}
+\end{align*}
+\subsection{Update}
+\subsubsection{$u$}
+$q\left(u\right) = \mathcal{N}\left(\mu_{u}^{q}, \Sigma_{u}^{q}\right)$ where
+\begin{align*}
+  \Sigma_{u}^{q} &= \left(Z'Z+{\Sigma_{u}^{0}}^{-1}\right)^{-1}\\
+  \mu_{u}^{q} &= \Sigma_{u}^{q}\left({\Sigma_{u}^{0}}^{-1}\mu_{u}^{0} + Z'\left(\mu_{y^{*}}^{q} - W\mu_{\beta}^{q}-\varphi_{J}\mu_{\theta}^{q}\right)\right)
+\end{align*}
+\subsubsection{$y_{i}^{*}$}
+\begin{equation*}
+  q\left(y_{i}^{*}\right) = \mathcal{TN}\left(\mu_{y_{i}^{*}}, 1\right)
+\end{equation*}
+truncated at zero where
+\begin{equation*}
+  \mu_{y_{i}^{*}} = w_{i}'\mu_{\beta}^{q} + z_{i}'\mu_{u}^{q} + \varphi_{i}'\mu_{\theta}^{q}.
+\end{equation*}
+To distinguish $\mu_{y_{i}^{*}}$ which is the parameter of the variational distribution from the expected value, we will denote the expectation by $\mu_{y_{i}^{*}}^{q}$ where
+\begin{equation*}
+  \opn{E}\left(y_{i}^{*}\right) = \mu_{y_{i}^{*}}^{q} = \mu_{y_{i}^{*}} + \frac{\phi\left(\mu_{y_{i}^{*}}\right)}{\Phi\left(\mu_{y_{i}^{*}}\right)^{y_{i}}\left(\Phi\left(\mu_{y_{i}^{*}}\right)-1\right)^{1-y_{i}}}
+\end{equation*}
+\subsubsection{$\theta_{j}$}
+$q\left(\theta_{J}\right) = \mathcal{N}\left(\mu_{\theta}^{q}, \Sigma_{\theta}^{q}\right)$ where
+\begin{align*}
+  \Sigma_{\theta}^{q} &= \left(\frac{r_{q,\tau}}{s_{q,\tau}}\frac{r_{q,\sigma}}{s_{q,\sigma}}\opn{Dg}\left(Q_{1:J}\right) + \varphi_{J}'\varphi_{J}\right)^{-1}\\
+  \mu_{\theta}^{q} &= \Sigma_{\theta}^{q}\varphi_{J}'\left(\mu_{y_{i}}^{q} - W\mu_{\theta}^{q}-Z\mu_{u}^{q}\right).
+\end{align*}
+\subsubsection{$\beta$}
+$q\left(\beta\right) = \mathcal{N}\left(\mu_{\beta}^{q}, \Sigma_{\beta}^{q}\right)$ where
+\begin{align*}
+  \Sigma_{\beta}^{q} &= \left(\frac{r_{q,\sigma}}{s_{q,\sigma}}{\Sigma_{\beta}^{0}}^{-1} + W'W\right)^{-1}\\
+  \mu_{\beta}^{q} &= \Sigma_{\beta}^{q}\left({\Sigma_{\beta}^{0}}^{-1}\mu_{\beta}^{0}+W'\left(\mu_{y^{*}}^{q}-Z\mu_{u}^{q}-\varphi_{J}\mu_{\theta}^{q}\right)\right).
+\end{align*}
+\subsubsection{$\tau^{2}$}
+\begin{align*}
+  r_{q,\tau} &\leftarrow r_{0,\tau} +J\\
+  s_{q,\tau} &\leftarrow s_{0,\tau} + \frac{r_{q,\sigma}}{s_{q,\sigma}}\sum_{j=1}^{J}\left(\Sigma_{\theta, jj}^{q}+{\mu_{\theta, j}^{q}}^{2}\right)Q_{j}
+\end{align*}
+\subsubsection{$\sigma^{2}$}
+\begin{align*}
+  r_{q,\sigma} &\leftarrow r_{0,\sigma} + J + p + 1\\
+  s_{q,\sigma} &\leftarrow s_{0,\sigma} +\frac{r_{q,\tau}}{s_{q,\tau}}\sum_{j=1}^{J}\left(\Sigma_{\theta, jj}^{q}+{\mu_{\theta, j}^{q}}^{2}\right)Q_{j} + \Tr\left({\Sigma_{\beta}^{0}}^{-1}\Sigma_{\beta}^{q}\right) +\left(\mu_{\beta}^{q}-\mu_{\beta}^{0}\right)'{\Sigma_{\beta}^{0}}^{-1}\left(\mu_{\beta}^{q}-\mu_{\beta}^{0}\right)
+\end{align*}
 \section{Probit: Monotone Shape Restriction}
 \subsection{Model}
   \begin{align*}
@@ -277,7 +385,7 @@ Therefore,
   \end{align*}
 truncated at zero where
   $$
-    \mu_{y_{i}^{*}} = w_{i}'\mu_{\beta}^{q} + \delta\Tr\left(\varphi_{J}\left(x_{i}\right)\Sigma_{\theta}^{q}\right)+\delta{\mu_{\theta}^{q}}'\varphi_{J}^{a}\left(x_{i}\right)\mu_{\theta}.
+    \mu_{y_{i}^{*}} = w_{i}'\mu_{\beta}^{q} + \delta\Tr\left(\varphi_{J}\left(x_{i}\right)\Sigma_{\theta}^{q}\right)+\delta{\mu_{\theta}^{q}}'\varphi_{J}^{a}\left(x_{i}\right)\mu_{\theta}^{q}.
   $$
 To distinguish the mean of the normal distribution and the mean of the truncated normal distribution, the latter will be denoted $\mu_{y_{i}^{*}}^{q}$ where
   $$
@@ -285,11 +393,26 @@ To distinguish the mean of the normal distribution and the mean of the truncated
   $$
 \subsubsection{$\theta$}
   \begin{align*}
-    \ln q\left(\theta\right) &\propto \opn{E}_{-\theta}\left[-\frac{1}{2}\sum_{j=1}^{J}\frac{e^{j\left|\psi\right|}\theta_{j}^{2}}{\sigma^{2}\tau^{2}} -\frac{1}{2}\sum_{i=1}^{n}\left(y_{i}^{*}-w_{i}'\beta -\theta_{J}'\varphi_{J}^{a}\left(x_{i}\right)\theta_{J}\right)^{2} \right]\\
-    &\propto -\frac{1}{2}\opn{E}\left(\frac{1}{\sigma_{2}}\right)\opn{E}\left(\frac{1}{\tau^{2}}\right)\theta_{J}'\opn{Dg}\left(Q_{1:J}\right)\theta_{J}\\
-    &\quad  -\frac{1}{2}\sum_{i=1}^{n}\opn{E}\left(\left(w_{i}'\beta + \theta_{J}'\varphi_{J}^{a}\left(x_{i}\right)\theta_{J} \right)^{2} -2y_{i}^{*}\left(w_{i}'\beta + \theta_{J}'\varphi_{J}^{a}\left(x_{i}\right)\theta_{J}\right) \right)
+    S_{1}\left(\mu_{\theta}^{q}, \Sigma_{\theta}^{q}\right) &= \opn{E}\left(\ln p\left(\theta_{J}|\sigma^{2}, \sigma^{2}, \psi\right)\right)\\
+    &= -\frac{1}{2}\opn{E}\left(\frac{1}{\sigma}\right)\Tr\left\{\left(\Sigma_{\theta}^{q}+\mu_{\theta}^{q}{\mu_{\theta}^{q}}'\right)\opn{Dg}\left(\opn{E}\left(\Upsilon^{-1}\right)\right) \right\}\\
+    S_{2}\left(\mu_{\theta}^{q},\Sigma_{\theta}^{q}\right) &= \opn{E}\left(\ln p\left(y^{*}|\beta, \theta_{J}, \sigma^{2}\right)\right)\\
+    &= -\frac{1}{2}\sum_{i=1}^{n}\left\{\left(\mu_{y_{i}^{*}}^{q} -w_{i}'\mu_{\beta}^{q}-\delta\Tr\left(\varphi_{J}^{a}\left(x_{i}\right)\Sigma_{\theta}^{q}\right)-\delta{\mu_{\theta}^{q}}'\varphi_{J}^{a}\left(x_{i}\right)\mu_{\theta}^{q}\right)^{2} \right.\\
+    &\quad \left. +2\Tr\left(\varphi_{J}^{a}\left(x_{i}\right)\Sigma_{\theta}^{q}\varphi_{J}^{a}\left(x_{i}\right)\Sigma_{\theta}^{q}\right) +4{\mu_{\theta}^{q}}'\varphi_{J}^{a}\left(x_{i}\right)\Sigma_{\theta}^{q}\varphi_{J}^{a}\left(x_{i}\right)\mu_{\theta}^{q}\right\}
   \end{align*}
-Seems like the authors of the original paper used NCVMP.
+  Then by NCVMP introduced in Wand (2014),
+  \begin{align*}
+    \Sigma_{\theta}^{q} &\leftarrow -\frac{1}{2}\left\{\sum_{a=1}^{2} \frac{\partial S_{a}\left(\mu_{\theta}^{q}, \Sigma_{\theta}^{q}\right)}{\partial \Sigma_{\theta}^{q}} \right\}^{-1}\\
+    \mu_{\theta}^{q} &\leftarrow \mu_{\theta}^{q} + \Sigma_{\theta}^{q}\left\{\sum_{a=1}^{2} \frac{\partial S_{a}\left(\mu_{\theta}^{q}, \Sigma_{\theta}^{q}\right)}{\partial \mu_{\theta}^{q}} \right\}.
+  \end{align*}
+  By matrix differential calculus,
+  \begin{align*}
+    \frac{\partial S_{1}}{\partial \Sigma_{\theta}^{q}} &= -\frac{1}{2}\opn{E}\left(\frac{1}{\sigma}\right)\opn{Dg}\left(\opn{E}\left(\Upsilon^{-1}\right)\right)\\
+    \frac{\partial S_{2}}{\partial \Sigma_{\theta}^{q}} &= -\frac{1}{2} \sum_{i=1}^{n}\left\{4\varphi_{J}^{a}\left(x_{i}\right)\Sigma_{\theta}^{q}\varphi_{J}^{a}\left(x_{i}\right) + 4\varphi_{J}^{a}\left(x_{i}\right)\mu_{\theta}^{q}{\mu_{\theta}^{q}}'\varphi_{J}^{a}\left(x_{i}\right) \right.\\
+    &\quad \left. -2\delta\left(\mu_{y_{i}^{*}}^{q}-w_{i}'\mu_{\beta}^{q}-\delta \Tr\left(\Sigma_{\theta}^{q}\varphi_{J}^{a}\left(x_{i}\right)\right) -\delta {\mu_{\theta}^{q}}'\Sigma_{\theta}^{q}\mu_{\theta}^{q}\right)\varphi_{J}^{a}\left(x_{i}\right)\right\}\\
+    \frac{\partial S_{1}}{\partial \mu_{\theta}^{q}} &= -\opn{E}\left(\frac{1}{\sigma}\right) \opn{Dg}\left(\opn{E}\left(\Upsilon^{-1}\right)\right)\mu_{\theta}^{q}\\
+    \frac{\partial S_{2}}{\partial \mu_{\theta}^{q}} &= -\frac{1}{2}\sum_{i=1}^{n}\left\{8\varphi_{J}^{a}\left(x_{i}\right)\Sigma_{\theta}^{q}\varphi_{J}^{a}\left(x_{i}\right)\mu_{\theta}^{q} -4\delta\left(\mu_{y_{i}^{*}}^{q} -w_{i}'\mu_{\beta}^{q}-\delta \Tr\left(\varphi_{J}^{a}\left(x_{i}\right)\Sigma_{\theta}^{q}\right)\right. \right. \\
+    &\quad \left.\left. -\delta{\mu_{\theta}^{q}}'\varphi_{J}^{a}\left(x_{i}\right)\mu_{\theta}^{q}\right)\varphi_{J}^{a}\left(x_{i}\right)\mu_{\theta}^{q}\right\}
+  \end{align*}
 \subsubsection{$\beta$}
   \begin{align*}
     \ln q\left(\beta\right)&\propto \opn{E}_{-\beta}\left(-\frac{1}{2\sigma^{2}}\left(\beta-\mu_{\beta}^{0}\right)'{\Sigma_{\beta}^{0}}^{-1}\left(\beta-\mu_{\beta}^{0}\right)-\frac{1}{2}\sum_{i=1}^{n}\left(y_{i}^{*}-w_{i}'\beta -\delta\theta_{J}'\varphi_{J}^{a}\left(x_{i}\right)\theta_{J}\right)^{2} \right)\\
@@ -322,10 +445,51 @@ Therefore, $q\left(\beta\right) = \mathcal{N}\left(\mu_{\beta}^{q}, \Sigma_{\bet
     c &= \frac{1}{2}\left\{s_{0,\sigma} + \left(\mu_{\beta}^{q}-\mu_{\beta}^{0}\right)'{\Sigma_{\beta}^{0}}^{-1}\left(\mu_{\beta}^{q}-\mu_{\beta}^{0}\right)+\Tr\left({\Sigma_{\beta}^{0}}^{-1}\Sigma_{\beta}^{q}\right) \right\}
   \end{align*}
 and $\Upsilon = \left(\sigma_{0}^{2}, \tau^{2}e^{-\gamma}, \ldots , \tau^{2}e^{-J\gamma} \right)'$ which gives $\opn{E}\left(\Upsilon^{-1}\right)=\left(1/\sigma_{0}^{2}, r_{q,\tau}/s_{q,\tau}\opn{E}\left(\Gamma^{-1}\right)\right)$. Lastly, $\opn{E}\left(\Gamma^{-1}\right)=Q_{1:J}$.
+\subsubsection{$\psi$}
+Same as before except that $r_{q,\sigma}/s_{q,\sigma}$ in $S_{2}\left(\mu_{\psi}^{q}, {\sigma_{\psi}^{q}}^{2}\right)$ is replaced by $\opn{E}\left(1/\sigma\right)$.
 \subsection{Lower Bound}
 \subsubsection{$\opn{E}\left(\ln p\left(y^{*}|\text{rest}\right)\right)+\opn{H}\left(y^{*}\right)$}
   \begin{align*}
     \opn{E}\left(\ln p\left(y^{*}|\text{rest}\right)\right) + \opn{H}\left(y^{*}\right) &= \sum_{i=1}^{n}\opn{E}\left(\ln \phi\left(y_{i}^{*}-w_{i}'\beta-\delta \theta_{J}'\varphi_{J}^{a}\left(x_{i}\right)\theta_{J}\right) - \ln \phi\left(y_{i}^{*}-\mu_{y_{i}^{*}}\right)\right)\\
-    &\quad + \sum_{i}^{n}\ln \left(\Phi\left(\mu_{y_{i}^{*}}\right)^{y_{i}}\left(1-\Phi\left(\mu_{y_{i}^{*}}\right)\right)^{1-y_{i}} \right)
+    &\quad + \sum_{i=1}^{n}\ln \left(\Phi\left(\mu_{y_{i}^{*}}\right)^{y_{i}}\left(1-\Phi\left(\mu_{y_{i}^{*}}\right)\right)^{1-y_{i}} \right)\\
+    &= -\frac{1}{2}\sum_{i=1}^{n}\left[ -2\mu_{y_{i}^{*}}^{q}\left(w_{i}'\mu_{\beta}^{q} + \delta \Tr\left(\varphi_{J}^{a}\left(x_{i}\right)\Sigma_{\theta}^{q}\right) + \delta {\mu_{\theta}^{q}}'\varphi_{J}^{a}\left(x_{i}\right)\mu_{\theta}^{q} \right)\right.\\
+    &\quad + \Tr\left(w_{i}w_{i}'\Sigma_{\beta}^{q}\right) + {\mu_{\beta}^{q}}'w_{i}w_{i}'\mu_{\beta}^{q} + 2w_{i}'\mu_{\beta}^{q}\left(\delta\Tr\left(\varphi_{J}^{a}\left(x_{i}\right)\Sigma_{\theta}^{q}\right) + \delta{\mu_{\theta}^{q}}'\varphi_{J}^{a}\left(x_{i}\right)\mu_{\theta}^{q}\right)\\
+    &\quad +\delta^{2}\left\{2\Tr\left(\varphi_{J}^{a}\left(x_{i}\right)\Sigma_{\theta}^{q}\right)^{2} + 4{\mu_{\theta}^{q}}'\varphi_{J}^{a}\left(x_{i}\right)\Sigma_{\theta}^{q}\varphi_{J}^{a}\left(x_{i}\right)\mu_{\theta}^{q} +\left(\Tr\left(\varphi_{J}^{a}\left(x_{i}\right)\Sigma_{\theta}^{q}\right)+{\mu_{\theta}^{q}}'\varphi_{J}^{a}\left(x_{i}\right)\mu_{\theta}^{q}\right)^{2} \right\}\\
+    &\quad \left. +2\mu_{y_{i}^{*}}^{q}\mu_{y_{i}^{*}} -\mu_{y_{i}^{*}}^{2} \right] + \sum_{i=1}^{n}\ln \left(\Phi\left(\mu_{y_{i}^{*}}\right)^{y_{i}}\left(1-\Phi\left(\mu_{y_{i}^{*}}\right)\right)^{1-y_{i}} \right)\\
+    &= -\frac{1}{2}\sum_{i=1}^{n}\left[\Tr\left(w_{i}w_{i}'\Sigma_{\beta}^{q}\right)+\delta^{2}\left\{2\Tr\left(\varphi_{J}^{a}\left(x_{i}\right)\Sigma_{\theta}^{q}\right)^{2}+4{\mu_{\theta}^{q}}'\varphi_{J}^{a}\left(x_{i}\right)\Sigma_{\theta}^{q}\varphi_{J}^{a}\left(x_{i}\right)\mu_{\theta}^{q} \right\}\right]\\
+    &\quad + \sum_{i=1}^{n}\ln \left(\Phi\left(\mu_{y_{i}^{*}}\right)^{y_{i}}\left(1-\Phi\left(\mu_{y_{i}^{*}}\right)\right)^{1-y_{i}} \right)
   \end{align*}
- \end{document}
+Note that $\sum_{i=1}^{n}\Tr\left(w_{i}w_{i}'\Sigma_{\beta}^{q}\right)=\Tr\left(W'W\Sigma_{\beta}^{q}\right)$.
+\subsubsection{$\opn{E}\left(\ln p \left(\theta\right)\right) + \opn{H}\left(\theta\right)$}
+\begin{align*}
+  \opn{E}\left(\ln p\left(\theta|\text{rest}\right)\right) + \opn{H}\left(\theta\right) &= -\frac{J+1}{2}\opn{E}\left(\ln \sigma\right) -\frac{1}{2}\opn{E}\left(\frac{1}{\sigma}\right)\Tr\left\{\left(\Sigma_{\theta}^{q}+\mu_{\theta}^{q}{\mu_{\theta}^{q}}'\right)\opn{Dg}\left(\opn{E}\left(\Upsilon^{-1}\right)\right) \right\} + \frac{1}{2}\ln\left|\Sigma_{\theta}^{q}\right|
+\end{align*}
+\subsubsection{$\opn{E}\left(\ln p\left(\beta\right)\right) + \opn{H}\left(\beta\right) $}
+
+\begin{align*}
+  \opn{E}\left(\ln p\left(\beta|\text{rest}\right)\right) + \opn{H}\left(\beta\right) &= -\frac{p+1}{2}\opn{E}\left(\ln \sigma^{2}\right) -\frac{1}{2}\opn{E}\left(\frac{1}{\sigma^{2}}\right)\left\{\left(\mu_{\beta}^{q}-\mu_{\beta}^{0}\right)'{\Sigma_{\beta}^{0}}^{-1}\left(\mu_{\beta}^{q}-\mu_{\beta}^{0}\right) +\Tr\left({\Sigma_{\beta}^{0}}^{-1}\Sigma_{\beta}^{q}\right) \right\} + \frac{1}{2}\ln\left|\Sigma_{\beta}^{q}\right|
+\end{align*}
+\subsubsection{$\opn{E}\left(\ln p\left(\tau^{2}\right)\right) + \opn{H}\left(\tau^{2}\right)$}
+  \begin{align*}
+    \opn{E}\left(\ln p\left(\tau^{2}|\text{rest}\right)\right) + \opn{H}\left(\tau^{2}\right) &= -\frac{r_{0,\tau}}{2}\ln \left(\frac{s_{q,\tau}}{2}\right) + \left(\frac{r_{0,\tau}}{2}-\frac{r_{q,\tau}}{2}\right)\opn{di}\left(\frac{r_{q,\tau}}{2}\right) + \left(1-\frac{s_{0,\tau}}{s_{q,\tau}}\right)\frac{r_{q,\tau}}{2} + \ln \Gamma\left(\frac{r_{q,\tau}}{2}\right)
+  \end{align*}
+\subsubsection{$\opn{E}\left(\ln p\left(\sigma^{2}\right)\right) + \opn{H}\left(\sigma^{2}\right)$}
+\begin{align*}
+  \opn{E}\left(\ln p\left(\sigma^{2}|\text{rest}\right)\right) + \opn{H}\left(\sigma^{2}\right) &= \frac{r_{0,\sigma}}{2}\ln \left(\frac{s_{0,\sigma}}{2}\right) -\ln \Gamma\left(\frac{r_{0,\sigma}}{2}\right)-\left(\frac{r_{0,\sigma}}{2}+1\right)\opn{E}\left(\ln \sigma^{2}\right) -\frac{s_{0,\sigma}}{2}\opn{E}\left(\frac{1}{\sigma^{2}}\right)\\
+  &\quad +2a\opn{E}\left(\ln \sigma\right) -b\opn{E}\left(\frac{1}{\sigma}\right) +c\opn{E}\left(\frac{1}{\sigma^{2}}\right)
+\end{align*}
+\subsubsection{$\opn{E}\left(\ln p\left(\psi\right)\right) + \opn{H}\left(\psi\right)$}
+\begin{align*}
+  \opn{E}\left(\ln p\left(\psi\right)\right) + \opn{H}\left(\psi\right) &= \ln \left(\frac{\omega_{0}}{2}\right) + S_{1}\left(\mu_{\psi}^{q}, {\sigma_{\psi}^{q}}^{2}\right) + \frac{1}{2}\ln \left(2\pi {\sigma_{\psi}^{q}}^{2}\right) -\frac{1}{2}
+\end{align*}
+\subsubsection{LB}
+  \begin{align*}
+    \mathcal{L} &= -\frac{1}{2}\left\{\Tr\left(W'W\Sigma_{\beta}^{q}\right) + \delta^{2}\sum_{i=1}^{n}\left(2\Tr\left(\varphi_{J}^{a}\left(x_{i}\right)\Sigma_{\theta}^{q}\right)^{2} +4{\mu_{\theta}^{q}}'\varphi_{J}^{a}\left(x_{i}\right)\Sigma_{\theta}^{q}\varphi_{J}^{a}\left(x_{i}\right)\mu_{\theta}^{q}\right) \right\}\\
+    &\quad + \sum_{i=1}^{n}\ln\left(\Phi\left(\mu_{y_{i}^{*}}\right)^{y_{i}}\left(1-\Phi\left(\mu_{y_{i}^{*}}\right)\right)^{1-y_{i}}\right)\\
+    &\quad -\frac{1}{2}\opn{E}\left(\frac{1}{\sigma}\right)\Tr\left\{\left(\Sigma_{\theta}^{q}+\mu_{\theta}^{q}{\mu_{\theta}^{q}}'\right)\opn{Dg}\left(\opn{E}\left(\Upsilon^{-1}\right)\right) \right\} +\frac{1}{2}\ln\left|\Sigma_{\theta}^{q}\right|\\
+    &\quad -\frac{1}{2}\opn{E}\left(\frac{1}{\sigma^{2}}\right)\left\{\left(\mu_{\beta}^{q}-\mu_{\beta}^{0}\right)'{\Sigma_{\beta}^{0}}^{-1}\left(\mu_{\beta}^{q}-\mu_{\beta}^{0}\right) + \Tr\left({\Sigma_{\beta}^{0}}^{-1}\Sigma_{\beta}^{q}\right) \right\} + \frac{1}{2}\ln\left|\Sigma_{\beta}^{q}\right|\\
+    &\quad +\frac{r_{0,\sigma}}{2}\ln\left(\frac{s_{0,\sigma}}{2}\right)-\ln\Gamma\left(\frac{r_{0,\sigma}}{2}\right) -\frac{s_{0,\sigma}}{2}\opn{E}\left(\frac{1}{\sigma^{2}}\right) -b\opn{E}\left(\frac{1}{\sigma}\right) +c\opn{E}\left(\frac{1}{\sigma^{2}}\right)\\
+    &\quad -\frac{r_{0,\tau}}{2}\ln\left(\frac{s_{q,\tau}}{2}\right) +\left(\frac{r_{0,\tau}}{2} -\frac{r_{q,\tau}}{2}\right)\opn{di}\left(\frac{r_{q,\tau}}{2}\right) +\left(1-\frac{s_{0,\tau}}{s_{q,\tau}}\right)\frac{r_{q,\tau}}{2} +\ln\Gamma\left(\frac{r_{q,\tau}}{2}\right)\\
+    &\quad +\ln\left(\frac{\omega_{0}}{2}\right) + S_{1}\left(\mu_{\psi}^{q}, {\sigma_{\psi}^{q}}^{2}\right) + \frac{1}{2}\ln\left(2\pi {\sigma_{\psi}^{q}}^{2}\right) -\frac{1}{2}
+  \end{align*}
+\end{document}

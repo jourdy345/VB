@@ -1,0 +1,881 @@
+x
+order(x)
+lines(x,fit$fxobs$mean,lwd=2)
+neam(fit$fxobs)
+names(fit$fxobs)
+polygon(c(x,rev(x)),c(fit$fxobs$upper,rev(fit$fxobs$lower)))
+polygon(c(x,rev(x)),c(fit$fxobs$upper,rev(fit$fxobs$lower)),border=NA)
+plot(x,y-fit$wbeta$mean,ylab='Parametric Residual',xlab='Temperature',lwd=2,pch=20)
+polygon(c(x,rev(x)),c(fit$fxobs$upper,rev(fit$fxobs$lower)),border=NA)
+polygon(c(x,rev(x)),c(fit$fxobs$upper,rev(fit$fxobs$lower)),border=NA,col='gray')
+plot(x,y-fit$wbeta$mean,ylab='Parametric Residual',xlab='Temperature',lwd=2,pch=20)
+polygon(c(x,rev(x)),c(fit$fxobs$upper,rev(fit$fxobs$lower)),border=NA,col='gray70')
+plot(x,y-fit$wbeta$mean,ylab='Parametric Residual',xlab='Temperature',lwd=2,pch=20)
+polygon(c(x,rev(x)),c(fit$fxobs$upper,rev(fit$fxobs$lower)),border=NA,col='gray')
+plot(x,y-fit$wbeta$mean,ylab='Parametric Residual',xlab='Temperature',pch=20)
+polygon(c(x,rev(x)),c(fit$fxobs$upper,rev(fit$fxobs$lower)),border=NA,col='gray')
+points(x,y-fit$wbeta$mean,pch=20)
+lines(x,fit$fxobs$mean,lwd=2)
+yhat
+semi$lb[length(semi$lb)]#
+vphi<-sqrt(2)*cos(outer(x,pi*(1:nbasis)))#
+ord<-order(x)#
+yhat<-(vphi[,1:length(semi$mutheta.q)]%*%semi$mutheta.q)+Z%*%semi$mubeta.q#
+semi$mubeta.q#
+sqrt(mean((y-yhat)^2))
+lines(x,yhat,lwd=2,lty=2,col=2)
+plot(x,y,ylab='Parametric Residual',xlab='Temperature',pch=20)
+plot(x,y,ylab='logenegy',xlab='Temperature',pch=20)
+plot(x,y,ylab='Electricity Demand',xlab='Temperature',pch=20)
+plot(x,y,ylab='Log Electricity Demand',xlab='Temperature',pch=20)
+polygon(c(x,rev(x)),c(fit$fxobs$upper+fit$wbeta$upper,rev(fit$fxobs$lower+fit$wbeta+lower)),border=NA,col='gray')
+fit$wbeta
+polygon(c(x,rev(x)),c(fit$fxobs$upper+fit$wbeta$upper,rev(fit$fxobs$lower+fit$wbeta$lower)),border=NA,col='gray')
+plot(x,y,ylab='Log Electricity Demand',xlab='Temperature',pch=20)
+polygon(c(x,rev(x)),c(fit$fxobs$upper+fit$wbeta$mean,rev(fit$fxobs$lower+fit$wbeta$mean)),border=NA,col='gray')
+plot(x,y-fit$wbeta$mean,ylab='Parametric Residual',xlab='Temperature',pch=20)#
+polygon(c(x,rev(x)),c(fit$fxobs$upper,rev(fit$fxobs$lower)),border=NA,col='gray')#
+points(x,y-fit$wbeta$mean,pch=20)#
+lines(x,fit$fxobs$mean,lwd=2)#
+lines(x,yhat,lwd=2,lty=2,col=2)
+lines(x,(vphi[,1:length(semi$mutheta.q)]%*%semi$mutheta.q),lwd=2,lty=2,col=2)
+lines(x,(vphi[,1:length(semi$mutheta.q)]%*%semi$mutheta.q)[o],lwd=2,lty=2,col=2)
+### Plot#
+plot(x,y-fit$wbeta$mean,ylab='Parametric Residual',xlab='Temperature',pch=20)#
+polygon(c(x,rev(x)),c(fit$fxobs$upper,rev(fit$fxobs$lower)),border=NA,col='gray')#
+points(x,y-fit$wbeta$mean,pch=20)#
+lines(x,fit$fxobs$mean,lwd=2)#
+lines(x,(vphi[,1:length(semi$mutheta.q)]%*%semi$mutheta.q)[o],lwd=2,lty=2,col=2)
+(vphi[,1:length(semi$mutheta.q)]%*%semi$mutheta.q)
+o = order(tempm)
+plot(x,y-fit$wbeta$mean,ylab='Parametric Residual',xlab='Temperature',pch=20)#
+polygon(c(x,rev(x)),c(fit$fxobs$upper,rev(fit$fxobs$lower)),border=NA,col='gray')#
+points(x,y-fit$wbeta$mean,pch=20)#
+lines(x,fit$fxobs$mean,lwd=2)#
+lines(x,(vphi[,1:length(semi$mutheta.q)]%*%semi$mutheta.q)[o],lwd=2,lty=2,col=2)
+yhat
+Z%*%semi$mubeta.q
+fit$wbeta$mean
+lines(x,(vphi[,1:length(semi$mutheta.q)]%*%semi$mutheta.q)[ord],lwd=2,lty=2,col=2)
+plot(x,y-fit$wbeta$mean,ylab='Parametric Residual',xlab='Temperature',pch=20)#
+polygon(c(x,rev(x)),c(fit$fxobs$upper,rev(fit$fxobs$lower)),border=NA,col='gray')#
+points(x,y-fit$wbeta$mean,pch=20)#
+lines(x,fit$fxobs$mean,lwd=2)#
+lines(x,(vphi[,1:length(semi$mutheta.q)]%*%semi$mutheta.q)[ord],lwd=2,lty=2,col=2)
+(vphi[,1:length(semi$mutheta.q)]%*%semi$mutheta.q)
+o = order(tempm)
+(vphi[,1:length(semi$mutheta.q)]%*%semi$mutheta.q)[o]
+fit$fxobs$mean
+(vphi[,1:length(semi$mutheta.q)]%*%semi$mutheta.q)
+z
+x
+o
+x[o]
+(vphi[,1:length(semi$mutheta.q)]%*%semi$mutheta.q)[ord]
+fit$fxobs$mean
+x
+vphi
+Z%*%semi$mubeta.q
+yhat
+yhat<-drop(yhat)
+yhat
+y
+fhat<-(vphi[,1:length(semi$mutheta.q)]%*%semi$mutheta.q)
+fhat
+fhat<-drop(vphi[,1:length(semi$mutheta.q)]%*%semi$mutheta.q)
+fgat
+fhat
+fit$fxobs$mean
+drop(fit$fxobs$mean)
+fhat
+fit$wbeta$mean
+fit$fxobs$mean
+vbgpspectral
+source('vbgpspectral.R')
+# Set up prior parameters#
+p=2#
+nbasis=30#
+sigma2_m0=1#
+sigma2_v0=100#
+sigma2_r0=2*(2+sigma2_m0^2/sigma2_v0)#
+sigma2_s0=sigma2_m0*(sigma2_r0-2)#
+tau2_m0=1#
+tau2_v0=100#
+tau2_r0=2*(2+tau2_m0^2/tau2_v0)#
+tau2_s0=tau2_m0*(tau2_r0-2)#
+tau2_rn=tau2_r0+nbasis#
+prior.parms<-list(rsig.0=sigma2_r0,ssig.0=sigma2_s0,#
+                  rtau.0=tau2_m0,stau.0=tau2_v0,w0=2,#
+                  mubeta.0=rep(0,p),sigbeta.0=diag(100,p))#
+# Fit the model#
+Z=cbind(1,w)#
+xmin=min(x)#
+xmax=max(x)#
+x=(x-xmin)/(xmax-xmin)#
+system.time({#
+semi<-vbgpspectral(y=y,x=x,Z=Z,T=nbasis,tol=0.0001,prior.parms,1)#
+})#
+semi$lb[length(semi$lb)]
+semi$vphi
+vphi<-semi$vphi
+ord<-order(x)#
+yhat<-(vphi[,1:length(semi$mutheta.q)]%*%semi$mutheta.q)+Z%*%semi$mubeta.q#
+fhat<-drop(vphi[,1:length(semi$mutheta.q)]%*%semi$mutheta.q)#
+semi$mubeta.q#
+sqrt(mean((y-yhat)^2))
+fhat
+plot(x,fhat)
+plot(x,y-fit$wbeta$mean,ylab='Parametric Residual',xlab='Temperature',pch=20)#
+polygon(c(x,rev(x)),c(fit$fxobs$upper,rev(fit$fxobs$lower)),border=NA,col='gray')#
+points(x,y-fit$wbeta$mean,pch=20)#
+lines(x,fit$fxobs$mean,lwd=2)#
+lines(x,(vphi[,1:length(semi$mutheta.q)]%*%semi$mutheta.q),lwd=2,lty=2,col=2)
+plot(x,y-Z%*%semi$mubeta.q,ylab='Parametric Residual',xlab='Temperature',pch=20)
+lines(x,(vphi[,1:length(semi$mutheta.q)]%*%semi$mutheta.q),lwd=2,lty=2,col=2)
+plot(x,y,ylab='Parametric Residual',xlab='Temperature',pch=20)
+lines(x,(vphi[,1:length(semi$mutheta.q)]%*%semi$mutheta.q)+Z%*%semi$mubeta.q,lwd=2,lty=2,col=2)
+plot(x,y-Z%*%semi$mubeta.q,ylab='Parametric Residual',xlab='Temperature',pch=20)#
+lines(x,(vphi[,1:length(semi$mutheta.q)]%*%semi$mutheta.q),lwd=2,lty=2,col=2)
+names(semi)
+semi$sigtheta.q
+semi$mutheta.q
+semi$vphi
+semi$mutheta.q
+round(semi$mutheta.q,3)
+round(semi$mutheta.q,4)
+round(semi$mutheta.q,6)
+source('vbgpspectral.R')#
+library(BSAM)#
+#
+#====================================================================#
+# Loading Data#
+#====================================================================#
+library(xlsx)#
+#
+Load=read.xlsx("ElecLoad.xls",sheetIndex=1)#
+nobs=nrow(Load)#
+lener      <- log(Load$ener)#
+lenerm     <- log(Load$enerm)#
+lpelec     <- log(Load$pelec)#
+lpgas      <- log(Load$pgas)#
+lgdp       <- log(Load$gdp)#
+temp       <- Load$cddq  - Load$hddq#
+tempm      <- Load$cddqm - Load$hddqm#
+tempmsq    <- tempm^2#
+lpelecpgas <- log(Load$pelec/Load$pgas)#
+lenermgdp  <- log(Load$enerm/Load$gdp)#
+#
+o = order(tempm)#
+x = tempm[o];#
+y = lenermgdp[o];#
+n = length(y)#
+#
+# @ Get wdata, if any @#
+w = lpelecpgas[o];#
+#### MCMC#
+system.time({#
+semi.mcmc <- bsar(y=y,w=w,x=x,nbasis=30,shape='Free')#
+})#
+semi.mcmc#
+fit=fitted(semi.mcmc)#
+sqrt(mean((y-fit$wbeta$mean-fit$fxobs$mean)^2))
+plot(x,y-semi.fit$wbeta$mean,ylab='Parametric Residual',xlab='Temperature',pch=20)
+semi.fit=fitted(semi.mcmc)
+semi.mcmc
+plot(x,y-semi.fit$wbeta$mean,ylab='Parametric Residual',xlab='Temperature',pch=20)
+polygon(c(x,rev(x)),c(semi.fit$fxobs$upper,rev(semi.fit$fxobs$lower)),border=NA,col='gray')
+points(x,y-fit$wbeta$mean,pch=20)
+lines(x,semi.fit$fxobs$mean,lwd=2)
+plot(x,y-semi.fit$wbeta$mean,ylab='Parametric Residual',xlab='Temperature',pch=20,ylim=c(-0.5,0.5))
+plot(x,y-semi.fit$wbeta$mean,ylab='Parametric Residual',xlab='Temperature',pch=20,ylim=c(-0.5,0.4))
+plot(x,y-semi.fit$wbeta$mean,ylab='Parametric Residual',xlab='Temperature',pch=20,ylim=c(-0.4,0.4))
+plot(x,y-semi.fit$wbeta$mean,ylab='Parametric Residual',xlab='Temperature',pch=20,ylim=c(-0.4,0.3))
+plot(x,y-semi.fit$wbeta$mean,ylab='Parametric Residual',xlab='Temperature',pch=20,ylim=c(-0.3,0.3))
+plot(x,y-semi.fit$wbeta$mean,ylab='Parametric Residual',xlab='Temperature',pch=20,ylim=c(-0.4,0.3))
+plot(x,y-semi.fit$wbeta$mean,ylab='Parametric Residual',xlab='Temperature',pch=20,ylim=c(-0.3,0.3))
+polygon(c(x,rev(x)),c(semi.fit$fxobs$upper,rev(semi.fit$fxobs$lower)),border=NA,col='gray')
+points(x,y-fit$wbeta$mean,pch=20)
+lines(x,semi.fit$fxobs$mean,lwd=2)
+# Fit the model#
+xmin=min(x)#
+xmax=max(x)#
+x=(x-xmin)/(xmax-xmin)#
+system.time({#
+semi.vb<-vbgpspectral(y=y-semi.fit$wbeta$mean,x=x,Z=rep(1,n),T=nbasis,tol=0.0001,prior.parms,1)#
+})
+p=2#
+nbasis=30#
+sigma2_m0=1#
+sigma2_v0=100#
+sigma2_r0=2*(2+sigma2_m0^2/sigma2_v0)#
+sigma2_s0=sigma2_m0*(sigma2_r0-2)#
+#
+tau2_m0=1#
+tau2_v0=100#
+tau2_r0=2*(2+tau2_m0^2/tau2_v0)#
+tau2_s0=tau2_m0*(tau2_r0-2)#
+tau2_rn=tau2_r0+nbasis#
+#
+prior.parms<-list(rsig.0=sigma2_r0,ssig.0=sigma2_s0,#
+                  rtau.0=tau2_m0,stau.0=tau2_v0,w0=2,#
+                  mubeta.0=rep(0,p),sigbeta.0=diag(100,p))#
+# Fit the model#
+xmin=min(x)#
+xmax=max(x)#
+x=(x-xmin)/(xmax-xmin)#
+system.time({#
+semi.vb<-vbgpspectral(y=y-semi.fit$wbeta$mean,x=x,Z=rep(1,n),T=nbasis,tol=0.0001,prior.parms,1)#
+})
+#### VB#
+p=1#
+nbasis=30#
+sigma2_m0=1#
+sigma2_v0=100#
+sigma2_r0=2*(2+sigma2_m0^2/sigma2_v0)#
+sigma2_s0=sigma2_m0*(sigma2_r0-2)#
+#
+tau2_m0=1#
+tau2_v0=100#
+tau2_r0=2*(2+tau2_m0^2/tau2_v0)#
+tau2_s0=tau2_m0*(tau2_r0-2)#
+tau2_rn=tau2_r0+nbasis#
+#
+prior.parms<-list(rsig.0=sigma2_r0,ssig.0=sigma2_s0,#
+                  rtau.0=tau2_m0,stau.0=tau2_v0,w0=2,#
+                  mubeta.0=rep(0,p),sigbeta.0=diag(100,p))#
+# Fit the model#
+xmin=min(x)#
+xmax=max(x)#
+x=(x-xmin)/(xmax-xmin)#
+system.time({#
+semi.vb<-vbgpspectral(y=y-semi.fit$wbeta$mean,x=x,Z=rep(1,n),T=nbasis,tol=0.0001,prior.parms,1)#
+})
+semi.vb$lb[length(semi$lb)]
+semi.vb$lb[length(semi.vb$lb)]
+vb.fit=semi.vb$vphi%*%semi.vb$mutheta.q+semi.vb$mubeta.q
+semi.vb$mutheta.q
+semi.vb$vphi
+nbasis
+source('vbgpspectral.R')
+#### VB#
+p=1#
+nbasis=30#
+sigma2_m0=1#
+sigma2_v0=100#
+sigma2_r0=2*(2+sigma2_m0^2/sigma2_v0)#
+sigma2_s0=sigma2_m0*(sigma2_r0-2)#
+#
+tau2_m0=1#
+tau2_v0=100#
+tau2_r0=2*(2+tau2_m0^2/tau2_v0)#
+tau2_s0=tau2_m0*(tau2_r0-2)#
+tau2_rn=tau2_r0+nbasis#
+#
+prior.parms<-list(rsig.0=sigma2_r0,ssig.0=sigma2_s0,#
+                  rtau.0=tau2_m0,stau.0=tau2_v0,w0=2,#
+                  mubeta.0=rep(0,p),sigbeta.0=diag(100,p))#
+# Fit the model#
+xmin=min(x)#
+xmax=max(x)#
+x=(x-xmin)/(xmax-xmin)#
+system.time({#
+semi.vb<-vbgpspectral(y=y-semi.fit$wbeta$mean,x=x,Z=rep(1,n),T=nbasis,tol=0.0001,prior.parms,1)#
+})#
+vb.fit=semi.vb$vphi%*%semi.vb$mutheta.q+semi.vb$mubeta.q#
+vb.fit.s=sqrt(semi.vb$ssig.q/(semi.vb$rsig.q-2))*sqrt(diag(semi.vb$vphi%*%solve(crossprod(semi.vb$vphi))%*%t(semi.vb$vphi)))
+lines(x,vb.fit,lwd=2,lty=2,col=2)
+vb.fit
+x
+lines(tempm[o],vb.fit,lwd=2,lty=2,col=2)
+plot(x,y-semi.fit$wbeta$mean,ylab='Parametric Residual',xlab='Temperature',pch=20,ylim=c(-0.3,0.3))#
+polygon(c(x,rev(x)),c(semi.fit$fxobs$upper,rev(semi.fit$fxobs$lower)),border=NA,col='gray')#
+points(x,y-fit$wbeta$mean,pch=20)#
+lines(x,semi.fit$fxobs$mean,lwd=2)
+lines(tempm[o],vb.fit,lwd=2,lty=2,col=2)
+tempm[o]
+vb.fit
+lines(tempm[o],vb.fit,lwd=2,lty=2,col=2)
+plot(x,y-semi.fit$wbeta$mean,ylab='Parametric Residual',xlab='Temperature',pch=20,ylim=c(-0.3,0.3))#
+polygon(c(x,rev(x)),c(semi.fit$fxobs$upper,rev(semi.fit$fxobs$lower)),border=NA,col='gray')#
+points(x,y-fit$wbeta$mean,pch=20)#
+lines(x,semi.fit$fxobs$mean,lwd=2)
+lines(tempm[o],vb.fit,lwd=2,lty=2,col=2)
+vb.fit
+tempm[o]
+x
+plot(tempm[o],y-semi.fit$wbeta$mean,ylab='Parametric Residual',xlab='Temperature',pch=20,ylim=c(-0.3,0.3))#
+polygon(c(tempm[o],rev(tempm[o])),c(semi.fit$fxobs$upper,rev(semi.fit$fxobs$lower)),border=NA,col='gray')#
+points(tempm[o],y-fit$wbeta$mean,pch=20)#
+lines(tempm[o],semi.fit$fxobs$mean,lwd=2)
+lines(tempm[o],vb.fit,lwd=2,lty=2,col=2)
+lines(tempm[o],vb.fit,lwd=2,lty=1,col=2)
+lines(tempm[o],vb.fit.l,lwd=2,lty=2,col=2)
+vb.fit.l=vb.fit-1.96*vb.fit.s#
+vb.fit.u=vb.fit+1.96*vb.fit.s
+lines(tempm[o],vb.fit.l,lwd=2,lty=2,col=2)
+lines(tempm[o],vb.fit.u,lwd=2,lty=2,col=2)
+semi.vb$mubeta.q
+coeff=c(semi.vb$mutheta.q,semi.vb$mubeta.q)
+coeff
+X=cbind(1,semi.vb$vphi)
+X
+vb.fit.s=sqrt(semi.vb$ssig.q/(semi.vb$rsig.q-2))*sqrt(diag(X%*%solve(crossprod(X))%*%t(X)))#
+vb.fit.l=vb.fit-1.96*vb.fit.s#
+vb.fit.u=vb.fit+1.96*vb.fit.s#
+### Plot#
+plot(tempm[o],y-semi.fit$wbeta$mean,ylab='Parametric Residual',xlab='Temperature',pch=20,ylim=c(-0.3,0.3))#
+polygon(c(tempm[o],rev(tempm[o])),c(semi.fit$fxobs$upper,rev(semi.fit$fxobs$lower)),border=NA,col='gray')#
+points(tempm[o],y-fit$wbeta$mean,pch=20)#
+lines(tempm[o],semi.fit$fxobs$mean,lwd=2)#
+lines(tempm[o],vb.fit,lwd=2,lty=1,col=2)#
+lines(tempm[o],vb.fit.l,lwd=2,lty=2,col=2)#
+lines(tempm[o],vb.fit.u,lwd=2,lty=2,col=2)
+w
+semi.mcmc
+names(semi.mcmc)
+semi.mcmc$mcmc.draws$beta
+semi.mcmc$mcmc.draws$beta[,2]
+mean(semi.mcmc$mcmc.draws$beta[,2])
+mean(semi.mcmc$mcmc.draws$beta[,2])*w
+plot(tempm[o],y-mean(semi.mcmc$mcmc.draws$beta[,2])*w,ylab='Parametric Residual',xlab='Temperature',pch=20,ylim=c(-0.3,0.3))
+plot(tempm[o],y-mean(semi.mcmc$mcmc.draws$beta[,2])*w,ylab='Parametric Residual',xlab='Temperature',pch=20)
+plot(tempm[o],y-semi.fit$wbeta$mean,ylab='Parametric Residual',xlab='Temperature',pch=20,ylim=c(-0.3,0.3))
+xmin=min(x)#
+xmax=max(x)#
+x=(x-xmin)/(xmax-xmin)#
+system.time({#
+semi.vb<-vbgpspectral(y=y-mean(semi.mcmc$mcmc.draws$beta[,2])*w,x=x,Z=rep(1,n),T=nbasis,tol=0.0001,prior.parms,1)#
+})#
+vb.fit=semi.vb$vphi%*%semi.vb$mutheta.q+semi.vb$mubeta.q#
+X=cbind(1,semi.vb$vphi)#
+vb.fit.s=sqrt(semi.vb$ssig.q/(semi.vb$rsig.q-2))*sqrt(diag(X%*%solve(crossprod(X))%*%t(X)))#
+vb.fit.l=vb.fit-1.96*vb.fit.s#
+vb.fit.u=vb.fit+1.96*vb.fit.s
+### Plot#
+plot(tempm[o],y-semi.fit$wbeta$mean,ylab='Parametric Residual',xlab='Temperature',pch=20,ylim=c(-0.3,0.3))#
+polygon(c(tempm[o],rev(tempm[o])),c(semi.fit$fxobs$upper,rev(semi.fit$fxobs$lower)),border=NA,col='gray')#
+points(tempm[o],y-fit$wbeta$mean,pch=20)#
+lines(tempm[o],semi.fit$fxobs$mean,lwd=2)#
+lines(tempm[o],vb.fit,lwd=2,lty=1,col=2)#
+lines(tempm[o],vb.fit.l,lwd=2,lty=2,col=2)#
+lines(tempm[o],vb.fit.u,lwd=2,lty=2,col=2)
+semi.vb$mubeta.q
+semi.vb$vphi%*%semi.vb$mutheta.q+semi.vb$mubeta.q
+semi.vb$vphi%*%semi.vb$mutheta.q
+# Fit the model#
+xmin=min(x)#
+xmax=max(x)#
+x=(x-xmin)/(xmax-xmin)#
+system.time({#
+semi.vb<-vbgpspectral(y=y-semi.fit$wbeta$mean,x=x,Z=rep(1,n),T=nbasis,tol=0.0001,prior.parms,1)#
+})#
+vb.fit=semi.vb$vphi%*%semi.vb$mutheta.q+semi.vb$mubeta.q#
+X=cbind(1,semi.vb$vphi)#
+vb.fit.s=sqrt(semi.vb$ssig.q/(semi.vb$rsig.q-2))*sqrt(diag(X%*%solve(crossprod(X))%*%t(X)))#
+vb.fit.l=vb.fit-1.96*vb.fit.s#
+vb.fit.u=vb.fit+1.96*vb.fit.s
+plot(tempm[o],y-semi.fit$wbeta$mean,ylab='Parametric Residual',xlab='Temperature',pch=20,ylim=c(-0.3,0.3))#
+polygon(c(tempm[o],rev(tempm[o])),c(semi.fit$fxobs$upper,rev(semi.fit$fxobs$lower)),border=NA,col='gray')#
+points(tempm[o],y-fit$wbeta$mean,pch=20)#
+lines(tempm[o],semi.fit$fxobs$mean,lwd=2)#
+lines(tempm[o],vb.fit,lwd=2,lty=1,col=2)#
+lines(tempm[o],vb.fit.l,lwd=2,lty=2,col=2)#
+lines(tempm[o],vb.fit.u,lwd=2,lty=2,col=2)
+semi.vb$mubeta.q
+X=semi.vb$vphi#cbind(1,semi.vb$vphi)
+vb.fit=semi.vb$vphi%*%semi.vb$mutheta.q#
+X=semi.vb$vphi#cbind(1,semi.vb$vphi)#
+vb.fit.s=sqrt(semi.vb$ssig.q/(semi.vb$rsig.q-2))*sqrt(diag(X%*%solve(crossprod(X))%*%t(X)))#
+vb.fit.l=vb.fit-1.96*vb.fit.s#
+vb.fit.u=vb.fit+1.96*vb.fit.s
+vb.fit=semi.vb$vphi%*%semi.vb$mutheta.q#+semi.vb$mubeta.q#
+X=semi.vb$vphi#cbind(1,semi.vb$vphi)#
+vb.fit.s=sqrt(semi.vb$ssig.q/(semi.vb$rsig.q-2))*sqrt(diag(X%*%solve(crossprod(X))%*%t(X)))#
+vb.fit.l=vb.fit-1.96*vb.fit.s#
+vb.fit.u=vb.fit+1.96*vb.fit.s#
+### Plot#
+plot(tempm[o],y-semi.fit$wbeta$mean,ylab='Parametric Residual',xlab='Temperature',pch=20,ylim=c(-0.3,0.3))#
+polygon(c(tempm[o],rev(tempm[o])),c(semi.fit$fxobs$upper,rev(semi.fit$fxobs$lower)),border=NA,col='gray')#
+points(tempm[o],y-fit$wbeta$mean,pch=20)#
+lines(tempm[o],semi.fit$fxobs$mean,lwd=2)#
+lines(tempm[o],vb.fit,lwd=2,lty=1,col=2)#
+lines(tempm[o],vb.fit.l,lwd=2,lty=2,col=2)#
+lines(tempm[o],vb.fit.u,lwd=2,lty=2,col=2)
+legend('topright',legend=c("Residual","BSAR","VB"),col=1:2)
+legend('topright',legend=c("Residual","BSAR","VB"),col=1:2,lty=c(NA,1,1))
+legend('topright',legend=c("Residual","BSAR","VB"),col=1:2,lty=c(NA,1,1),pch=c(20,NA,NA))
+legend('topright',legend=c("Residual","BSAR","VB"),col=1:2,lty=c(NA,1,1),pch=c(20,NA,NA),lwd=2)
+plot(tempm[o],y-semi.fit$wbeta$mean,ylab='Parametric Residual',xlab='Temperature',pch=20,ylim=c(-0.3,0.3))#
+polygon(c(tempm[o],rev(tempm[o])),c(semi.fit$fxobs$upper,rev(semi.fit$fxobs$lower)),border=NA,col='gray')#
+points(tempm[o],y-fit$wbeta$mean,pch=20)#
+lines(tempm[o],semi.fit$fxobs$mean,lwd=2)#
+lines(tempm[o],vb.fit,lwd=2,lty=1,col=2)#
+lines(tempm[o],vb.fit.l,lwd=2,lty=2,col=2)#
+lines(tempm[o],vb.fit.u,lwd=2,lty=2,col=2)#
+legend('topright',legend=c("Residual","BSAR","VB"),col=1:2,lty=c(NA,1,1),pch=c(20,NA,NA),lwd=2)
+legend('topright',legend=c("Residual","BSAR","VB"),col=c(1,1,2),lty=c(NA,1,1),pch=c(20,NA,NA),lwd=2)
+plot(tempm[o],y-semi.fit$wbeta$mean,ylab='Parametric Residual',xlab='Temperature',pch=20,ylim=c(-0.3,0.3))#
+polygon(c(tempm[o],rev(tempm[o])),c(semi.fit$fxobs$upper,rev(semi.fit$fxobs$lower)),border=NA,col='gray')#
+points(tempm[o],y-fit$wbeta$mean,pch=20)#
+lines(tempm[o],semi.fit$fxobs$mean,lwd=2)#
+lines(tempm[o],vb.fit,lwd=2,lty=1,col=2)#
+lines(tempm[o],vb.fit.l,lwd=2,lty=2,col=2)#
+lines(tempm[o],vb.fit.u,lwd=2,lty=2,col=2)#
+legend('topright',legend=c("Residual","BSAR","VB"),col=c(1,1,2),lty=c(NA,1,1),pch=c(20,NA,NA),lwd=2)
+plot(tempm[o],y-semi.fit$wbeta$mean,ylab='Parametric Residual',xlab='Temperature',pch=20,ylim=c(-0.3,0.35))#
+polygon(c(tempm[o],rev(tempm[o])),c(semi.fit$fxobs$upper,rev(semi.fit$fxobs$lower)),border=NA,col='gray')#
+points(tempm[o],y-fit$wbeta$mean,pch=20)#
+lines(tempm[o],semi.fit$fxobs$mean,lwd=2)#
+lines(tempm[o],vb.fit,lwd=2,lty=1,col=2)#
+lines(tempm[o],vb.fit.l,lwd=2,lty=2,col=2)#
+lines(tempm[o],vb.fit.u,lwd=2,lty=2,col=2)#
+legend('topright',legend=c("Residual","BSAR","VB"),col=c(1,1,2),lty=c(NA,1,1),pch=c(20,NA,NA),lwd=2)
+setEPS()#
+postscript('CI.eps')#
+plot(tempm[o],y-semi.fit$wbeta$mean,ylab='Parametric Residual',xlab='Temperature',pch=20,ylim=c(-0.3,0.35))#
+polygon(c(tempm[o],rev(tempm[o])),c(semi.fit$fxobs$upper,rev(semi.fit$fxobs$lower)),border=NA,col='gray')#
+points(tempm[o],y-fit$wbeta$mean,pch=20)#
+lines(tempm[o],semi.fit$fxobs$mean,lwd=2)#
+lines(tempm[o],vb.fit,lwd=2,lty=1,col=2)#
+lines(tempm[o],vb.fit.l,lwd=2,lty=2,col=2)#
+lines(tempm[o],vb.fit.u,lwd=2,lty=2,col=2)#
+legend('topright',legend=c("Residual","BSAR","VB"),col=c(1,1,2),lty=c(NA,1,1),pch=c(20,NA,NA),lwd=2)#
+dev.off()
+source('vbgpspectral.R')#
+library(BSAM)#
+library(xlsx)#
+#
+Load=read.xlsx("ElecLoad.xls",sheetIndex=1)#
+nobs=nrow(Load)#
+lener      <- log(Load$ener)#
+lenerm     <- log(Load$enerm)#
+lpelec     <- log(Load$pelec)#
+lpgas      <- log(Load$pgas)#
+lgdp       <- log(Load$gdp)#
+temp       <- Load$cddq  - Load$hddq#
+tempm      <- Load$cddqm - Load$hddqm#
+tempmsq    <- tempm^2#
+lpelecpgas <- log(Load$pelec/Load$pgas)#
+lenermgdp  <- log(Load$enerm/Load$gdp)#
+#
+o = order(tempm)#
+x = tempm[o];#
+y = lenermgdp[o];#
+n = length(y)#
+#
+# @ Get wdata, if any @#
+w = lpelecpgas[o];#
+#### VB#
+p=1#
+nbasis=30#
+sigma2_m0=1#
+sigma2_v0=100#
+sigma2_r0=2*(2+sigma2_m0^2/sigma2_v0)#
+sigma2_s0=sigma2_m0*(sigma2_r0-2)#
+#
+tau2_m0=1#
+tau2_v0=100#
+tau2_r0=2*(2+tau2_m0^2/tau2_v0)#
+tau2_s0=tau2_m0*(tau2_r0-2)#
+tau2_rn=tau2_r0+nbasis#
+#
+prior.parms<-list(rsig.0=sigma2_r0,ssig.0=sigma2_s0,#
+                  rtau.0=tau2_m0,stau.0=tau2_v0,w0=2,#
+                  mubeta.0=rep(0,p),sigbeta.0=diag(100,p))#
+# Fit the model#
+xmin=min(x)#
+xmax=max(x)#
+x=(x-xmin)/(xmax-xmin)#
+system.time({#
+semi.vb<-vbgpspectral(y=y,x=x,Z=cbind(1,w),T=nbasis,tol=0.0001,prior.parms,1)#
+})#
+vb.fit=semi.vb$vphi%*%semi.vb$mutheta.q#+semi.vb$mubeta.q#
+X=semi.vb$vphi#cbind(1,semi.vb$vphi)#
+vb.fit.s=sqrt(semi.vb$ssig.q/(semi.vb$rsig.q-2))*sqrt(diag(X%*%solve(crossprod(X))%*%t(X)))#
+vb.fit.l=vb.fit-1.96*vb.fit.s#
+vb.fit.u=vb.fit+1.96*vb.fit.s
+o = order(tempm)#
+x = tempm[o];#
+y = lenermgdp[o];#
+n = length(y)#
+#
+# @ Get wdata, if any @#
+w = lpelecpgas[o];#
+#### VB#
+p=2#
+nbasis=30#
+sigma2_m0=1#
+sigma2_v0=100#
+sigma2_r0=2*(2+sigma2_m0^2/sigma2_v0)#
+sigma2_s0=sigma2_m0*(sigma2_r0-2)#
+#
+tau2_m0=1#
+tau2_v0=100#
+tau2_r0=2*(2+tau2_m0^2/tau2_v0)#
+tau2_s0=tau2_m0*(tau2_r0-2)#
+tau2_rn=tau2_r0+nbasis#
+#
+prior.parms<-list(rsig.0=sigma2_r0,ssig.0=sigma2_s0,#
+                  rtau.0=tau2_m0,stau.0=tau2_v0,w0=2,#
+                  mubeta.0=rep(0,p),sigbeta.0=diag(100,p))#
+# Fit the model#
+xmin=min(x)#
+xmax=max(x)#
+x=(x-xmin)/(xmax-xmin)#
+system.time({#
+semi.vb<-vbgpspectral(y=y,x=x,Z=cbind(1,w),T=nbasis,tol=0.0001,prior.parms,1)#
+})#
+vb.fit=semi.vb$vphi%*%semi.vb$mutheta.q+semi.vb$mubeta.q
+semi.vb$mubeta.q
+Z=cbind(1,w)
+xmin=min(x)#
+xmax=max(x)#
+x=(x-xmin)/(xmax-xmin)#
+system.time({#
+semi.vb<-vbgpspectral(y=y,x=x,Z=Z,T=nbasis,tol=0.0001,prior.parms,1)#
+})
+vb.fit=semi.vb$vphi%*%semi.vb$mutheta.q+Z%*%semi.vb$mubeta.q
+vb.fit
+semi.vb$vphi
+Z
+semi.vb$mubeta.q
+library(Matrix)
+bdiag
+X=bdiag(list(Z,semi.vb$vphi))
+X
+X=data.matrix(X)
+X
+vb.fit.s=sqrt(semi.vb$ssig.q/(semi.vb$rsig.q-2))*sqrt(diag(X%*%solve(crossprod(X))%*%t(X)))#
+vb.fit.l=vb.fit-1.96*vb.fit.s#
+vb.fit.u=vb.fit+1.96*vb.fit.s
+dim(X)
+dim(semi.vb$vphi)
+X=cbind(Z,semi.vb$vphi)
+X
+vb.fit.s=sqrt(semi.vb$ssig.q/(semi.vb$rsig.q-2))*sqrt(diag(X%*%solve(crossprod(X))%*%t(X)))
+vb.fit.l=vb.fit-1.96*vb.fit.s#
+vb.fit.u=vb.fit+1.96*vb.fit.s
+vb.fit
+system.time({#
+semi.mcmc <- bsar(y=y-Z%*%semi.vb$mubeta.q,x=x,nbasis=30,shape='Free')#
+})#
+semi.mcmc#
+semi.fit=fitted(semi.mcmc)
+plot(tempm[o],y-Z%*%semi.vb$mubeta.q,ylab='Parametric Residual',xlab='Temperature',pch=20,ylim=c(-0.3,0.35))
+polygon(c(tempm[o],rev(tempm[o])),c(vb.fit.l,rev(vb.fit.u)),border=NA,col='gray')
+vb.fit=semi.vb$vphi%*%semi.vb$mutheta.q#+Z%*%semi.vb$mubeta.q#
+X=cbind(Z,semi.vb$vphi)#
+vb.fit.s=sqrt(semi.vb$ssig.q/(semi.vb$rsig.q-2))*sqrt(diag(X%*%solve(crossprod(X))%*%t(X)))#
+vb.fit.l=vb.fit-1.96*vb.fit.s#
+vb.fit.u=vb.fit+1.96*vb.fit.s
+polygon(c(tempm[o],rev(tempm[o])),c(vb.fit.l,rev(vb.fit.u)),border=NA,col='gray')
+points(tempm[o],y-fit$wbeta$mean,pch=20)
+lines(tempm[o],semi.fit$fxobs$mean,lwd=2)
+points(tempm[o],y-Z%*%semi.vb$mubeta.q,pch=20)
+lines(tempm[o],semi.fit$fxobs$mean,lwd=2)
+semi.fit$fxobs$mean
+lines(tempm[o],semi.fit$fxobs$mean+semi.fit$wbeta$mean,lwd=2)
+plot(tempm[o],y-Z%*%semi.vb$mubeta.q,ylab='Parametric Residual',xlab='Temperature',pch=20,ylim=c(-0.3,0.35))#
+polygon(c(tempm[o],rev(tempm[o])),c(vb.fit.l,rev(vb.fit.u)),border=NA,col='gray')#
+points(tempm[o],y-Z%*%semi.vb$mubeta.q,pch=20)#
+lines(tempm[o],semi.fit$fxobs$mean,lwd=2)
+lines(tempm[o],vb.fit,lwd=2,lty=1,col=2)
+plot(tempm[o],y-Z%*%semi.vb$mubeta.q,ylab='Parametric Residual',xlab='Temperature',pch=20,ylim=c(-0.3,0.35))#
+polygon(c(tempm[o],rev(tempm[o])),c(vb.fit.l,rev(vb.fit.u)),border=NA,col='gray')#
+points(tempm[o],y-Z%*%semi.vb$mubeta.q,pch=20)#
+lines(tempm[o],vb.fit,lwd=2,lty=1,col=1)#
+lines(tempm[o],semi.fit$fxobs$mean,lwd=2,col=2)
+lines(tempm[o],semi.fit$fxobs$lower,lwd=2,lty=2,col=2)
+lines(tempm[o],semi.fit$fxobs$upper,lwd=2,lty=2,col=2)
+plot(tempm[o],y-Z%*%semi.vb$mubeta.q,ylab='Parametric Residual',xlab='Temperature',pch=20,ylim=c(-0.3,0.35))#
+polygon(c(tempm[o],rev(tempm[o])),c(semi.fit$fxobs$upper,rev(semi.fit$fxobs$lower)),border=NA,col='gray')#
+points(tempm[o],y-fit$wbeta$mean,pch=20)#
+lines(tempm[o],semi.fit$fxobs$mean,lwd=2)#
+lines(tempm[o],vb.fit,lwd=2,lty=1,col=2)#
+lines(tempm[o],vb.fit.l,lwd=2,lty=2,col=2)#
+lines(tempm[o],vb.fit.u,lwd=2,lty=2,col=2)
+legend('topright',legend=c("Residual","BSAR","VB"),col=c(1,1,2),lty=c(NA,1,1),pch=c(20,NA,NA),lwd=2)
+legend('topright',legend=c("Residual","BSAR",'95% CI (BSAR)',"VB",'95% CI (VB)'),col=c(1,1,gray,2,2),lty=c(NA,1,1),pch=c(20,NA,NA),lwd=2)
+plot(tempm[o],y-Z%*%semi.vb$mubeta.q,ylab='Parametric Residual',xlab='Temperature',pch=20,ylim=c(-0.3,0.35))#
+polygon(c(tempm[o],rev(tempm[o])),c(semi.fit$fxobs$upper,rev(semi.fit$fxobs$lower)),border=NA,col='gray')#
+points(tempm[o],y-fit$wbeta$mean,pch=20)#
+lines(tempm[o],semi.fit$fxobs$mean,lwd=2)#
+lines(tempm[o],vb.fit,lwd=2,lty=1,col=2)#
+lines(tempm[o],vb.fit.l,lwd=2,lty=2,col=2)#
+lines(tempm[o],vb.fit.u,lwd=2,lty=2,col=2)#
+legend('topright',legend=c("Residual","BSAR",'95% CI (BSAR)',"VB",'95% CI (VB)'),col=c(1,1,gray,2,2),lty=c(NA,1,1,1,2,2),pch=c(20,NA,NA),lwd=2)
+legend('topright',legend=c("Residual","BSAR",'95% CI (BSAR)',"VB",'95% CI (VB)'),col=c(1,1,gray,2,2),lty=c(NA,1,1,1,2,2),pch=c(20,NA,NA,NA,NA),lwd=2)
+legend('topright',legend=c("Residual","BSAR",'95% CI (BSAR)',"VB",'95% CI (VB)'),col=c(1,1,'gray',2,2),lty=c(NA,1,1,1,2,2),pch=c(20,NA,NA,NA,NA),lwd=2)
+setEPS()#
+postscript('CI2.eps')#
+plot(tempm[o],y-Z%*%semi.vb$mubeta.q,ylab='Parametric Residual',xlab='Temperature',pch=20,ylim=c(-0.3,0.35))#
+polygon(c(tempm[o],rev(tempm[o])),c(semi.fit$fxobs$upper,rev(semi.fit$fxobs$lower)),border=NA,col='gray')#
+points(tempm[o],y-fit$wbeta$mean,pch=20)#
+lines(tempm[o],semi.fit$fxobs$mean,lwd=2)#
+lines(tempm[o],vb.fit,lwd=2,lty=1,col=2)#
+lines(tempm[o],vb.fit.l,lwd=2,lty=2,col=2)#
+lines(tempm[o],vb.fit.u,lwd=2,lty=2,col=2)#
+legend('topright',legend=c("Residual","BSAR",'95% CI (BSAR)',"VB",'95% CI (VB)'),col=c(1,1,'gray',2,2),lty=c(NA,1,1,1,2,2),pch=c(20,NA,NA,NA,NA),lwd=2)#
+dev.off()
+#====================================================================#
+# Loading Data#
+#====================================================================#
+library(xlsx)#
+#
+Load=read.xlsx("ElecLoad.xls",sheetIndex=1)#
+nobs=nrow(Load)#
+lener      <- log(Load$ener)#
+lenerm     <- log(Load$enerm)#
+lpelec     <- log(Load$pelec)#
+lpgas      <- log(Load$pgas)#
+lgdp       <- log(Load$gdp)#
+temp       <- Load$cddq  - Load$hddq#
+tempm      <- Load$cddqm - Load$hddqm#
+tempmsq    <- tempm^2#
+lpelecpgas <- log(Load$pelec/Load$pgas)#
+lenermgdp  <- log(Load$enerm/Load$gdp)#
+#
+o = order(tempm)#
+x = tempm[o];#
+y = lenermgdp[o];#
+n = length(y)#
+#
+# @ Get wdata, if any @#
+w = lpelecpgas[o];#
+#### MCMC#
+system.time({#
+semi.mcmc <- bsar(y=y,w=w,x=x,nbasis=30,shape='Free')#
+})#
+semi.mcmc#
+semi.fit=fitted(semi.mcmc)#
+#### VB#
+p=1#
+nbasis=30#
+sigma2_m0=1#
+sigma2_v0=100#
+sigma2_r0=2*(2+sigma2_m0^2/sigma2_v0)#
+sigma2_s0=sigma2_m0*(sigma2_r0-2)#
+#
+tau2_m0=1#
+tau2_v0=100#
+tau2_r0=2*(2+tau2_m0^2/tau2_v0)#
+tau2_s0=tau2_m0*(tau2_r0-2)#
+tau2_rn=tau2_r0+nbasis#
+#
+prior.parms<-list(rsig.0=sigma2_r0,ssig.0=sigma2_s0,#
+                  rtau.0=tau2_m0,stau.0=tau2_v0,w0=2,#
+                  mubeta.0=rep(0,p),sigbeta.0=diag(100,p))#
+# Fit the model#
+xmin=min(x)#
+xmax=max(x)#
+x=(x-xmin)/(xmax-xmin)#
+system.time({#
+semi.vb<-vbgpspectral(y=y-semi.fit$wbeta$mean,x=x,Z=rep(1,n),T=nbasis,tol=0.0001,prior.parms,1)#
+})#
+vb.fit=semi.vb$vphi%*%semi.vb$mutheta.q#+semi.vb$mubeta.q#
+X=semi.vb$vphi#cbind(1,semi.vb$vphi)#
+vb.fit.s=sqrt(semi.vb$ssig.q/(semi.vb$rsig.q-2))*sqrt(diag(X%*%solve(crossprod(X))%*%t(X)))#
+vb.fit.l=vb.fit-1.96*vb.fit.s#
+vb.fit.u=vb.fit+1.96*vb.fit.s#
+### Plot#
+setEPS()#
+postscript('CI.eps')#
+plot(tempm[o],y-semi.fit$wbeta$mean,ylab='Parametric Residual',xlab='Temperature',pch=20,ylim=c(-0.3,0.35))#
+polygon(c(tempm[o],rev(tempm[o])),c(semi.fit$fxobs$upper,rev(semi.fit$fxobs$lower)),border=NA,col='gray')#
+points(tempm[o],y-fit$wbeta$mean,pch=20)#
+lines(tempm[o],semi.fit$fxobs$mean,lwd=2)#
+lines(tempm[o],vb.fit,lwd=2,lty=1,col=2)#
+lines(tempm[o],vb.fit.l,lwd=2,lty=2,col=2)#
+lines(tempm[o],vb.fit.u,lwd=2,lty=2,col=2)#
+legend('topright',legend=c("Residual","BSAR",'95% CI (BSAR)',"VB",'95% CI (VB)'),col=c(1,1,'gray',2,2),lty=c(NA,1,1,1,2,2),pch=c(20,NA,NA,NA,NA),lwd=2)#
+dev.off()
+plot(tempm[o],y-semi.fit$wbeta$mean,ylab='Parametric Residual',xlab='Temperature',pch=20,ylim=c(-0.3,0.35))#
+polygon(c(tempm[o],rev(tempm[o])),c(semi.fit$fxobs$upper,rev(semi.fit$fxobs$lower)),border=NA,col='gray')#
+points(tempm[o],y-semi.fit$wbeta$mean,pch=20)#
+lines(tempm[o],semi.fit$fxobs$mean,lwd=2)#
+lines(tempm[o],vb.fit,lwd=2,lty=1,col=2)#
+lines(tempm[o],vb.fit.l,lwd=2,lty=2,col=2)#
+lines(tempm[o],vb.fit.u,lwd=2,lty=2,col=2)#
+legend('topright',legend=c("Residual","BSAR",'95% CI (BSAR)',"VB",'95% CI (VB)'),col=c(1,1,'gray',2,2),lty=c(NA,1,1,1,2,2),pch=c(20,NA,NA,NA,NA),lwd=2)
+setEPS()#
+postscript('CI.eps')#
+plot(tempm[o],y-semi.fit$wbeta$mean,ylab='Parametric Residual',xlab='Temperature',pch=20,ylim=c(-0.3,0.35))#
+polygon(c(tempm[o],rev(tempm[o])),c(semi.fit$fxobs$upper,rev(semi.fit$fxobs$lower)),border=NA,col='gray')#
+points(tempm[o],y-semi.fit$wbeta$mean,pch=20)#
+lines(tempm[o],semi.fit$fxobs$mean,lwd=2)#
+lines(tempm[o],vb.fit,lwd=2,lty=1,col=2)#
+lines(tempm[o],vb.fit.l,lwd=2,lty=2,col=2)#
+lines(tempm[o],vb.fit.u,lwd=2,lty=2,col=2)#
+legend('topright',legend=c("Residual","BSAR",'95% CI (BSAR)',"VB",'95% CI (VB)'),col=c(1,1,'gray',2,2),lty=c(NA,1,1,1,2,2),pch=c(20,NA,NA,NA,NA),lwd=2)#
+dev.off()
+Load=read.xlsx("ElecLoad.xls",sheetIndex=1)#
+nobs=nrow(Load)#
+lener      <- log(Load$ener)#
+lenerm     <- log(Load$enerm)#
+lpelec     <- log(Load$pelec)#
+lpgas      <- log(Load$pgas)#
+lgdp       <- log(Load$gdp)#
+temp       <- Load$cddq  - Load$hddq#
+tempm      <- Load$cddqm - Load$hddqm#
+tempmsq    <- tempm^2#
+lpelecpgas <- log(Load$pelec/Load$pgas)#
+lenermgdp  <- log(Load$enerm/Load$gdp)#
+#
+o = order(tempm)#
+x = tempm[o];#
+y = lenermgdp[o];#
+n = length(y)#
+#
+# @ Get wdata, if any @#
+w = lpelecpgas[o];#
+#### VB#
+p=2#
+nbasis=30#
+sigma2_m0=1#
+sigma2_v0=100#
+sigma2_r0=2*(2+sigma2_m0^2/sigma2_v0)#
+sigma2_s0=sigma2_m0*(sigma2_r0-2)#
+#
+tau2_m0=1#
+tau2_v0=100#
+tau2_r0=2*(2+tau2_m0^2/tau2_v0)#
+tau2_s0=tau2_m0*(tau2_r0-2)#
+tau2_rn=tau2_r0+nbasis#
+#
+prior.parms<-list(rsig.0=sigma2_r0,ssig.0=sigma2_s0,#
+                  rtau.0=tau2_m0,stau.0=tau2_v0,w0=2,#
+                  mubeta.0=rep(0,p),sigbeta.0=diag(100,p))#
+# Fit the model#
+Z=cbind(1,w)#
+xmin=min(x)#
+xmax=max(x)#
+x=(x-xmin)/(xmax-xmin)#
+system.time({#
+semi.vb<-vbgpspectral(y=y,x=x,Z=Z,T=nbasis,tol=0.0001,prior.parms,1)#
+})#
+vb.fit=semi.vb$vphi%*%semi.vb$mutheta.q#
+X=cbind(Z,semi.vb$vphi)#
+vb.fit.s=sqrt(semi.vb$ssig.q/(semi.vb$rsig.q-2))*sqrt(diag(X%*%solve(crossprod(X))%*%t(X)))#
+vb.fit.l=vb.fit-1.96*vb.fit.s#
+vb.fit.u=vb.fit+1.96*vb.fit.s#
+#### MCMC#
+system.time({#
+semi.mcmc <- bsar(y=y-Z%*%semi.vb$mubeta.q,x=x,nbasis=30,shape='Free')#
+})#
+semi.mcmc#
+semi.fit=fitted(semi.mcmc)#
+#
+setEPS()#
+postscript('CI2.eps')#
+plot(tempm[o],y-Z%*%semi.vb$mubeta.q,ylab='Parametric Residual',xlab='Temperature',pch=20,ylim=c(-0.3,0.35))#
+polygon(c(tempm[o],rev(tempm[o])),c(semi.fit$fxobs$upper,rev(semi.fit$fxobs$lower)),border=NA,col='gray')#
+points(tempm[o],y-Z%*%semi.vb$mubeta.q,pch=20)#
+lines(tempm[o],semi.fit$fxobs$mean,lwd=2)#
+lines(tempm[o],vb.fit,lwd=2,lty=1,col=2)#
+lines(tempm[o],vb.fit.l,lwd=2,lty=2,col=2)#
+lines(tempm[o],vb.fit.u,lwd=2,lty=2,col=2)#
+legend('topright',legend=c("Residual","BSAR",'95% CI (BSAR)',"VB",'95% CI (VB)'),col=c(1,1,'gray',2,2),lty=c(NA,1,1,1,2,2),pch=c(20,NA,NA,NA,NA),lwd=2)#
+dev.off()
+rm(list=ls())
+source('vblm.R')#
+source('vbgpspectral.R')#
+library(BSAM)#
+#====================================================================#
+# Loading Data#
+#====================================================================#
+library(xlsx)#
+Load=read.xlsx("ElecLoad.xls",sheetIndex=1)#
+nobs=nrow(Load)#
+lener      <- log(Load$ener)#
+lenerm     <- log(Load$enerm)#
+lpelec     <- log(Load$pelec)#
+lpgas      <- log(Load$pgas)#
+lgdp       <- log(Load$gdp)#
+temp       <- Load$cddq  - Load$hddq#
+tempm      <- Load$cddqm - Load$hddqm#
+tempmsq    <- tempm^2#
+lpelecpgas <- log(Load$pelec/Load$pgas)#
+lenermgdp  <- log(Load$enerm/Load$gdp)#
+o = order(tempm)#
+x = tempm[o];#
+y = lenermgdp[o];#
+n = length(y)#
+# @ Get wdata, if any @#
+w = lpelecpgas[o];
+plot(tempm[o],y-semi.fit$wbeta$mean,ylab='Parametric Residual',xlab='Temperature',pch=20,ylim=c(-0.3,0.35))#
+polygon(c(tempm[o],rev(tempm[o])),c(semi.fit$fxobs$upper,rev(semi.fit$fxobs$lower)),border=NA,col='gray')#
+points(tempm[o],y-semi.fit$wbeta$mean,pch=20)#
+lines(tempm[o],semi.fit$fxobs$mean,lwd=2)
+fit=fitted(semi.mcmc)
+system.time({#
+semi.mcmc <- bsar(y=y,w=w,x=x,nbasis=30,shape='Free')#
+})#
+semi.mcmc#
+semi.fit=fitted(semi.mcmc)
+plot(tempm[o],y-semi.fit$wbeta$mean,ylab='Parametric Residual',xlab='Temperature',pch=20,ylim=c(-0.3,0.35))#
+polygon(c(tempm[o],rev(tempm[o])),c(semi.fit$fxobs$upper,rev(semi.fit$fxobs$lower)),border=NA,col='gray')#
+points(tempm[o],y-semi.fit$wbeta$mean,pch=20)#
+lines(tempm[o],semi.fit$fxobs$mean,lwd=2)
+legend('topright',legend=c("Residual","BSAR",'95% CI (BSAR)'),col=c(1,2,'gray'),lty=c(NA,1,1),pch=c(20,NA,NA),lwd=2)
+plot(tempm[o],y-semi.fit$wbeta$mean,ylab='Parametric Residual',xlab='Temperature',pch=20,ylim=c(-0.3,0.35))#
+polygon(c(tempm[o],rev(tempm[o])),c(semi.fit$fxobs$upper,rev(semi.fit$fxobs$lower)),border=NA,col='gray')#
+points(tempm[o],y-semi.fit$wbeta$mean,pch=20)#
+lines(tempm[o],semi.fit$fxobs$mean,lwd=2,col=2)#
+legend('topright',legend=c("Residual","BSAR",'95% CI (BSAR)'),col=c(1,2,'gray'),lty=c(NA,1,1),pch=c(20,NA,NA),lwd=2)
+### Plot#
+setEPS()#
+postscript('BSAR_CI.eps')#
+plot(tempm[o],y-semi.fit$wbeta$mean,ylab='Parametric Residual',xlab='Temperature',pch=20,ylim=c(-0.3,0.35))#
+polygon(c(tempm[o],rev(tempm[o])),c(semi.fit$fxobs$upper,rev(semi.fit$fxobs$lower)),border=NA,col='gray')#
+points(tempm[o],y-semi.fit$wbeta$mean,pch=20)#
+lines(tempm[o],semi.fit$fxobs$mean,lwd=2,col=2)#
+legend('topright',legend=c("Residual","BSAR",'95% CI (BSAR)'),col=c(1,2,'gray'),lty=c(NA,1,1),pch=c(20,NA,NA),lwd=2)#
+dev.off()
+# Set up prior parameters#
+p=2#
+nbasis=30#
+sigma2_m0=1#
+sigma2_v0=100#
+sigma2_r0=2*(2+sigma2_m0^2/sigma2_v0)#
+sigma2_s0=sigma2_m0*(sigma2_r0-2)#
+tau2_m0=1#
+tau2_v0=100#
+tau2_r0=2*(2+tau2_m0^2/tau2_v0)#
+tau2_s0=tau2_m0*(tau2_r0-2)#
+tau2_rn=tau2_r0+nbasis#
+prior.parms<-list(rsig.0=sigma2_r0,ssig.0=sigma2_s0,#
+                  rtau.0=tau2_m0,stau.0=tau2_v0,w0=2,#
+                  mubeta.0=rep(0,p),sigbeta.0=diag(100,p))#
+# Fit the model#
+Z=cbind(1,w)#
+xmin=min(x)#
+xmax=max(x)#
+x=(x-xmin)/(xmax-xmin)#
+system.time({#
+semi.vb<-vbgpspectral(y=y,x=x,Z=Z,T=nbasis,tol=0.0001,prior.parms,1)#
+})#
+semi.vb$lb[length(semi.vb$lb)]#
+vphi<-semi.vb$vphi#
+ord<-order(x)#
+yhat<-(vphi[,1:length(semi.vb$mutheta.q)]%*%semi.vb$mutheta.q)+Z%*%semi.vb$mubeta.q#
+fhat<-drop(vphi[,1:length(semi.vb$mutheta.q)]%*%semi.vb$mutheta.q)#
+semi.vb$mubeta.q#
+sqrt(mean((y-yhat)^2))
+vb.fit=semi.vb$vphi%*%semi.vb$mutheta.q
+X=cbind(Z,semi.vb$vphi)
+vb.fit.s=sqrt(semi.vb$ssig.q/(semi.vb$rsig.q-2))*sqrt(diag(X%*%solve(crossprod(X))%*%t(X)))
+vb.fit.l=vb.fit-1.96*vb.fit.s
+vb.fit.u=vb.fit+1.96*vb.fit.s
+plot(tempm[o],y-Z%*%semi.vb$mubeta.q,ylab='Parametric Residual',xlab='Temperature',pch=20,ylim=c(-0.3,0.35))
+polygon(c(tempm[o],rev(tempm[o])),c(vb.fit.l,rev(vb.fit.u)),border=NA,col='gray')
+points(tempm[o],y-Z%*%semi.vb$mubeta.q,pch=20)
+lines(tempm[o],vb.fit,lwd=2,lty=1,col=2)
+legend('topright',legend=c("Residual","VB",'95% CI (VB)'),col=c(1,2,'gray'),lty=c(NA,1,1),pch=c(20,NA,NA),lwd=2)
+setEPS()#
+postscript('VB_CI.eps')#
+plot(tempm[o],y-Z%*%semi.vb$mubeta.q,ylab='Parametric Residual',xlab='Temperature',pch=20,ylim=c(-0.3,0.35))#
+polygon(c(tempm[o],rev(tempm[o])),c(vb.fit.l,rev(vb.fit.u)),border=NA,col='gray')#
+points(tempm[o],y-Z%*%semi.vb$mubeta.q,pch=20)#
+lines(tempm[o],vb.fit,lwd=2,lty=1,col=2)#
+legend('topright',legend=c("Residual","VB",'95% CI (VB)'),col=c(1,2,'gray'),lty=c(NA,1,1),pch=c(20,NA,NA),lwd=2)#
+dev.off()

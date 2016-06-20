@@ -1,0 +1,333 @@
+###### Functions ########
+
+fitfun<-function(psi,mu) {
+  return(sum(mu*(psi%*%mu))) 
+}
+
+fitfun2<-function(psi,mu) {
+  return(sum(diag(psi%*%mu))) 
+}
+
+matfun6<-function(psi,sigma,mu) {
+    return(2*sum(diag(psi%*%sigma%*%psi%*%sigma))+4*sum(mu*(psi%*%sigma%*%psi%*%mu)))
+}
+
+vb.sigma2=function(r,s) {
+	list(mean=(s/2)/(r/2-1),sd=sqrt((s/2)^2/((r/2-1)^2*(r/2-2))))
+}
+
+vb.sigma=function(r,s) sqrt((s/2)/(r/2-1))
+
+
+#############################################
+## Child-Growth Data in Kim, Choi, and Jo. ##
+##									       ##
+## Ong et al. (2015)                       ##
+#############################################
+source('vb_unrestricted.R')
+source('vb_monotone.R')
+library(BSAM)
+source('vb_con.R')
+library(mvtnorm)
+source('CI.R')
+# data generation
+nsim=50    # number of simulated datasets
+n=100      # sample size
+
+mcmc=list(nblow0=10000,nblow=10000,nskip=10,smcmc=1000,ndisp=1000,maxmodmet=10)
+
+f1=function(x) 5*exp(10*x-5)/(1+exp(10*x-5)) # Sigmoid
+f2=function(x) x  # Slope
+f3=function(x) 2*pi*x+sin(2*pi*x) # Sinusoid
+f4=function(x) exp(6*x-3) # Exponential: increasing-convex
+f5=function(x) log(1+10*x) # LogX: increasing-concave
+f6=function(x) 16*x^2-4*cos(2*pi*x)/(pi^2)-cos(4*pi*x)/(pi^2)-32*cos(3*pi*x)/(9*pi^2)-32*cos(pi*x)/(pi^2)+365/(9*pi^2) # QuadCos: increasing-convex
+
+gen.data=function(nsim,n,f,sig,seed,equal=T){
+	if(!missing(seed)) set.seed(seed)
+	dat=list()
+	for(isim in 1:nsim){
+		xy=list()
+		if(equal) x=(2*(1:n)-1)/(2*n) 
+		else x=runif(n)
+		fx=f(x)
+		xy$x=x
+		xy$fx=fx
+		xy$y=fx+rnorm(n,sd=sig)
+		dat[[isim]]=xy
+	}
+	dat
+}
+dat=gen.data(nsim,n,f4,sig=1,seed=1,equal=TRUE) # data generation
+
+
+comp.time=lmarg=rmse=rmise=matrix(0,nr=nsim,nc=8)
+colnames(comp.time)=colnames(lmarg)=colnames(rmse)=colnames(rmise)=c('VBU','VBM','VBM(NEW)','VBMC','VBMC(NEW)','BSAR','BSARM','BSARMC')
+
+#====================================================================
+# Fitting semiparametric model
+#====================================================================
+# Set up prior parameters
+p=1
+nbasis=30
+sigma2_m0=1
+sigma2_v0=100
+sigma2_r0=2*(2+sigma2_m0^2/sigma2_v0)
+sigma2_s0=sigma2_m0*(sigma2_r0-2)
+
+tau2_m0=1
+tau2_v0=100
+rtau.0 = 2*(2+tau2_m0^2/tau2_v0)
+stau.0<- tau2_m0*(rtau.0 -2)	
+
+prior.parms<-list(rsig.0=sigma2_r0,ssig.0=sigma2_s0,
+                  rtau.0=tau2_m0,stau.0=tau2_v0,w0=2,
+                  mubeta.0=rep(0,p),sigbeta.0=diag(100,p))
+
+
+Z=matrix(1,nr=n,nc=1)
+
+# simulation study
+for(isim in 1:nsim){
+
+x=dat[[isim]]$x
+y=dat[[isim]]$y
+fx=dat[[isim]]$fx
+
+xmin=min(x)
+xmax=max(x)
+x=(x-xmin)/(xmax-xmin)
+
+
+#####################################################
+##### Fit the model using unconstrainted model ######
+#####################################################
+
+######################
+##### MCMC BSAR ######
+
+comp.time[isim,'BSAR']=system.time({
+semi.mcmc <- bsar(y=y,x=x,nbasis=nbasis,shape='Free')
+})[3]
+lmarg[isim,'BSAR']=semi.mcmc$lmarg.gd
+
+semi.fit=fitted(semi.mcmc)
+rmse[isim,'BSAR']=sqrt(mean((y-semi.fit$yhat$mean)^2))
+rmise[isim,'BSAR']=sqrt(mean((fx-semi.fit$yhat$mean)^2))
+
+############################
+##### VB Unrestricted ######
+
+comp.time[isim,'VBU']=system.time({
+semi.vb<-vbgpspectral(y=y,x=x,Z=Z,T=nbasis,tol=0.0001,prior.parms,1)
+})[3]
+lmarg[isim,'VBU']=semi.vb$lb[length(semi.vb$lb)]
+
+#############################
+##### Fitting the model #####
+
+vphi<-sqrt(2)*cos(outer(x,pi*(1:nbasis)))  #This is eta_j (x) = \sqrt{2} cos(\pi x_j)
+ZB <-  Z%*%semi.vb$mubeta.q
+vb.fit <- (vphi[,1:length(semi.vb$mutheta.q)]%*%semi.vb$mutheta.q) + ZB
+rmse[isim,'VBU']=sqrt(mean((y-vb.fit)^2))
+rmise[isim,'VBU']=sqrt(mean((fx-vb.fit)^2))
+
+###############################################
+##### Fit the model using monotone model ######
+###############################################
+#######################
+##### MCMC BSARM ######
+
+comp.time[isim,'BSARM']=system.time({
+semi.mcmc <- bsar(y=y,x=x,nbasis=nbasis,shape='Increasing')
+})[3]
+lmarg[isim,'BSARM']=semi.mcmc$lmarg.gd
+semi.fit=fitted(semi.mcmc)
+rmse[isim,'BSARM']=sqrt(mean((y-semi.fit$yhat$mean)^2))
+rmise[isim,'BSARM']=sqrt(mean((fx-semi.fit$yhat$mean)^2))
+
+########################
+##### VB MONOTONE ######
+
+VBSC_time = 0
+tol<-0.0001
+delta<- 1 #Increasing
+
+prior.parms<-list(rsig.0=sigma2_r0,ssig.0=sigma2_s0,
+                  rtau.0=tau2_m0,stau.0=tau2_v0,w0=2,
+                  mubeta.0=rep(0,p),sigbeta.0=diag(100,p),sig02=10000)
+
+mutheta.q.start<-rep(5,times=(nbasis+1))
+mutheta.q.start[1] = 5
+
+mupsi.q.start<-0.5
+n.grid<-n
+T = nbasis
+
+semi.vb = NULL
+while(is.null(semi.vb))
+{
+VBSC_time <- system.time(try(semi.vb<- vbgpspectralsc(y,x,Z,T,tol,prior.parms,delta,mupsi.q.start,mutheta.q.start,n.grid,stepsize=0.5,maxit=200)))
+mupsi.q.start<- mupsi.q.start + 0.5
+}
+comp.time[isim,'VBM']=VBSC_time[3]
+lmarg[isim,'VBM']=semi.vb$lb[length(semi.vb$lb)]
+
+
+#############################
+##### Fitting the model #####
+
+fxterm1 <- apply(semi.vb$dmats,1,fitfun2,semi.vb$sigtheta.q) #trace of sigtheta %*% phi(x_i)
+fxterm2 <- apply(semi.vb$dmats,1,fitfun,semi.vb$mutheta.q) #theta^T phi(x_i) theta 
+ZB <- (Z)%*%semi.vb$mubeta.q
+vb.fit <- delta*(fxterm1 + fxterm2) + ZB
+rmse[isim,'VBM']=sqrt(mean((y-vb.fit)^2))
+rmise[isim,'VBM']=sqrt(mean((fx-vb.fit)^2))
+
+
+##############################
+##### VB MONOTONE (NEW) ######
+
+VBSC_time = 0
+tol<-0.0001
+delta<- 1 #Increasing
+
+prior.parms<-list(rsig.0=sigma2_r0,ssig.0=sigma2_s0,
+                  rtau.0=tau2_m0,stau.0=tau2_v0,w0=2,
+                  mubeta.0=rep(0,p),sigbeta.0=diag(100,p),sig02=10000)
+
+## Setting for larger number of basis ##
+mupsi.q.start<-2
+n.grid<-n
+T = nbasis*2
+mutheta.q.start<-rep(1,times=(T+1))
+
+semi.vb.new = NULL
+while(is.null(semi.vb.new))
+{
+VBSC_time <- system.time(try(semi.vb.new<- vbgpspectralsc(y,x,Z,T,tol,prior.parms,delta,mupsi.q.start,mutheta.q.start,n.grid,stepsize=0.5,maxit=200)))
+mupsi.q.start<- mupsi.q.start + 0.5
+}
+comp.time[isim,'VBM(NEW)']=VBSC_time[3]
+lmarg[isim,'VBM(NEW)']=semi.vb.new$lb[length(semi.vb.new$lb)]
+
+
+#############################
+##### Fitting the model #####
+
+fxterm1.new <- apply(semi.vb.new$dmats,1,fitfun2,semi.vb.new$sigtheta.q) 
+fxterm2.new <- apply(semi.vb.new$dmats,1,fitfun,semi.vb.new$mutheta.q) 
+ZB.new <- (Z)%*%semi.vb.new$mubeta.q
+fit.new <- delta*(fxterm1.new + fxterm2.new) + ZB.new
+rmse[isim,'VBM(NEW)']=sqrt(mean((y-fit.new)^2))
+rmise[isim,'VBM(NEW)']=sqrt(mean((fx-fit.new)^2))
+
+
+
+########################################
+##### VB Increasing concave model ######
+########################################
+
+########################
+##### MCMC BSARMC ######
+
+comp.time[isim,'BSARMC']=system.time({
+semi.mcmc <- bsar(y=y,x=x,nbasis=nbasis,shape='IncreasingConvex')
+})[3]
+lmarg[isim,'BSARMC']=semi.mcmc$lmarg.gd
+semi.fit=fitted(semi.mcmc)
+rmse[isim,'BSARMC']=sqrt(mean((y-semi.fit$yhat$mean)^2))
+rmise[isim,'BSARMC']=sqrt(mean((fx-semi.fit$yhat$mean)^2))
+
+################################
+##### VB Increasing Convex #####
+
+delta_con <- 1
+swap <- -1 #For decreasing convex and increasing concave, -1 otherwise
+
+sig02=10000
+mualpha.0 = 3
+sigalpha.0 = 50^2
+alpha02 = sig02
+prior.parms<-list(rsig.0=sigma2_r0,ssig.0=sigma2_s0,
+                  rtau.0=tau2_m0,stau.0=tau2_v0,w0=2,
+                  mubeta.0=rep(0,p),sigbeta.0=diag(100,p),sig02=sig02,alpha02=alpha02)
+
+mutheta.q.start<-rep(0.5,times=(nbasis+1))
+mutheta.q.start <- c(0.5,mutheta.q.start)
+
+semi.vb = NULL
+VBSCCon_time = NULL
+mupsi.q.start = 0.5
+tol<-0.0001
+n.grid<-n
+T<-nbasis
+while(is.null(semi.vb))
+{
+VBSCCon_time <- system.time(try(semi.vb<- vbgpspectral_con(y,x,Z,T,tol,prior.parms,delta=delta_con,mupsi.q.start=mupsi.q.start,mutheta.q.start=mutheta.q.start,n.grid,stepsize=0.5,swap=swap,maxit=200)))
+mupsi.q.start = mupsi.q.start + 0.5
+mutheta.q.start[1] = mutheta.q.start[1] + 0.5
+}
+comp.time[isim,'VBMC']=VBSCCon_time[3]
+lmarg[isim,'VBMC']=semi.vb$lb[length(semi.vb$lb)]
+
+
+#############################
+##### Fitting the model #####
+
+fxterm1 <- apply(semi.vb$dmats,1,fitfun2,semi.vb$sigtheta.q)
+fxterm2 <- apply(semi.vb$dmats,1,fitfun,semi.vb$mutheta.q) #theta^T phi(x_i) theta (1 to n)
+ZB <- Z%*%(semi.vb$mubeta.q)
+vb.fit <- delta_con*(fxterm1 + fxterm2) + ZB
+rmse[isim,'VBMC']=sqrt(mean((y-vb.fit)^2))
+rmise[isim,'VBMC']=sqrt(mean((fx-vb.fit)^2))
+
+
+######################################
+##### VB Increasing Convex (NEW) #####
+
+delta_con <- 1
+swap <- -1 #For decreasing convex and increasing concave, -1 otherwise
+
+sig02=10000
+mualpha.0 = 3
+sigalpha.0 = 50^2
+alpha02 = sig02
+prior.parms<-list(rsig.0=sigma2_r0,ssig.0=sigma2_s0,
+                  rtau.0=tau2_m0,stau.0=tau2_v0,w0=2,
+                  mubeta.0=rep(0,p),sigbeta.0=diag(100,p),sig02=sig02,alpha02=alpha02)
+T<-nbasis*2
+mutheta.q.start<-rep(0.5,times=(T+1))
+mutheta.q.start <- c(0.5,mutheta.q.start)
+
+semi.vb.new = NULL
+VBSCCon_time = NULL
+mupsi.q.start = 0.5
+tol<-0.0001
+n.grid<-n
+
+while(is.null(semi.vb.new))
+{
+VBSCCon_time <- system.time(try(semi.vb.new<- vbgpspectral_con(y,x,Z,T,tol,prior.parms,delta=delta_con,mupsi.q.start=mupsi.q.start,mutheta.q.start=mutheta.q.start,n.grid,stepsize=0.5,swap=swap,maxit=200)))
+mupsi.q.start = mupsi.q.start + 0.5
+mutheta.q.start[1] = mutheta.q.start[1] + 0.5
+}
+comp.time[isim,'VBMC(NEW)']=VBSCCon_time[3]
+lmarg[isim,'VBMC(NEW)']=semi.vb.new$lb[length(semi.vb.new$lb)]
+
+
+#############################
+##### Fitting the model #####
+
+fxterm1.new <- apply(semi.vb.new$dmats,1,fitfun2,semi.vb.new$sigtheta.q)
+fxterm2.new <- apply(semi.vb.new$dmats,1,fitfun,semi.vb.new$mutheta.q) 
+ZB.new <- Z%*%(semi.vb.new$mubeta.q)
+vb.fit.new <- delta_con*(fxterm1.new + fxterm2.new) + ZB.new
+rmse[isim,'VBMC(NEW)']=sqrt(mean((y-vb.fit.new)^2))
+rmise[isim,'VBMC(NEW)']=sqrt(mean((fx-vb.fit.new)^2))
+
+print(paste('Simulation Dataset = ',isim,sep=''))
+}
+
+
+save.image(file=paste('Exponential_n',n,'.RData',sep=''))
