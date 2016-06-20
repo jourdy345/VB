@@ -55,7 +55,7 @@ DS2_muPsi = function(muPsi, sigmaPsi2, w0, rqs_over_sqs, rqt_over_sqt, SigmaThet
   -0.25 * J * (J + 1) / w0 * DS1_muPsi(muPsi, sigmaPsi2, w0) - 0.5 * rqs_over_sqs * rqt_over_sqt * sum((diag(SigmaThetaq) + muThetaq^2) * DQj_muPsi(muPsi, sigmaPsi2, 1:J))
 }
 
-LB = function(y, W, Z, varphi, SigmaBetaq, Sigmauq, SigmaThetaq, muYStar, Sigmau0, rqs, sqs, rqt, sqt, muPsi, sigmaPsi2, r0t, s0t, r0s, s0s, , SigmaBeta0, muBetaq, muBeta0, w0, muThetaq) {
+LB = function(y, W, Z, varphi, SigmaBetaq, Sigmauq, SigmaThetaq, muYStar, Sigmau0, rqs, sqs, rqt, sqt, muPsi, sigmaPsi2, r0t, s0t, r0s, s0s, SigmaBeta0, muBetaq, muBeta0, w0, muThetaq) {
   J = length(muThetaq)
   p = length(muBetaq)
   t1 = solve(SigmaBeta0, SigmaBetaq)
@@ -88,15 +88,16 @@ VB = function(y, x, W, muBeta0, SigmaBeta0, w0, r0s, s0s, r0t, s0t, muPsi0, muu0
   Sigmauq = Sigmau0
   muBetaq = muBeta0
   muPsi = muPsi0
-  sigmaPsi2 = muPsi^2 / 10
+  sigmaPsi2 = muPsi^2 / 100
   sigmaPsi = sqrt(sigmaPsi2)
-  muThetaq = rnorm(J, 0, s0t_half / (r0t_half - 1) * s0s_half / (r0s_half - 1) * exp(-(1:J) * abs(muPsi0)))
+  muThetaq = rep(0, J)
   muYStar = W %*% muBetaq + Z %*% muuq + varphi %*% muThetaq
-  muYStarq = muYStar + dnorm(muYStar) / (pnorm(muYStar)^y * (pnorm(muYStar) - 1)^(1-y))
-  SigmaThetaq = solve(varphitvarphi + rqs_over_sqs * rqt_over_sqt * Qj(muPsi, sigmaPsi2, 1:J))
+  muYStarq = rep(0, n)
+  SigmaThetaq = diag(1, J)
 
   count = 0
-  lbold = LB(y, W, Z, varphi, SigmaBetaq, Sigmauq, SigmaThetaq, muYStar, Sigmau0, rqs, sqs, rqt, sqt, muPsi, sigmaPsi2, r0t, s0t, r0s, s0s, , SigmaBeta0, muBetaq, muBeta0, w0, muThetaq)
+  lbold = LB(y, W, Z, varphi, SigmaBetaq, Sigmauq, SigmaThetaq, muYStar, Sigmau0, rqs, sqs, rqt, sqt, muPsi, sigmaPsi2, r0t, s0t, r0s, s0s, SigmaBeta0, muBetaq, muBeta0, w0, muThetaq)
+  lbnew = 0
   lbrecord = c(lbold)
   while (dif > tol) {
     count = count + 1
@@ -139,7 +140,7 @@ VB = function(y, x, W, muBeta0, SigmaBeta0, w0, r0s, s0s, r0t, s0t, muPsi0, muu0
     muYStar = W %*% muBetaq + Z %*% muuq + varphi %*% muThetaq
     muYStarq = muYStar + dnorm(muYStar) / (pnorm(muYStar)^y * (pnorm(muYStar) - 1)^(1-y))
 
-    lbnew = LB(y, W, Z, varphi, SigmaBetaq, Sigmauq, SigmaThetaq, muYStar, Sigmau0, rqs, sqs, rqt, sqt, muPsi, sigmaPsi2, r0t, s0t, r0s, s0s, , SigmaBeta0, muBetaq, muBeta0, w0, muThetaq)
+    lbnew = LB(y, W, Z, varphi, SigmaBetaq, Sigmauq, SigmaThetaq, muYStar, Sigmau0, rqs, sqs, rqt, sqt, muPsi, sigmaPsi2, r0t, s0t, r0s, s0s, SigmaBeta0, muBetaq, muBeta0, w0, muThetaq)
     diff = lbnew - lbold
     if (diff < 0) {
       a = 1
@@ -174,7 +175,7 @@ VB = function(y, x, W, muBeta0, SigmaBeta0, w0, r0s, s0s, r0t, s0t, muPsi0, muu0
       muYStar = W %*% muBetaq + Z %*% muuq + varphi %*% muThetaq
       muYStarq = muYStar + dnorm(muYStar) / (pnorm(muYStar)^y * (pnorm(muYStar) - 1)^(1-y))
 
-      lbnew = LB(y, W, Z, varphi, SigmaBetaq, Sigmauq, SigmaThetaq, muYStar, Sigmau0, rqs, sqs, rqt, sqt, muPsi, sigmaPsi2, r0t, s0t, r0s, s0s, , SigmaBeta0, muBetaq, muBeta0, w0, muThetaq)
+      lbnew = LB(y, W, Z, varphi, SigmaBetaq, Sigmauq, SigmaThetaq, muYStar, Sigmau0, rqs, sqs, rqt, sqt, muPsi, sigmaPsi2, r0t, s0t, r0s, s0s, SigmaBeta0, muBetaq, muBeta0, w0, muThetaq)
       diff = lbnew - lbold
     }
 
