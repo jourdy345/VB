@@ -327,7 +327,7 @@ To distinguish $\mu_{y_{i}^{*}}$ which is the parameter of the variational distr
 $q\left(\theta_{J}\right) = \mathcal{N}\left(\mu_{\theta}^{q}, \Sigma_{\theta}^{q}\right)$ where
 \begin{align*}
   \Sigma_{\theta}^{q} &= \left(\frac{r_{q,\tau}}{s_{q,\tau}}\frac{r_{q,\sigma}}{s_{q,\sigma}}\opn{Dg}\left(Q_{1:J}\right) + \varphi_{J}'\varphi_{J}\right)^{-1}\\
-  \mu_{\theta}^{q} &= \Sigma_{\theta}^{q}\varphi_{J}'\left(\mu_{y_{i}}^{q} - W\mu_{\theta}^{q}-Z\mu_{u}^{q}\right).
+  \mu_{\theta}^{q} &= \Sigma_{\theta}^{q}\varphi_{J}'\left(\mu_{y_{i}}^{q} - W\mu_{\beta}^{q}-Z\mu_{u}^{q}\right).
 \end{align*}
 \subsubsection{$\beta$}
 $q\left(\beta\right) = \mathcal{N}\left(\mu_{\beta}^{q}, \Sigma_{\beta}^{q}\right)$ where
@@ -492,4 +492,7 @@ Note that $\sum_{i=1}^{n}\Tr\left(w_{i}w_{i}'\Sigma_{\beta}^{q}\right)=\Tr\left(
     &\quad -\frac{r_{0,\tau}}{2}\ln\left(\frac{s_{q,\tau}}{2}\right) +\left(\frac{r_{0,\tau}}{2} -\frac{r_{q,\tau}}{2}\right)\opn{di}\left(\frac{r_{q,\tau}}{2}\right) +\left(1-\frac{s_{0,\tau}}{s_{q,\tau}}\right)\frac{r_{q,\tau}}{2} +\ln\Gamma\left(\frac{r_{q,\tau}}{2}\right)\\
     &\quad +\ln\left(\frac{\omega_{0}}{2}\right) + S_{1}\left(\mu_{\psi}^{q}, {\sigma_{\psi}^{q}}^{2}\right) + \frac{1}{2}\ln\left(2\pi {\sigma_{\psi}^{q}}^{2}\right) -\frac{1}{2}
   \end{align*}
+\section{Probit: Monotone Convex/Concave Shape Restriction}
+\subsection{Model}
+
 \end{document}
