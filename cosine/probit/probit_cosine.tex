@@ -492,6 +492,52 @@ Note that $\sum_{i=1}^{n}\Tr\left(w_{i}w_{i}'\Sigma_{\beta}^{q}\right)=\Tr\left(
     &\quad -\frac{r_{0,\tau}}{2}\ln\left(\frac{s_{q,\tau}}{2}\right) +\left(\frac{r_{0,\tau}}{2} -\frac{r_{q,\tau}}{2}\right)\opn{di}\left(\frac{r_{q,\tau}}{2}\right) +\left(1-\frac{s_{0,\tau}}{s_{q,\tau}}\right)\frac{r_{q,\tau}}{2} +\ln\Gamma\left(\frac{r_{q,\tau}}{2}\right)\\
     &\quad +\ln\left(\frac{\omega_{0}}{2}\right) + S_{1}\left(\mu_{\psi}^{q}, {\sigma_{\psi}^{q}}^{2}\right) + \frac{1}{2}\ln\left(2\pi {\sigma_{\psi}^{q}}^{2}\right) -\frac{1}{2}
   \end{align*}
+\subsection{Some Calculation}
+As we were going through the variational approximation for the monotone shape restriction model, we have seen the term $\opn{E}\left(1/\sigma\right)$ and $\opn{E}\left(1/\sigma^{2}\right)$ several times and did not mention how to compute the integral. We give the mathematical consideration. Wolfram Alpha gives
+\begin{align*}
+  \int_{0}^{\infty}x^{p}\exp\left(qx-rx^{2}\right)\,dx &= \frac{1}{2}r^{-p/2 -1}\left(q\Gamma\left(\frac{p}{2}+1\right)\, _{1}{F}_{1}\left(\frac{p}{2}+1;\frac{3}{2};\frac{q^{2}}{4r}\right)+\sqrt{r}\Gamma\left(\frac{p+1}{2}\right)\, _{1}{F}_{1}\left(\frac{p+1}{2};\frac{1}{2};\frac{q^{2}}{4r}\right)\right)
+\end{align*}
+for $\opn{Re}\left(r\right)>0 \wedge \opn{Re}\left(p\right) > -1$. Note that $_{1}F_{1}\left(a;b;x\right)$ is the \emph{Kummer confluent hypergeometric function}. \textsf{R} package \textsf{fAsianOptions} provides the function \texttt{kummerM(x,a,b)} for $_{1}F_{1}\left(a;b;x\right)$. \par
+However, since the variable is not $x$ but rather the reciprocal $1/\sigma$, care must be taken in that the parameters should be changed accordingly. Let $x=1/\sigma$. Then the differential is $dx = -d\sigma/\sigma^{2}$ and as $x\to 0$, $\sigma \to \infty$; as $x \to \infty$, $\sigma \to 0$. Therefore,
+\begin{align*}
+  \int_{0}^{\infty}x^{p}\exp\left(qx-rx^{2}\right)\,dx &= \int_{\infty}^{0} -\left(\frac{1}{\sigma}\right)^{p}\exp\left(\frac{q}{\sigma}-\frac{r}{\sigma^{2}}\right)\cdot \frac{1}{\sigma^{2}}\,d\sigma\\
+  &= \int_{0}^{\infty} \left(\frac{1}{\sigma}\right)^{p+2}\exp\left(\frac{q}{\sigma}-\frac{r}{\sigma^{2}}\right)\,d\sigma.
+\end{align*}
+Now we can compute the expectations.
+\begin{align*}
+  \opn{E}\left(\frac{1}{\sigma}\right) &= \frac{\int_{0}^{\infty}\left(\frac{1}{\sigma}\right)^{p+3}\exp\left(\frac{q}{\sigma}-\frac{r}{\sigma^{2}}\right)\,\sigma}{\int_{0}^{\infty} \left(\frac{1}{\sigma}\right)^{p+2}\exp\left(\frac{q}{\sigma}-\frac{r}{\sigma^{2}}\right)\,d\sigma}\\
+  \opn{E}\left(\frac{1}{\sigma^{2}}\right) &= \frac{\int_{0}^{\infty}\left(\frac{1}{\sigma}\right)^{p+4}\exp\left(\frac{q}{\sigma}-\frac{r}{\sigma^{2}}\right)\,d\sigma}{\int_{0}^{\infty} \left(\frac{1}{\sigma}\right)^{p+2}\exp\left(\frac{q}{\sigma}-\frac{r}{\sigma^{2}}\right)\,d\sigma}
+\end{align*}
+% \subsection{Corrections}
+% \subsubsection{Original Paper: Linear model}
+% There are some mistakes in the original paper so I provide the calculation. $S_{2}\left(\mu_{\theta}^{q}, \Sigma_{\theta}^{q}\right) = \opn{E}\left(\ln p\left(y|\beta, \theta_{J}, \sigma^{2}\right)\right)$. Let's do this.
+% \begin{align*}
+%   S_{2}\left(\mu_{\theta}^{q}, \Sigma_{\theta}^{q}\right) &= -\frac{1}{2}\opn{E}\left(\frac{1}{\sigma^{2}}\right)\sum_{i=1}^{n}\opn{E}\left(\left(y_{i}-w_{i}'\beta - \delta\theta_{J}'\varphi_{J}^{a}\left(x_{i}\right)\theta_{J}\right)^{2} \right)\\
+%   &= -\frac{1}{2}\opn{E}\left(\frac{1}{\sigma^{2}}\right)\sum_{i=1}^{n}\opn{E}\left(y_{i}^{2}-2\underbrace{y_{i}\left(w_{i}'\beta+\delta \theta_{J}'\varphi_{J}^{a}\left(x_{i}\right)\theta_{J}\right)}_{T_{1}}+\underbrace{\left(w_{i}'\beta + \delta \theta_{J}'\varphi_{J}^{a}\left(x_{i}\right)\theta_{J}\right)^{2}}_{T_{2}} \right)
+% \end{align*}
+% where
+% \begin{align*}
+%   \opn{E}\left(T_{1}\right) &= y_{i}\left(w'_{i}\mu_{\beta}^{q} + \delta\left(\Tr\left(\varphi_{J}^{a}\left(x_{i}\right)\Sigma_{\theta}^{q}\right) + {\mu_{\theta}^{q}}'\varphi_{J}^{a}\left(x_{i}\right)\mu_{\theta}^{q}\right)\right)\\
+%   \opn{E}\left(T_{2}\right) &= \opn{E}\left(\left(w_{i}'\beta\right)^{2}\right) + 2\delta \left(w_{i}'\mu_{\beta}^{q}\left(\Tr\left(\varphi_{J}^{a}\left(x_{i}\right)\Sigma_{\theta}^{q}\right) + {\mu_{\theta}^{q}}'\varphi_{J}^{a}\left(x_{i}\right)\mu_{\theta}^{q}\right) \right) + \opn{E}\left(\left(\theta_{J}'\varphi_{J}^{a}\left(x_{i}\right)\theta_{J}\right)\right)\\
+%   &= {\mu_{\beta}^{q}}'w_{i}w'_{i}\mu_{\beta}^{q} + \Tr\left(w_{i}w'_{i}\Sigma_{\beta}^{q}\right) + 2\delta \left(w_{i}'\mu_{\beta}^{q}\left(\Tr\left(\varphi_{J}^{a}\left(x_{i}\right)\Sigma_{\theta}^{q}\right) + {\mu_{\theta}^{q}}'\varphi_{J}^{a}\left(x_{i}\right)\mu_{\theta}^{q}\right) \right)\\
+%   &\quad + \textcolor{myorange}{\delta^{2}}\left(3\Tr\left(\varphi_{J}^{a}\left(x_{i}\right)\Sigma_{\theta}^{q}\right)^{2} + 6{\mu_{\theta}^{q}}'\varphi_{J}^{a}\left(x_{i}\right)\Sigma_{\theta}^{q}\varphi_{J}^{a}\left(x_{i}\right)\mu_{\theta}^{q} + \left({\mu_{\theta}^{q}}'\varphi_{J}^{a}\left(x_{i}\right)\mu_{\theta}\right)^{2} \right)
+% \end{align*}
+% Note the orange color delta that is missing in the original paper. Arranging the terms,
+% \begin{align*}
+%   S_{2}\left(\mu_{\theta}^{q}, \Sigma_{\theta}^{q}\right) &= -\frac{1}{2}\opn{E}\left(\frac{1}{\sigma^{2}}\right)\sum_{i=1}^{n} \left(y_{i} -w_{i}'\mu_{\beta}^{q}-\delta\left(\Tr\left(\varphi_{J}^{a}\left(x_{i}\right)\Sigma_{\theta}^{q}\right)+{\mu_{\theta}^{q}}'\varphi_{J}^{a}\left(x_{i}\right)\mu_{\theta}^{q}\right)\right)^{2}\\
+%   &\qquad + \textcolor{myorange}{\delta^{2}}\left(2\Tr\left(\varphi_{J}^{a}\left(x_{i}\right)\Sigma_{\theta}^{q}\right)^{2}+4{\mu_{\theta}^{q}}'\varphi_{J}^{a}\left(x_{i}\right)\Sigma_{\theta}^{q}\varphi_{J}^{a}\left(x_{i}\right)\mu_{\theta}^{q}\right) + \Tr\left(w_{i}w'_{i}\Sigma_{\beta}^{q}\right).
+% \end{align*}
+% \subsubsection{Probit model}
+% $S_{2}\left(\mu_{\theta}^{q}, \Sigma_{\theta}^{q}\right) = \opn{E}\left(\ln p\left(y^{*}|\beta, \theta_{J}, \sigma^{2}\right)\right)$.
+% \begin{align*}
+%   S_{2}\left(\mu_{\theta}^{q}, \Sigma_{\theta}^{q}\right) &= -\frac{1}{2}\opn{E}\left(\frac{1}{\sigma^{2}}\right)\sum_{i=1}^{n} \left(\mu_{y_{i}}^{q} -w_{i}'\mu_{\beta}^{q}-\delta\left(\Tr\left(\varphi_{J}^{a}\left(x_{i}\right)\Sigma_{\theta}^{q}\right)+{\mu_{\theta}^{q}}'\varphi_{J}^{a}\left(x_{i}\right)\mu_{\theta}^{q}\right)\right)^{2}\\
+%   &\qquad + \delta^{2}\left(2\Tr\left(\varphi_{J}^{a}\left(x_{i}\right)\Sigma_{\theta}^{q}\right)^{2}+4{\mu_{\theta}^{q}}'\varphi_{J}^{a}\left(x_{i}\right)\Sigma_{\theta}^{q}\varphi_{J}^{a}\left(x_{i}\right)\mu_{\theta}^{q}\right) + \Tr\left(w_{i}w'_{i}\Sigma_{\beta}^{q}\right)
+% \end{align*}
+% Therefore, the derivative is as follows.
+% \begin{align*}
+%   \frac{\partial S_{2}}{\partial \Sigma_{\theta}^{q}} &= -\frac{1}{2}\opn{E}\left(\frac{1}{\sigma^{2}}\right)\sum_{i=1}^{n}\delta^{2}\left(4\varphi_{J}^{a}\left(x_{i}\right)\Sigma_{\theta}^{q}\varphi_{J}^{a}\left(x_{i}\right)+4\varphi_{J}^{a}\left(x_{i}\right)\mu_{\theta}^{q}{\mu_{\theta}^{q}}'\varphi_{J}^{a}\left(x_{i}\right)\right)\\
+%   &\qquad -2\delta\left(\mu_{y_{i}^{*}}^{q}-w'_{i}\mu_{\beta}^{q}-\delta\Tr\left(\varphi_{J}^{a}\left(x_{i}\right)\Sigma_{\theta}^{q}\right) -\delta{\mu_{\theta}^{q}}'\Sigma_{\theta}^{q}\mu_{\theta}^{q}\right)\varphi_{J}^{a}\left(x_{i}\right)
+% \end{align*}
 \section{Probit: Monotone Convex/Concave Shape Restriction}
 \subsection{Model}
 
