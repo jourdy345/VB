@@ -203,7 +203,7 @@ vbgpspectralsc.step.v2<-function(y,x,Z,T,tol,prior.parms,delta,mupsi.q.start,mut
     if(n<=n.grid) {
       data.term<-apply(as.vector(-4*delta*(y-Z%*%mubeta.q-delta*term2))*dmatstheta,2,sum)
     } else {
-      temp1<-aggregate(I(-4*delta*(y-Z%*%mubeta.q)) ~ index, FUN=sum)
+      temp1\<-aggregate(I(-4*delta*(y-Z%*%mubeta.q)) ~ index, FUN=sum)
       temp2<-rep(0,times=n.grid)
       temp2[temp1[,1]]<-temp1[,2]
       data.term<-apply((temp2+4*wts*term2)*dmatstheta,2,sum)    

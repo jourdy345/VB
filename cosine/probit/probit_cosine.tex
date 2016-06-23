@@ -508,25 +508,51 @@ Now we can compute the expectations.
   \opn{E}\left(\frac{1}{\sigma}\right) &= \frac{\int_{0}^{\infty}\left(\frac{1}{\sigma}\right)^{p+3}\exp\left(\frac{q}{\sigma}-\frac{r}{\sigma^{2}}\right)\,d\sigma}{\int_{0}^{\infty} \left(\frac{1}{\sigma}\right)^{p+2}\exp\left(\frac{q}{\sigma}-\frac{r}{\sigma^{2}}\right)\,d\sigma}\\
   \opn{E}\left(\frac{1}{\sigma^{2}}\right) &= \frac{\int_{0}^{\infty}\left(\frac{1}{\sigma}\right)^{p+4}\exp\left(\frac{q}{\sigma}-\frac{r}{\sigma^{2}}\right)\,d\sigma}{\int_{0}^{\infty} \left(\frac{1}{\sigma}\right)^{p+2}\exp\left(\frac{q}{\sigma}-\frac{r}{\sigma^{2}}\right)\,d\sigma}
 \end{align*}
-% \subsection{Corrections}
-% \subsubsection{Original Paper: Linear model}
-% There are some mistakes in the original paper so I provide the calculation. $S_{2}\left(\mu_{\theta}^{q}, \Sigma_{\theta}^{q}\right) = \opn{E}\left(\ln p\left(y|\beta, \theta_{J}, \sigma^{2}\right)\right)$. Let's do this.
-% \begin{align*}
-%   S_{2}\left(\mu_{\theta}^{q}, \Sigma_{\theta}^{q}\right) &= -\frac{1}{2}\opn{E}\left(\frac{1}{\sigma^{2}}\right)\sum_{i=1}^{n}\opn{E}\left(\left(y_{i}-w_{i}'\beta - \delta\theta_{J}'\varphi_{J}^{a}\left(x_{i}\right)\theta_{J}\right)^{2} \right)\\
-%   &= -\frac{1}{2}\opn{E}\left(\frac{1}{\sigma^{2}}\right)\sum_{i=1}^{n}\opn{E}\left(y_{i}^{2}-2\underbrace{y_{i}\left(w_{i}'\beta+\delta \theta_{J}'\varphi_{J}^{a}\left(x_{i}\right)\theta_{J}\right)}_{T_{1}}+\underbrace{\left(w_{i}'\beta + \delta \theta_{J}'\varphi_{J}^{a}\left(x_{i}\right)\theta_{J}\right)^{2}}_{T_{2}} \right)
-% \end{align*}
-% where
-% \begin{align*}
-%   \opn{E}\left(T_{1}\right) &= y_{i}\left(w'_{i}\mu_{\beta}^{q} + \delta\left(\Tr\left(\varphi_{J}^{a}\left(x_{i}\right)\Sigma_{\theta}^{q}\right) + {\mu_{\theta}^{q}}'\varphi_{J}^{a}\left(x_{i}\right)\mu_{\theta}^{q}\right)\right)\\
-%   \opn{E}\left(T_{2}\right) &= \opn{E}\left(\left(w_{i}'\beta\right)^{2}\right) + 2\delta \left(w_{i}'\mu_{\beta}^{q}\left(\Tr\left(\varphi_{J}^{a}\left(x_{i}\right)\Sigma_{\theta}^{q}\right) + {\mu_{\theta}^{q}}'\varphi_{J}^{a}\left(x_{i}\right)\mu_{\theta}^{q}\right) \right) + \opn{E}\left(\left(\theta_{J}'\varphi_{J}^{a}\left(x_{i}\right)\theta_{J}\right)\right)\\
-%   &= {\mu_{\beta}^{q}}'w_{i}w'_{i}\mu_{\beta}^{q} + \Tr\left(w_{i}w'_{i}\Sigma_{\beta}^{q}\right) + 2\delta \left(w_{i}'\mu_{\beta}^{q}\left(\Tr\left(\varphi_{J}^{a}\left(x_{i}\right)\Sigma_{\theta}^{q}\right) + {\mu_{\theta}^{q}}'\varphi_{J}^{a}\left(x_{i}\right)\mu_{\theta}^{q}\right) \right)\\
-%   &\quad + \textcolor{myorange}{\delta^{2}}\left(3\Tr\left(\varphi_{J}^{a}\left(x_{i}\right)\Sigma_{\theta}^{q}\right)^{2} + 6{\mu_{\theta}^{q}}'\varphi_{J}^{a}\left(x_{i}\right)\Sigma_{\theta}^{q}\varphi_{J}^{a}\left(x_{i}\right)\mu_{\theta}^{q} + \left({\mu_{\theta}^{q}}'\varphi_{J}^{a}\left(x_{i}\right)\mu_{\theta}\right)^{2} \right)
-% \end{align*}
-% Note the orange color delta that is missing in the original paper. Arranging the terms,
-% \begin{align*}
-%   S_{2}\left(\mu_{\theta}^{q}, \Sigma_{\theta}^{q}\right) &= -\frac{1}{2}\opn{E}\left(\frac{1}{\sigma^{2}}\right)\sum_{i=1}^{n} \left(y_{i} -w_{i}'\mu_{\beta}^{q}-\delta\left(\Tr\left(\varphi_{J}^{a}\left(x_{i}\right)\Sigma_{\theta}^{q}\right)+{\mu_{\theta}^{q}}'\varphi_{J}^{a}\left(x_{i}\right)\mu_{\theta}^{q}\right)\right)^{2}\\
-%   &\qquad + \textcolor{myorange}{\delta^{2}}\left(2\Tr\left(\varphi_{J}^{a}\left(x_{i}\right)\Sigma_{\theta}^{q}\right)^{2}+4{\mu_{\theta}^{q}}'\varphi_{J}^{a}\left(x_{i}\right)\Sigma_{\theta}^{q}\varphi_{J}^{a}\left(x_{i}\right)\mu_{\theta}^{q}\right) + \Tr\left(w_{i}w'_{i}\Sigma_{\beta}^{q}\right).
-% \end{align*}
+\subsection{Corrections}
+\subsubsection{Original Paper: Linear model}
+There are some mistakes in the original paper so I provide the calculation. $S_{2}\left(\mu_{\theta}^{q}, \Sigma_{\theta}^{q}\right) = \opn{E}\left(\ln p\left(y|\beta, \theta_{J}, \sigma^{2}\right)\right)$. Let's do this.
+\begin{align*}
+  S_{2}\left(\mu_{\theta}^{q}, \Sigma_{\theta}^{q}\right) &= -\frac{1}{2}\opn{E}\left(\frac{1}{\sigma^{2}}\right)\sum_{i=1}^{n}\opn{E}\left(\left(y_{i}-w_{i}'\beta - \delta\theta_{J}'\varphi_{J}^{a}\left(x_{i}\right)\theta_{J}\right)^{2} \right)\\
+  &= -\frac{1}{2}\opn{E}\left(\frac{1}{\sigma^{2}}\right)\sum_{i=1}^{n}\opn{E}\left(y_{i}^{2}-2\underbrace{y_{i}\left(w_{i}'\beta+\delta \theta_{J}'\varphi_{J}^{a}\left(x_{i}\right)\theta_{J}\right)}_{T_{1}}+\underbrace{\left(w_{i}'\beta + \delta \theta_{J}'\varphi_{J}^{a}\left(x_{i}\right)\theta_{J}\right)^{2}}_{T_{2}} \right)
+\end{align*}
+where
+\begin{align*}
+  \opn{E}\left(T_{1}\right) &= y_{i}\left(w'_{i}\mu_{\beta}^{q} + \delta\left(\Tr\left(\varphi_{J}^{a}\left(x_{i}\right)\Sigma_{\theta}^{q}\right) + {\mu_{\theta}^{q}}'\varphi_{J}^{a}\left(x_{i}\right)\mu_{\theta}^{q}\right)\right)\\
+  \opn{E}\left(T_{2}\right) &= \opn{E}\left(\left(w_{i}'\beta\right)^{2}\right) + 2\delta \left(w_{i}'\mu_{\beta}^{q}\left(\Tr\left(\varphi_{J}^{a}\left(x_{i}\right)\Sigma_{\theta}^{q}\right) + {\mu_{\theta}^{q}}'\varphi_{J}^{a}\left(x_{i}\right)\mu_{\theta}^{q}\right) \right) + \opn{E}\left(\left(\theta_{J}'\varphi_{J}^{a}\left(x_{i}\right)\theta_{J}\right)\right)\\
+  &= {\mu_{\beta}^{q}}'w_{i}w'_{i}\mu_{\beta}^{q} + \Tr\left(w_{i}w'_{i}\Sigma_{\beta}^{q}\right) + 2\delta \left(w_{i}'\mu_{\beta}^{q}\left(\Tr\left(\varphi_{J}^{a}\left(x_{i}\right)\Sigma_{\theta}^{q}\right) + {\mu_{\theta}^{q}}'\varphi_{J}^{a}\left(x_{i}\right)\mu_{\theta}^{q}\right) \right)\\
+  &\quad + \delta^{2}\left(3\Tr\left(\varphi_{J}^{a}\left(x_{i}\right)\Sigma_{\theta}^{q}\right)^{2} + 6{\mu_{\theta}^{q}}'\varphi_{J}^{a}\left(x_{i}\right)\Sigma_{\theta}^{q}\varphi_{J}^{a}\left(x_{i}\right)\mu_{\theta}^{q} + \left({\mu_{\theta}^{q}}'\varphi_{J}^{a}\left(x_{i}\right)\mu_{\theta}\right)^{2} \right)
+\end{align*}
+Arranging the terms,
+\begin{align*}
+  S_{2}\left(\mu_{\theta}^{q}, \Sigma_{\theta}^{q}\right) &= -\frac{1}{2}\opn{E}\left(\frac{1}{\sigma^{2}}\right)\sum_{i=1}^{n} \underbrace{\left(y_{i} -w_{i}'\mu_{\beta}^{q}-\delta\left(\Tr\left(\varphi_{J}^{a}\left(x_{i}\right)\Sigma_{\theta}^{q}\right)+{\mu_{\theta}^{q}}'\varphi_{J}^{a}\left(x_{i}\right)\mu_{\theta}^{q}\right)\right)^{2}}_{T_{3}}\\
+  &\qquad + \delta^{2}\left(\underbrace{2\Tr\left(\varphi_{J}^{a}\left(x_{i}\right)\Sigma_{\theta}^{q}\right)^{2}+4{\mu_{\theta}^{q}}'\varphi_{J}^{a}\left(x_{i}\right)\Sigma_{\theta}^{q}\varphi_{J}^{a}\left(x_{i}\right)\mu_{\theta}^{q}}_{T_{4}}\right) + \Tr\left(w_{i}w'_{i}\Sigma_{\beta}^{q}\right).
+\end{align*}
+We have represented $S_{2}$ with regards to the squared term for the sake of succinctness. However, for matrix differentiation, let's expand it again.
+\begin{align*}
+  T_{3} &= y_{i}^{2} - 2y_{i}\left(w_{i}'\mu_{\beta}^{q}+\delta\left(\Tr\left(\varphi_{J}^{a}\left(x_{i}\right)\Sigma_{\theta}^{q}\right)+{\mu_{\theta}^{q}}'\varphi_{J}^{a}\left(x_{i}\right)\mu_{\theta}^{q}\right)\right) + 2\delta w_{i}'\mu_{\beta}^{q}\left(\Tr\left(\varphi_{J}^{a}\left(x_{i}\right)\Sigma_{\theta}^{q}\right)+{\mu_{\theta}^{q}}'\varphi_{J}^{a}\left(x_{i}\right)\mu_{\theta}^{q}\right)\\
+  &\quad  + \delta^{2}\left(\Tr\left(\varphi_{J}^{a}\left(x_{i}\right)\Sigma_{\theta}^{q}\right)^{2}+2\Tr\left(\varphi_{J}^{a}\left(x_{i}\right)\Sigma_{\theta}^{q}\right){\mu_{\theta}^{q}}'\varphi_{J}^{a}\left(x_{i}\right)\mu_{\theta}^{q}+\left({\mu_{\theta}^{q}}'\varphi_{J}^{a}\left(x_{i}\right)\mu_{\theta}^{q}\right)^{2}\right)\\
+  \frac{\partial T_{3}}{\partial \Sigma_{\theta}^{q}} &= -2\delta y_{i}\varphi_{J}^{a}\left(x_{i}\right) +2\delta w_{i}'\mu_{\beta}^{q}\varphi_{J}^{a}\left(x_{i}\right) + 2\delta^{2}\varphi_{J}^{a}\left(x_{i}\right)\Sigma_{\theta}^{q}\varphi_{J}^{a}\left(x_{i}\right) + 2\delta^{2}{\mu_{\theta}^{q}}'\varphi_{J}^{a}\left(x_{i}\right)\mu_{\theta}^{q}\varphi_{J}^{a}\left(x_{i}\right)\\
+  \frac{\partial T_{4}}{\partial \Sigma_{\theta}^{q}} &= 4\varphi_{J}^{a}\left(x_{i}\right)\Sigma_{\theta}^{q}\varphi_{J}^{a}\left(x_{i}\right) + 4\varphi_{J}^{a}\left(x_{i}\right)\mu_{\theta}^{q}{\mu_{\theta}^{q}}'\varphi_{J}^{a}\left(x_{i}\right)
+\end{align*}
+
+The original paper gives the following derivative:
+\begin{align*}
+  \frac{\partial S_{2}}{\partial \Sigma_{\theta}^{q}} &= -\frac{1}{2}\opn{E}\left(\frac{1}{\sigma^{2}}\right)\sum_{i=1}^{n}\left\{4\varphi_{J}^{a}\left(x_{i}\right)\Sigma_{\theta}^{q}\varphi_{J}^{a}\left(x_{i}\right)+4\varphi_{J}^{a}\left(x_{i}\right)\mu_{\theta}^{q}{\mu_{\theta}^{q}}'\varphi_{J}^{a}\left(x_{i}\right)\right.\\
+  &\quad \left. -2\delta\left(y_{i}-w_{i}'\mu_{\beta}^{q}-\delta\underbrace{\textcolor{myblue}{\Tr\left(\Sigma_{\theta}^{q}\varphi_{J}^{a}\left(x_{i}\right)\right)}}_{\textcolor{myblue}{(1)}}-\delta\underbrace{\textcolor{myorange}{{\mu_{\theta}^{q}}'\Sigma_{\theta}^{q}\mu_{\theta}^{q}}}_{\textcolor{myorange}{(2)}}\right)\varphi_{J}^{a}\left(x_{i}\right) \right\}
+\end{align*}
+First, where did $\textcolor{myblue}{(1)}$ come from? Second, $\textcolor{myorange}{(2)}$ should be ${\mu_{\theta}^{q}}'\varphi_{J}^{a}\left(x_{i}\right)\mu_{\theta}^{q}$.\par
+$\textcolor{myblue}{(1)}$ is supposed to be $\varphi_{J}^{a}\left(x_{i}\right)\Sigma_{\theta}^{q}\varphi_{J}^{a}\left(x_{i}\right)$ because the derivative of $\Tr\left(\varphi_{J}^{a}\left(x_{i}\right)\Sigma_{\theta}^{q}\right)^{2}$ is missing. Let $f = \Tr\left(\varphi_{J}^{a}\left(x_{i}\right)\Sigma_{\theta}^{q}\right)^{2} = \varphi\Sigma:\varphi\Sigma$.
+\begin{align*}
+  f &= \varphi\Sigma: \varphi\Sigma\\
+  \partial f &= 2\left(\varphi\Sigma: \varphi \partial \Sigma\right)\\
+  &= 2\varphi\Sigma\varphi: \partial \Sigma\\
+  \frac{\partial f}{\partial \Sigma} &= 2\varphi\Sigma\varphi.
+\end{align*}
+Therefore, the derivative should be as follows:
+\begin{align*}
+  \frac{\partial S_{2}}{\partial \Sigma_{\theta}^{q}} &= -\frac{1}{2}\opn{E}\left(\frac{1}{\sigma^{2}}\right)\sum_{i=1}^{n}\left\{\underbrace{\textcolor{myblue}{6}}_{\textcolor{myblue}{(1)}}\varphi_{J}^{a}\left(x_{i}\right)\Sigma_{\theta}^{q}\varphi_{J}^{a}\left(x_{i}\right)+4\varphi_{J}^{a}\left(x_{i}\right)\mu_{\theta}^{q}{\mu_{\theta}^{q}}'\varphi_{J}^{a}\left(x_{i}\right)\right.\\
+  &\quad \left. -2\delta\left(y_{i}-w_{i}'\mu_{\beta}^{q}-\delta\underbrace{\textcolor{myorange}{{\mu_{\theta}^{q}}'\varphi_{J}^{a}\left(x_{i}\right)\mu_{\theta}^{q}}}_{\textcolor{myorange}{(2)}}\right)\varphi_{J}^{a}\left(x_{i}\right) \right\}
+\end{align*}
 % \subsubsection{Probit model}
 % $S_{2}\left(\mu_{\theta}^{q}, \Sigma_{\theta}^{q}\right) = \opn{E}\left(\ln p\left(y^{*}|\beta, \theta_{J}, \sigma^{2}\right)\right)$.
 % \begin{align*}

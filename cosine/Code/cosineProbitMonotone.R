@@ -1,4 +1,5 @@
 require(fAsianOptions)
+
 # Auxiliary functions
 intSigma <- function(p,q,r) {
   0.5 * r^(-p/2-1)*(q * gamma(p/2+1) * Re(kummerM(q^2/(4*r), p/2+1, 3/2)) + sqrt(r)*gamma((p+1)/2) * Re(kummerM(q^2/(4*r), (p+1)/2, 1/2)))
@@ -14,7 +15,7 @@ E1overSigma2 <- function(a, b, c) {
 
 Qj <- function(muPsi, sigmaPsi2, j) {
   sigmaPsi <- sqrt(sigmaPsi2)
-  exp(0.5 * sigmaPsi2 * j^2 + muPsi * j) * (1 - pnorm(-muPsi/sigmaPsi - sigmaPsi * j)) + exp(9.5 * sigmaPsi2 * j^2 - muPsi * j) * (1 - pnorm(muPsi/sigmaPsi - sigmaPsi * j))
+  exp(0.5 * sigmaPsi2 * j^2 + muPsi * j) * (1 - pnorm(-muPsi/sigmaPsi - sigmaPsi * j)) + exp(0.5 * sigmaPsi2 * j^2 - muPsi * j) * (1 - pnorm(muPsi/sigmaPsi - sigmaPsi * j))
 }
 
 S1 <- function(muPsi, sigmaPsi2, w0) {
@@ -102,10 +103,21 @@ DS2_SigmaThetaq <- function(varphi, muThetaq, SigmaThetaq, W, muYStarq, muBetaq,
   temp <- matrix(0, nrow = J+1, ncol = J+1)
   for (i in 1:n) {
     tempVec <- varphi[,,i] %*% muThetaq
-    temp <- temp + 4 * (varphi[,,i] %*% SigmaThetaq %*% varphi[,,i] + tcrossprod(tempVec)) -2 * delta * (muYStarq[i] - sum(W[i,] * muBetaq) - delta * sum(SigmaThetaq * varphi[,,i]) - delta * sum(SigmaThetaq * tcrossprod(muThetaq)))
+    temp <- temp + ( 6 * varphi[,,i] %*% SigmaThetaq %*% varphi[,,i] + 4 * tcrossprod(tempVec)) -2 * delta * (muYStarq[i] - sum(W[i,] * muBetaq) - delta * sum(varphi[,,i] * tcrossprod(muThetaq))) * varphi[,,i]
   }
   -0.5 * E1overSigma2(a, b, c) * temp
 }
+
+# DS2_SigmaThetaq <- function(varphi, muThetaq, SigmaThetaq, W, muYStarq, muBetaq, a, b, c, delta) {
+#   J <- dim(varphi)[1] - 1
+#   n <- dim(varphi)[3]
+#   temp <- matrix(0, nrow = J+1, ncol = J+1)
+#   for (i in 1:n) {
+#     tempVec <- varphi[,,i] %*% muThetaq
+#     temp <- temp + 4 * (varphi[,,i] %*% SigmaThetaq %*% varphi[,,i] + tcrossprod(tempVec)) -2 * delta * (muYStarq[i] - sum(W[i,] * muBetaq) - delta * sum(SigmaThetaq * varphi[,,i]) - delta * sum(varphi[,,i] * tcrossprod(muThetaq))) * varphi[,,i]
+#   }
+#   -0.5 * E1overSigma2(a, b, c) * temp
+# }
 
 DS2_muThetaq <- function(varphi, muThetaq, SigmaThetaq, W, muYStarq, muBetaq, a, b, c, delta) {
   temp = rep(0, length(muThetaq))
@@ -173,16 +185,17 @@ VB <- function(y, x, W, J, delta, r0s, s0s, r0t, s0t, w0, muBeta0, SigmaBeta0, m
   rqt_over_sqt <- rqt/sqt
   muBetaq <- rep(0, p)
   SigmaBetaq <- diag(1, p)
-  muThetaq <- rep(0, J+1)
+  muThetaq <- rep(1, J+1)
   SigmaThetaq <- diag(1, J+1)
-  muPsi <- 0.1
-  sigmaPsi2 <- muPsi^2/100
+  SigmaThetaOldInv <- solve(SigmaThetaq)
+  muPsi <- 1
+  sigmaPsi2 <- 0.01
   sigmaPsi <- sqrt(sigmaPsi2)
   muYStar <- rep(0, n)
   muYStarq <- rep(0, n)
   a <- 0.25 * (J+1) + r0s_half + 0.5 * p + 1
-  b <- 2
-  c <- 2
+  b <- 1
+  c <- 1
   lbold <- LB(y, varphi, W, delta, SigmaBeta0, SigmaBetaq, muThetaq, SigmaThetaq, muYStar, a, b, c, sigma0, muPsi, sigmaPsi2, w0, muBetaq, muBeta0, r0t_half, s0t_half, r0s_half, s0s_half, rqt_half, sqt_half)
   lbnew <- 0
   dif <- tol + 1
@@ -192,19 +205,38 @@ VB <- function(y, x, W, J, delta, r0s, s0s, r0t, s0t, w0, muBeta0, SigmaBeta0, m
     count <- count + 1
     
     # Update theta
+
+    ## SigmaTheta
     step <- 1
-    temp1 <- SigmaTheta0_inv + DS1_SigmaThetaq(a, b, c, muPsi, sigmaPsi2, sigma0, J, rqt, sqt) + DS2_SigmaThetaq(varphi, muThetaq, SigmaThetaq, W, muYStarq, muBetaq, a, b, c, delta)
-    SigmaThetaqNew <- solve((1-step) * solve(SigmaThetaq) + step * temp1)
-    EV <- eigen(SigmaThetaqNew, only.values = TRUE)$values
+    SigmaThetaNewInv <- -2 * DS1_SigmaThetaq(a, b, c, muPsi, sigmaPsi2, sigma0, J, rqt, sqt) + DS2_SigmaThetaq(varphi, muThetaq, SigmaThetaq, W, muYStarq, muBetaq, a, b, c, delta)
+    SigmaThetaOldInvTry <- (1-step) * SigmaThetaOldInv + step * SigmaThetaNewInv
+    SigmaThetaTry <- solve(SigmaThetaOldInvTry)
+    EV <- eigen(SigmaThetaTry, only.values = TRUE)$values
 
-    while(isSymmetric(SigmaThetaqNew, tol=1.0e-10)==FALSE | any(Re(EV) < 0)) {
+    while(isSymmetric(SigmaThetaTry, tol = 1.0e-10) == FALSE | any(Re(EV) < 0)) {
       step <- 2/3 * step
-      SigmaThetaqNew <- solve((1-step) * solve(SigmaThetaq) + step * temp1)
-      EV <- eigen(SigmaThetaqNew, only.values=TRUE)$values
+      SigmaThetaOldInvTry <- (1-step) * SigmaThetaOldInv + step * SigmaThetaNewInv
+      SigmaThetaTry <- solve(SigmaThetaOldInvTry)
+      EV <- eigen(SigmaThetaTry, only.values = TRUE)$values
     }
+    SigmaThetaOldInv <- SigmaThetaOldInvTry
+    SigmaThetaq <- SigmaThetaTry
 
-    SigmaThetaq <- SigmaThetaqNew
-    muThetaq <- muThetaq + step*SigmaThetaq %*% (DS1_muThetaq(a, b, c, muPsi, sigmaPsi2, muThetaq, sigma0, rqt, sqt) + DS2_muThetaq(varphi, muThetaq, SigmaThetaq, W, muYStarq, muBetaq, a, b, c, delta))
+    ## muTheta
+    muThetaq <- muThetaq + step * SigmaThetaq %*% (DS1_muThetaq(a, b, c, muPsi, sigmaPsi2, muThetaq, sigma0, rqt, sqt) + DS2_muThetaq(varphi, muThetaq, SigmaThetaq, W, muYStarq, muBetaq, a, b, c, delta))
+    cat("DS1_muThetaq: ", DS1_muThetaq(a, b, c, muPsi, sigmaPsi2, muThetaq, sigma0, rqt, sqt), '\n')
+    cat("DS2_muThetaq: ", DS2_muThetaq(varphi, muThetaq, SigmaThetaq, W, muYStarq, muBetaq, a, b, c, delta), '\n')
+    # SigmaThetaqNew <- solve((1-step) * solve(SigmaThetaq) + step * temp1)
+    # EV <- eigen(SigmaThetaqNew, only.values = TRUE)$values
+
+    # while(isSymmetric(SigmaThetaqNew, tol=1.0e-10)==FALSE | any(Re(EV) < 0)) {
+    #   step <- 2/3 * step
+    #   SigmaThetaqNew <- solve((1-step) * solve(SigmaThetaq) + step * temp1)
+    #   EV <- eigen(SigmaThetaqNew, only.values=TRUE)$values
+    # }
+
+    # SigmaThetaq <- SigmaThetaqNew
+    # muThetaq <- muThetaq + step*SigmaThetaq %*% (DS1_muThetaq(a, b, c, muPsi, sigmaPsi2, muThetaq, sigma0, rqt, sqt) + DS2_muThetaq(varphi, muThetaq, SigmaThetaq, W, muYStarq, muBetaq, a, b, c, delta))
     
     # Update psi
     step_psi = 1
@@ -227,17 +259,23 @@ VB <- function(y, x, W, J, delta, r0s, s0s, r0t, s0t, w0, muBeta0, SigmaBeta0, m
     # Update y*
     for (i in 1:n) {
       muYStar[i] <- sum(W[i,] * muBetaq) + delta * sum(varphi[,,i] * SigmaThetaq) + delta * sum(varphi[,,i] * tcrossprod(muThetaq))
+      # cat('delta * sum(varphi[,,i] * SigmaThetaq): ', delta * sum(varphi[,,i] * SigmaThetaq), '\n')
+      # cat('delta * sum(varphi[,,i] * tcrossprod(muThetaq): ', delta * sum(varphi[,,i] * tcrossprod(muThetaq)), '\n')
     }
     muYStarq <- muYStar + dnorm(muYStar)/((pnorm(muYStar)^y)*(pnorm(muYStar)-1)^(1-y))
-
+    cat('sum of muYStarq: ', sum(muYStarq), '\n')
     # Update beta
     SigmaBetaq <- solve(E1overSigma2(a, b, c) * SigmaBeta0_inv + WtW)
 
-    tempBeta <- rep(0, n)
+    tempBeta <- rep(0, p)
     for (i in 1:n) {
       tempBeta <- tempBeta + (sum(varphi[,,i] * SigmaThetaq) + sum(varphi[,,i] * tcrossprod(muThetaq))) * W[i]
     }
-    muBetaq <- SigmaBetaq %*% (E1overSigma2(a, b, c) * SigmaBeta0_inv_muBeta0 + crossprod(W, muYStarq - delta * tempBeta))
+    muBetaq <- SigmaBetaq %*% (E1overSigma2(a, b, c) * SigmaBeta0_inv_muBeta0 + c(crossprod(W, muYStarq)) - delta * tempBeta)
+    # cat("Trace of SigmaBetaq: ", sum(diag(SigmaBetaq)), '\n')
+    # cat("Sum of squared muBetaq: ", sum(muBetaq^2), '\n')
+    # cat("E1overSigma2: ", E1overSigma2(a, b, c), '\n')
+    # cat("Wt %*% muYStarq: ", c(crossprod(W, muYStarq)), '\n')
 
     # Update tau^2
     SigmaThetaqStar <- SigmaThetaq[-1,]
@@ -246,7 +284,10 @@ VB <- function(y, x, W, J, delta, r0s, s0s, r0t, s0t, w0, muBeta0, SigmaBeta0, m
     sqt <- s0t + E1overSigma(a, b, c) * sum((diag(SigmaThetaqStar) + muThetaqStar^2) * Qj(muPsi, sigmaPsi2, 1:J))
     sqt_half <- 0.5 * sqt
     rqt_over_sqt <- rqt/sqt
-
+    cat("sqt: ", sqt, '\n')
+    cat("rqt_over_sqt: ", rqt_over_sqt, '\n')
+    cat("rqt_over_sqt * Qj: ", rqt_over_sqt * Qj(muPsi, sigmaPsi2, 1:J), '\n')
+    cat("E1overSigma: ", E1overSigma(a, b, c), '\n')
     # Update sigma^2
     b <- -0.5 * sum((diag(SigmaThetaq) + muThetaq^2) * c(1/sigma0, rqt_over_sqt * Qj(muPsi, sigmaPsi2, 1:J)))
     c <- 0.5 * (s0s + sum(SigmaBeta0_inv * tcrossprod(muBetaq - muBeta0)) + sum(SigmaBeta0_inv * SigmaBetaq))
@@ -256,20 +297,26 @@ VB <- function(y, x, W, J, delta, r0s, s0s, r0t, s0t, w0, muBeta0, SigmaBeta0, m
     diff <- lbnew - lbold
     if (diff < 0) {
       # Update theta
+
+      ## SigmaTheta
       step <- 1
-      temp1 <- SigmaTheta0_inv + DS1_SigmaThetaq(a, b, c, muPsi, sigmaPsi2, sigma0, J, rqt, sqt) + DS2_SigmaThetaq(varphi, muThetaq, SigmaThetaq, W, muYStarq, muBetaq, a, b, c, delta)
-      SigmaThetaqNew <- solve((1-step) * solve(SigmaThetaq) + step * temp1)
-      EV <- eigen(SigmaThetaqNew, only.values = TRUE)$values
+      SigmaThetaNewInv <- -2 * DS1_SigmaThetaq(a, b, c, muPsi, sigmaPsi2, sigma0, J, rqt, sqt) + DS2_SigmaThetaq(varphi, muThetaq, SigmaThetaq, W, muYStarq, muBetaq, a, b, c, delta)
+      SigmaThetaOldInvTry <- (1-step) * SigmaThetaOldInv + step * SigmaThetaNewInv
+      SigmaThetaTry <- solve(SigmaThetaOldInvTry)
+      EV <- eigen(SigmaThetaTry, only.values = TRUE)$values
 
-      while(isSymmetric(SigmaThetaqNew, tol=1.0e-10)==FALSE | any(Re(EV) < 0)) {
+      while(isSymmetric(SigmaThetaTry, tol = 1.0e-10) == FALSE | any(Re(EV) < 0)) {
         step <- 2/3 * step
-        SigmaThetaqNew <- solve((1-step) * solve(SigmaThetaq) + step * temp1)
-        EV <- eigen(SigmaThetaqNew, only.values=TRUE)$values
+        SigmaThetaOldInvTry <- (1-step) * SigmaThetaOldInv + step * SigmaThetaNewInv
+        SigmaThetaTry <- solve(SigmaThetaOldInvTry)
+        EV <- eigen(SigmaThetaTry, only.values = TRUE)$values
       }
+      SigmaThetaOldInv <- SigmaThetaOldInvTry
+      SigmaThetaq <- SigmaThetaTry
 
-      SigmaThetaq <- SigmaThetaqNew
-      muThetaq <- muThetaq + step*SigmaThetaq %*% (DS1_muThetaq(a, b, c, muPsi, sigmaPsi2, muThetaq, sigma0, rqt, sqt) + DS2_muThetaq(varphi, muThetaq, SigmaThetaq, W, muYStarq, muBetaq, a, b, c, delta))
-
+      ## muTheta
+      muThetaq <- muThetaq + step * SigmaThetaq %*% (DS1_muThetaq(a, b, c, muPsi, sigmaPsi2, muThetaq, sigma0, rqt, sqt) + DS2_muThetaq(varphi, muThetaq, SigmaThetaq, W, muYStarq, muBetaq, a, b, c, delta))
+      cat("SigmaThetaq: ", SigmaThetaq, '\n')
       # Update psi
       step_psi = 1
       sigmaPsi2_old = sigmaPsi2
@@ -291,17 +338,24 @@ VB <- function(y, x, W, J, delta, r0s, s0s, r0t, s0t, w0, muBeta0, SigmaBeta0, m
       # Update y*
       for (i in 1:n) {
         muYStar[i] <- sum(W[i,] * muBetaq) + delta * sum(varphi[,,i] * SigmaThetaq) + delta * sum(varphi[,,i] * tcrossprod(muThetaq))
+        # cat('delta * sum(varphi[,,i] * SigmaThetaq): ', delta * sum(varphi[,,i] * SigmaThetaq), '\n')
+        # cat('delta * sum(varphi[,,i] * tcrossprod(muThetaq): ', delta * sum(varphi[,,i] * tcrossprod(muThetaq)), '\n')
       }
       muYStarq <- muYStar + dnorm(muYStar)/((pnorm(muYStar)^y)*(pnorm(muYStar)-1)^(1-y))
+      cat('sum of muYStarq: ', sum(muYStarq), '\n')
 
       # Update beta
       SigmaBetaq <- solve(E1overSigma2(a, b, c) * SigmaBeta0_inv + WtW)
 
-      tempBeta <- rep(0, n)
+      tempBeta <- rep(0, p)
       for (i in 1:n) {
         tempBeta <- tempBeta + (sum(varphi[,,i] * SigmaThetaq) + sum(varphi[,,i] * tcrossprod(muThetaq))) * W[i]
       }
-      muBetaq <- SigmaBetaq %*% (E1overSigma2(a, b, c) * SigmaBeta0_inv_muBeta0 + crossprod(W, muYStarq - delta * tempBeta))
+      muBetaq <- SigmaBetaq %*% (E1overSigma2(a, b, c) * SigmaBeta0_inv_muBeta0 + c(crossprod(W, muYStarq)) - delta * tempBeta)
+      # cat("Trace of SigmaBetaq: ", sum(diag(SigmaBetaq)), '\n')
+      # cat("Sum of squared muBetaq: ", sum(muBetaq^2), '\n')
+      # cat("E1overSigma2: ", E1overSigma2(a, b, c), '\n')
+      # cat("Wt %*% muYStarq: ", c(crossprod(W, muYStarq)), '\n')
 
       # Update tau^2
       SigmaThetaqStar <- SigmaThetaq[-1,]
@@ -323,5 +377,5 @@ VB <- function(y, x, W, J, delta, r0s, s0s, r0t, s0t, w0, muBeta0, SigmaBeta0, m
     lbrecord <- c(lbrecord, lbnew)
     cat("count: ", count, ", lbnew: ", lbnew, ", dif: ", dif, '\n')
   }
-  list(muThetaq = muThetaq, SigmaThetaq = SigmaThetaq, muBetaq = muBetaq, SigmaBetaq = SigmaBetaq, rqt = rqt, sqt = sqt, a = a, b = b, c = c, muYStarq = muYStarq, muYStar = muYStar, lbrecord = lbrecord)
+  list(count = count, muThetaq = muThetaq, SigmaThetaq = SigmaThetaq, muBetaq = muBetaq, SigmaBetaq = SigmaBetaq, rqt = rqt, sqt = sqt, a = a, b = b, c = c, muYStarq = muYStarq, muYStar = muYStar, lbrecord = lbrecord)
 }
