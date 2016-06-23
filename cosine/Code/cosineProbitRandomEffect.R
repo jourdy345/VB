@@ -62,7 +62,7 @@ LB = function(y, W, Z, varphi, SigmaBetaq, Sigmauq, SigmaThetaq, muYStar, Sigmau
   -0.5 * (sum(crossprod(W) * SigmaBetaq) + sum(crossprod(Z) * Sigmauq) + sum(crossprod(varphi) * SigmaThetaq)) + sum(log((pnorm(muYStar))^y * (1 - pnorm(muYStar))^(1-y))) + 0.5 * determinant(solve(Sigmau0, Sigmauq))$modulus[1] - 0.5 * J * (log(2 * pi) - (digamma(rqs/2) - log(sqs/2)) - (digamma(rqt/2) - log(sqt/2))) + S2(muPsi, sigmaPsi2, muThetaq, SigmaThetaq, rqs, sqs, rqt, sqt, w0, J) + r0t/2 * log(s0t/2) - lgamma(r0t/2) + (r0t/2 + 1) * (digamma(rqt/2) - log(sqt/2)) - s0t/2 * rqt/sqt + rqt/2 + log(sqt/2) + lgamma(rqt/2) - (1 + rqt/2) * digamma(rqt/2) + r0s/2 * log(s0s/2) - lgamma(r0s/2) + (r0s/2 + 1) * (digamma(rqs/2) - log(sqs/2)) - s0s/2 * rqs/sqs + rqs/2 + log(sqs/2) + lgamma(rqs/2) - (1 + rqs/2) * digamma(rqs/2) + 0.5 * (p + 1) + 0.5 * (digamma(rqs/2) - log(sqs/2)) + 0.5 * determinant(t1)$modulus[1] - 0.5 * rqs/sqs * (sum(diag(t1)) + sum((muBetaq - muBeta0) * solve(SigmaBeta0, muBetaq - muBeta0))) + log(w0/2) + S1(muPsi, sigmaPsi2, w0) + 0.5 * log(2 * pi * sigmaPsi2) - 0.5
 }
 
-VB = function(y, x, W, Z, muBeta0, SigmaBeta0, w0, r0s, s0s, r0t, s0t, muPsi0, muu0, Sigmau0, J, tol = 1.0e-04) {
+VB = function(y, x, W, Z, muBeta0, SigmaBeta0, w0, r0s, s0s, r0t, s0t, muu0, Sigmau0, J, tol = 1.0e-04) {
   n = length(y)
   if (!is.matrix(W)) W = as.matrix(W)
   if (!is.matrix(Z)) Z = as.matrix(Z)
@@ -90,7 +90,7 @@ VB = function(y, x, W, Z, muBeta0, SigmaBeta0, w0, r0s, s0s, r0t, s0t, muPsi0, m
   Sigmauq = Sigmau0
   muBetaq = muBeta0
   SigmaBetaq = SigmaBeta0
-  muPsi = muPsi0
+  muPsi = 0.1
   sigmaPsi2 = muPsi^2 / 100
   sigmaPsi = sqrt(sigmaPsi2)
   muThetaq = rep(0, J)
