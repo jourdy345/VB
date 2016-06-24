@@ -1,4 +1,6 @@
 require(fAsianOptions)
+# require(Rcpp)
+# require(RcppArmadillo)
 
 # Auxiliary functions
 intSigma <- function(p,q,r) {
@@ -61,13 +63,19 @@ DQj_sigmaPsi2 <- function(muPsi, sigmaPsi2, j) {
 }
 
 DS2_sigmaPsi2 <- function(muPsi, sigmaPsi2, w0, a, b, c, rqt_over_sqt, SigmaThetaq, muThetaq) {
-  J <- length(muThetaq)
-  -0.25 * J * (J + 1) / w0 * DS1_sigmaPsi2(muPsi, sigmaPsi2, w0) - 0.5 * E1overSigma(a, b, c) * rqt_over_sqt * sum((diag(SigmaThetaq) + muThetaq^2) * DQj_sigmaPsi2(muPsi, sigmaPsi2, 1:J))
+  J <- length(muThetaq) - 1
+  SigmaThetaqStar <- SigmaThetaq[-1,]
+  SigmaThetaqStar <- SigmaThetaqStar[,-1]
+  muThetaqStar <- muThetaq[-1]
+  -0.25 * J * (J + 1) / w0 * DS1_sigmaPsi2(muPsi, sigmaPsi2, w0) - 0.5 * E1overSigma(a, b, c) * rqt_over_sqt * sum((diag(SigmaThetaqStar) + muThetaqStar^2) * DQj_sigmaPsi2(muPsi, sigmaPsi2, 1:J))
 }
 
 DS2_muPsi <- function(muPsi, sigmaPsi2, w0, a, b, c, rqt_over_sqt, SigmaThetaq, muThetaq) {
-  J <- length(muThetaq)
-  -0.25 * J * (J + 1) / w0 * DS1_muPsi(muPsi, sigmaPsi2, w0) - 0.5 * E1overSigma(a, b, c) * rqt_over_sqt * sum((diag(SigmaThetaq) + muThetaq^2) * DQj_muPsi(muPsi, sigmaPsi2, 1:J))
+  J <- length(muThetaq) - 1
+  SigmaThetaqStar <- SigmaThetaq[-1,]
+  SigmaThetaqStar <- SigmaThetaqStar[,-1]
+  muThetaqStar <- muThetaq[-1]
+  -0.25 * J * (J + 1) / w0 * DS1_muPsi(muPsi, sigmaPsi2, w0) - 0.5 * E1overSigma(a, b, c) * rqt_over_sqt * sum((diag(SigmaThetaqStar) + muThetaqStar^2) * DQj_muPsi(muPsi, sigmaPsi2, 1:J))
 }
 
 MDarrayMult <- function(MDarray, VorM) {
@@ -103,7 +111,7 @@ DS2_SigmaThetaq <- function(varphi, muThetaq, SigmaThetaq, W, muYStarq, muBetaq,
   temp <- matrix(0, nrow = J+1, ncol = J+1)
   for (i in 1:n) {
     tempVec <- varphi[,,i] %*% muThetaq
-    temp <- temp + ( 6 * varphi[,,i] %*% SigmaThetaq %*% varphi[,,i] + 4 * tcrossprod(tempVec)) -2 * delta * (muYStarq[i] - sum(W[i,] * muBetaq) - delta * sum(varphi[,,i] * tcrossprod(muThetaq))) * varphi[,,i]
+    temp <- temp + (6 * varphi[,,i] %*% SigmaThetaq %*% varphi[,,i] + 4 * tcrossprod(tempVec)) -2 * delta * (muYStarq[i] - sum(W[i,] * muBetaq) - delta * sum(varphi[,,i] * tcrossprod(muThetaq))) * varphi[,,i]
   }
   -0.5 * E1overSigma2(a, b, c) * temp
 }
@@ -144,22 +152,23 @@ LB <- function(y, varphi, W, delta, SigmaBeta0, SigmaBetaq, muThetaq, SigmaTheta
 
 setVarPhi <- function(x, J) {
   n <- length(x)
-  varphi = array(0, dim = c(J+1, J+1, n))  
+  varphi <- array(0, dim = c(J+1, J+1, n))  
   for (i in 1:n) {
     varphi[1,1,i] <- x[i] - 0.5
-    for (j in 1:J+1) {
+    for (j in 2:(J+1)) {
       varphi[1,j,i] <- varphi[j,1,i] <- sqrt(2)/(pi * j) * sin(pi * j * x[i]) - sqrt(2)/((pi * j)^2) * (1 - cos(pi * j))
-      for (k in 2:J+1) {
+      for (k in j:(J+1)) {
         if (k == j) {
           varphi[j,j,i] <- sin(2*pi*j*x[i])/(2*pi*j) + x[i] - 0.5
         } else {
-          varphi[j,k,i] <- sin(pi*(j+k)*x[i])/(pi*(j+k)) + sin(pi*(j-k)*x[i])/(pi*(j-k)) - (1-cos(pi*(j+k)))/((pi*(j+k))^2) - (1-cos(pi*(j-k)))/((pi*(j-k))^2)
+          varphi[j,k,i] <- varphi[k,j,i] <- sin(pi*(j+k)*x[i])/(pi*(j+k)) + sin(pi*(j-k)*x[i])/(pi*(j-k)) - (1-cos(pi*(j+k)))/((pi*(j+k))^2) - (1-cos(pi*(j-k)))/((pi*(j-k))^2)
         }
       }
     }
   }
   varphi
 }
+
 
 VB <- function(y, x, W, J, delta, r0s, s0s, r0t, s0t, w0, muBeta0, SigmaBeta0, muTheta0, SigmaTheta0, sigma0, tol = 1.0e-04) {
   ## Set design matrix varphi
@@ -247,12 +256,17 @@ VB <- function(y, x, W, J, delta, r0s, s0s, r0t, s0t, w0, muBeta0, SigmaBeta0, m
     muPsi_old = muPsi
 
     temp = DS1_muPsi(muPsi, sigmaPsi2, w0) + DS2_muPsi(muPsi, sigmaPsi2, w0, a, b, c, rqt_over_sqt, SigmaThetaq, muThetaq)
-    while (sigmaPsi2_new < 0)
-    {
-      step_psi = 2/3 * step_psi
-      sigmaPsi2_new = 1 / (1/sigmaPsi2_old + step_psi * (1/sigmaPsi2_new - 1/sigmaPsi2_old))
+    while (sigmaPsi2_new < 0) {
+      step_psi <- 2/3 * step_psi
+      sigmaPsi2_new <- 1 / (1/sigmaPsi2_old + step_psi * (1/temp2 - 1/sigmaPsi2_old))
     }
-    sigmaPsi2 = sigmaPsi2_new
+    sigmaPsi2 <- sigmaPsi2_new
+    # while (sigmaPsi2_new < 0)
+    # {
+    #   step_psi = 2/3 * step_psi
+    #   sigmaPsi2_new = 1 / (1/sigmaPsi2_old + step_psi * (1/sigmaPsi2_new - 1/sigmaPsi2_old))
+    # }
+    # sigmaPsi2 = sigmaPsi2_new
     sigmaPsi = sqrt(sigmaPsi2)
     muPsi = muPsi + step_psi * sigmaPsi2 * temp
 
@@ -329,7 +343,7 @@ VB <- function(y, x, W, J, delta, r0s, s0s, r0t, s0t, w0, muBeta0, SigmaBeta0, m
       while (sigmaPsi2_new < 0)
       {
         step_psi = 2/3 * step_psi
-        sigmaPsi2_new = 1 / (1/sigmaPsi2_old + step_psi * (1/sigmaPsi2_new - 1/sigmaPsi2_old))
+        sigmaPsi2_new = 1 / (1/sigmaPsi2_old + step_psi * (1/temp2 - 1/sigmaPsi2_old))
       }
       sigmaPsi2 = sigmaPsi2_new
       sigmaPsi = sqrt(sigmaPsi2)

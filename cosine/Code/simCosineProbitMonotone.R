@@ -15,7 +15,7 @@ simCosineProbitMonotone <- function(FUN, J) {
   delta <- -1
   muTheta0 <- rep(0, J+1)
   SigmaTheta0 <- diag(1, J+1)
-  fit <- VB(y, x, W, J = 20, delta = delta, r0s = 0.01, s0s = 0.01, r0t = 0.01, s0t = 0.01, w0 = 1, muBeta0 = muBeta0, SigmaBeta0 = SigmaBeta0, muTheta0, SigmaTheta0, sigma0=1, tol = 1.0e-04)
+  fit <- VB(y, x, W, J = J, delta = delta, r0s = 0.01, s0s = 0.01, r0t = 0.01, s0t = 0.01, w0 = 1, muBeta0 = muBeta0, SigmaBeta0 = SigmaBeta0, muTheta0, SigmaTheta0, sigma0=1, tol = 1.0e-04)
   
   varphi <- setVarPhi(x, J)
   unknownFunction <- rep(0, n)
