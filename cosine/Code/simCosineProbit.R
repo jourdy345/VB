@@ -204,7 +204,7 @@ sim_cosine_probit = function(FUN, J, draw = TRUE, intercept = TRUE) {
   }
 
   varphi = sqrt(2)*cos(outer(x,pi*(1:J)))
-  unknown_f = varphi %*% fit$mutq + W %*% fit$sigbq
+  unknown_f = varphi %*% fit$mutq + W %*% fit$mubq
   res = sapply(fit$muystar, categorize)
   if (draw == TRUE) {
     # plot(y-mean(y) ~ xobs, xlab = 'index', ylab = 'observed/fitted', main = 'Simulation result', type = 'p')
