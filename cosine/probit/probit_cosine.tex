@@ -221,7 +221,7 @@ where
 \subsubsection{$\beta$}
 \begin{align*}
   \Sigma_{\beta}^{q} &\leftarrow \left(\frac{r_{q,\sigma}}{s_{q,\sigma}}{\Sigma_{\beta}^{0}}^{-1}+W'W \right)^{-1}\\
-  \mu_{\beta}^{q} &\leftarrow \frac{r_{q,\sigma}}{s_{q,\sigma}}\Sigma_{\beta}^{q}\left({\Sigma_{\beta}^{0}}^{-1}\mu_{\beta}^{0}+W'\left(\mu_{y^*}^{q}-\varphi_{J}\mu_{\theta}^{q}\right)\right)
+  \mu_{\beta}^{q} &\leftarrow \Sigma_{\beta}^{q}\left(\frac{r_{q,\sigma}}{s_{q,\sigma}}{\Sigma_{\beta}^{0}}^{-1}\mu_{\beta}^{0}+W'\left(\mu_{y^*}^{q}-\varphi_{J}\mu_{\theta}^{q}\right)\right)
 \end{align*}
 \subsubsection{$\psi$}
 \begin{align*}
@@ -485,7 +485,7 @@ Note that $\sum_{i=1}^{n}\Tr\left(w_{i}w_{i}'\Sigma_{\beta}^{q}\right)=\Tr\left(
 \subsubsection{LB}
   \begin{align*}
     \mathcal{L} &= -\frac{1}{2}\left\{\Tr\left(W'W\Sigma_{\beta}^{q}\right) + \delta^{2}\sum_{i=1}^{n}\left(2\Tr\left(\varphi_{J}^{a}\left(x_{i}\right)\Sigma_{\theta}^{q}\right)^{2} +4{\mu_{\theta}^{q}}'\varphi_{J}^{a}\left(x_{i}\right)\Sigma_{\theta}^{q}\varphi_{J}^{a}\left(x_{i}\right)\mu_{\theta}^{q}\right) \right\}\\
-    &\quad + \sum_{i=1}^{n}\ln\left(\Phi\left(\mu_{y_{i}^{*}}\right)^{y_{i}}\left(1-\Phi\left(\mu_{y_{i}^{*}}\right)\right)^{1-y_{i}}\right)\\
+    &\quad + \sum_{i=1}^{n}\left\{\ln\left(\Phi\left(\mu_{y_{i}^{*}}\right)^{y_{i}}\left(1-\Phi\left(\mu_{y_{i}^{*}}\right)\right)^{1-y_{i}}\right) + \left(-1\right)^{y_{i}}\frac{\mu_{y_{i}^{*}}\phi\left(\mu_{y_{i}^{*}}\right)}{2\Phi\left(\mu_{y_{i}^{*}}\right)^{y_{i}}\left(1-\Phi\left(\mu_{y_{i}^{*}}\right)\right)^{1-y_{i}}}\right\}\\
     &\quad -\frac{1}{2}\opn{E}\left(\frac{1}{\sigma}\right)\Tr\left\{\left(\Sigma_{\theta}^{q}+\mu_{\theta}^{q}{\mu_{\theta}^{q}}'\right)\opn{Dg}\left(\opn{E}\left(\Upsilon^{-1}\right)\right) \right\} +\frac{1}{2}\ln\left|\Sigma_{\theta}^{q}\right|\\
     &\quad -\frac{1}{2}\opn{E}\left(\frac{1}{\sigma^{2}}\right)\left\{\left(\mu_{\beta}^{q}-\mu_{\beta}^{0}\right)'{\Sigma_{\beta}^{0}}^{-1}\left(\mu_{\beta}^{q}-\mu_{\beta}^{0}\right) + \Tr\left({\Sigma_{\beta}^{0}}^{-1}\Sigma_{\beta}^{q}\right) \right\} + \frac{1}{2}\ln\left|\Sigma_{\beta}^{q}\right|\\
     &\quad +\frac{r_{0,\sigma}}{2}\ln\left(\frac{s_{0,\sigma}}{2}\right)-\ln\Gamma\left(\frac{r_{0,\sigma}}{2}\right) -\frac{s_{0,\sigma}}{2}\opn{E}\left(\frac{1}{\sigma^{2}}\right) -b\opn{E}\left(\frac{1}{\sigma}\right) +c\opn{E}\left(\frac{1}{\sigma^{2}}\right)\\
@@ -493,6 +493,7 @@ Note that $\sum_{i=1}^{n}\Tr\left(w_{i}w_{i}'\Sigma_{\beta}^{q}\right)=\Tr\left(
     &\quad +\ln\left(\frac{\omega_{0}}{2}\right) + S_{1}\left(\mu_{\psi}^{q}, {\sigma_{\psi}^{q}}^{2}\right) + \frac{1}{2}\ln\left(2\pi {\sigma_{\psi}^{q}}^{2}\right) -\frac{1}{2}
   \end{align*}
 \subsection{Some Calculation}
+\subsubsection{$\opn{E}\left(1/\sigma\right)$}
 As we were going through the variational approximation for the monotone shape restriction model, we have seen the term $\opn{E}\left(1/\sigma\right)$ and $\opn{E}\left(1/\sigma^{2}\right)$ several times and did not mention how to compute the integral. We give the mathematical consideration. Wolfram Alpha gives
 \begin{align*}
   \int_{0}^{\infty}x^{p}\exp\left(qx-rx^{2}\right)\,dx &= \frac{1}{2}r^{-p/2 -1}\left(q\Gamma\left(\frac{p}{2}+1\right)\, _{1}{F}_{1}\left(\frac{p}{2}+1;\frac{3}{2};\frac{q^{2}}{4r}\right)+\sqrt{r}\Gamma\left(\frac{p+1}{2}\right)\, _{1}{F}_{1}\left(\frac{p+1}{2};\frac{1}{2};\frac{q^{2}}{4r}\right)\right)
@@ -508,6 +509,21 @@ Now we can compute the expectations.
   \opn{E}\left(\frac{1}{\sigma}\right) &= \frac{\int_{0}^{\infty}\left(\frac{1}{\sigma}\right)^{p+3}\exp\left(\frac{q}{\sigma}-\frac{r}{\sigma^{2}}\right)\,d\sigma}{\int_{0}^{\infty} \left(\frac{1}{\sigma}\right)^{p+2}\exp\left(\frac{q}{\sigma}-\frac{r}{\sigma^{2}}\right)\,d\sigma}\\
   \opn{E}\left(\frac{1}{\sigma^{2}}\right) &= \frac{\int_{0}^{\infty}\left(\frac{1}{\sigma}\right)^{p+4}\exp\left(\frac{q}{\sigma}-\frac{r}{\sigma^{2}}\right)\,d\sigma}{\int_{0}^{\infty} \left(\frac{1}{\sigma}\right)^{p+2}\exp\left(\frac{q}{\sigma}-\frac{r}{\sigma^{2}}\right)\,d\sigma}
 \end{align*}
+\subsubsection{$\phi\left(x\right)/\Phi\left(x\right)$ when $x$ is very small}
+In the variational parameter update section, we encounter the following evaluation:
+\begin{align*}
+  \opn{E}\left(y_{i}^{*}\right) &= \mu_{y_{i}^{*}} + \frac{\phi\left(\mu_{y_{i}^{*}}\right)}{\Phi\left(\mu_{y_{i}^{*}}\right)^{y_{i}}\left(\Phi\left(\mu_{y_{i}^{*}}\right)-1\right)^{1-y_{i}}}\\
+  \mu_{y_{i}^{*}} &= w'_{i}\mu_{\beta}^{q} + \delta\Tr\left(\varphi_{J}^{a}\left(x_{i}\right)\Sigma_{\theta}^{q}\right) + \delta{\mu_{\theta}^{q}}'\varphi_{J}^{a}\left(x_{i}\right)\mu_{\theta}^{q}
+\end{align*}
+However, we must note that the expectation behaves extremely pathologically. For example,
+\begin{equation*}
+  \lim_{t\to-\infty} \frac{\exp\left(-t^{2}/2\right)}{\int_{-\infty}^{t}\exp\left(-x^{2}/2\right)\, dx} = \infty.
+\end{equation*}
+This becomes clearer when we look at the Laurent series of $\phi\left(t\right)/\Phi\left(t\right)$:
+\begin{equation*}
+  \frac{\exp\left(-t^{2}/2\right)}{\int_{-\infty}^{t}\exp\left(-x^{2}/2\right)\, dx} = -t-\frac{1}{t}+\frac{2}{t^{3}} -\frac{10}{t^{5}} + \mathcal{O}\left(\left(\frac{1}{t}\right)^{6}\right)\qquad \text{at $t=-\infty$}.
+\end{equation*}
+For such a reason, even for as fairly reasonably small a value as $-40$, \texttt{dnorm(-40)/pnorm(-40)=NaN}.
 \subsection{Corrections}
 \subsubsection{Original Paper: Linear model}
 There are some mistakes in the original paper so I provide the calculation. $S_{2}\left(\mu_{\theta}^{q}, \Sigma_{\theta}^{q}\right) = \opn{E}\left(\ln p\left(y|\beta, \theta_{J}, \sigma^{2}\right)\right)$. Let's do this.

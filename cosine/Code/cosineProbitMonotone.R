@@ -1,6 +1,7 @@
 require(fAsianOptions)
-# require(Rcpp)
-# require(RcppArmadillo)
+require(Rcpp)
+require(RcppArmadillo)
+sourceCpp('setVarPhi.cpp')
 
 # Auxiliary functions
 intSigma <- function(p,q,r) {
@@ -147,27 +148,53 @@ LB <- function(y, varphi, W, delta, SigmaBeta0, SigmaBetaq, muThetaq, SigmaTheta
   J <- dim(varphi)[1] - 1
   SigmaBeta0_inv <- solve(SigmaBeta0)
   upsilon <- c(1/sigma0, rqt_half/sqt_half * Qj(muPsi, sigmaPsi2, 1:J))
-  sum(crossprod(W) * SigmaBetaq) + delta^2 * sumVarQuad(varphi, muThetaq, SigmaThetaq) + sum(log(pnorm(muYStar)^y * (1 - pnorm(muYStar))^(1-y))) - 0.5 * (E1overSigma(a, b, c) * sum((diag(SigmaThetaq) + c(crossprod(muThetaq))) * upsilon) - determinant(SigmaThetaq)$modulus[1] - determinant(SigmaBetaq)$modulus[1] + E1overSigma2(a, b, c) * (sum(SigmaBeta0_inv * tcrossprod(muBetaq - muBeta0)) + sum(SigmaBeta0_inv * SigmaBetaq)) - log(2*pi*sigmaPsi2) + 1) + log(w0/2) + S1(muPsi, sigmaPsi2, w0) + r0s_half * log(s0s_half) - lgamma(r0s_half) - s0s_half * E1overSigma2(a, b, c) - b * E1overSigma(a, b, c) + c * E1overSigma2(a, b, c) - r0t_half * log(sqt_half) + (r0t_half - rqt_half) * digamma(rqt_half) + (1 - s0t_half/sqt_half)*rqt_half + lgamma(rqt_half)
+  -0.5 * (sum(crossprod(W) * SigmaBetaq) + delta^2 * sumVarQuad(varphi, muThetaq, SigmaThetaq)) + sum(log(pnorm(muYStar)^y * (1 - pnorm(muYStar))^(1-y))) + sum((-1)^y * muYStar * dnorm(muYStar) / (2*pnorm(muYStar)^y *(1-pnorm(muYStar))^(1-y)))  - 0.5 * ((E1overSigma(a, b, c) * sum((diag(SigmaThetaq) + muThetaq^2) * upsilon)) - determinant(SigmaThetaq)$modulus[1] - determinant(SigmaBetaq)$modulus[1] + E1overSigma2(a, b, c) * (sum(SigmaBeta0_inv * tcrossprod(muBetaq - muBeta0)) + sum(SigmaBeta0_inv * SigmaBetaq)) - log(2*pi*sigmaPsi2) + 1) + log(w0/2) + S1(muPsi, sigmaPsi2, w0) + r0s_half * log(s0s_half) - lgamma(r0s_half) - s0s_half * E1overSigma2(a, b, c) - b * E1overSigma(a, b, c) + c * E1overSigma2(a, b, c) + log(intSigma(2*a-2, b, c)) - r0t_half * log(sqt_half) + (r0t_half - rqt_half) * digamma(rqt_half) + (1 - s0t_half/sqt_half)*rqt_half + lgamma(rqt_half)
 }
 
-setVarPhi <- function(x, J) {
-  n <- length(x)
-  varphi <- array(0, dim = c(J+1, J+1, n))  
-  for (i in 1:n) {
-    varphi[1,1,i] <- x[i] - 0.5
-    for (j in 2:(J+1)) {
-      varphi[1,j,i] <- varphi[j,1,i] <- sqrt(2)/(pi * j) * sin(pi * j * x[i]) - sqrt(2)/((pi * j)^2) * (1 - cos(pi * j))
-      for (k in j:(J+1)) {
-        if (k == j) {
-          varphi[j,j,i] <- sin(2*pi*j*x[i])/(2*pi*j) + x[i] - 0.5
-        } else {
-          varphi[j,k,i] <- varphi[k,j,i] <- sin(pi*(j+k)*x[i])/(pi*(j+k)) + sin(pi*(j-k)*x[i])/(pi*(j-k)) - (1-cos(pi*(j+k)))/((pi*(j+k))^2) - (1-cos(pi*(j-k)))/((pi*(j-k))^2)
-        }
-      }
-    }
-  }
-  varphi
-}
+# setVarPhi <- function(x, J) {
+#   n <- length(x)
+#   varphi <- array(0, dim = c(J+1, J+1, n))  
+#   for (i in 1:n) {
+#     varphi[1,1,i] <- x[i] - 0.5
+#     for (j in 2:(J+1)) {
+#       varphi[1,j,i] <- varphi[j,1,i] <- sqrt(2)/(pi * j) * sin(pi * j * x[i]) - sqrt(2)/((pi * j)^2) * (1 - cos(pi * j))
+#       for (k in j:(J+1)) {
+#         if (k == j) {
+#           varphi[j,j,i] <- sin(2*pi*j*x[i])/(2*pi*j) + x[i] - 0.5
+#         } else {
+#           varphi[j,k,i] <- varphi[k,j,i] <- sin(pi*(j+k)*x[i])/(pi*(j+k)) + sin(pi*(j-k)*x[i])/(pi*(j-k)) - (1-cos(pi*(j+k)))/((pi*(j+k))^2) - (1-cos(pi*(j-k)))/((pi*(j-k))^2)
+#         }
+#       }
+#     }
+#   }
+#   varphi
+# }
+
+# setVarPhi2 <- function(x.grid, J) {
+#   n.grid <- length(x.grid)
+#   dmatsfull<-array(0,dim=c(n.grid,J+1,J+1))
+#   dmatsfull[,1,1]<-x.grid-0.5
+#   temparg1<-outer(x.grid,(1:J))
+#   temparg2<-matrix(rep((1:J),each=n.grid),nrow=n.grid,byrow=FALSE)
+#   dmatsfull[,1,(2:(J+1))]<-sqrt(2)/(pi*temparg2)*sin(pi*temparg1)-sqrt(2)/((pi*temparg2)^2)*(1-cos(pi*temparg2))
+#   dmatsfull[,(2:(J+1)),1]<-dmatsfull[,1,(2:(J+1))]
+#   temparg1<-outer((1:J),(1:J),'+')
+#   temparg2<-outer(rep(1,times=n.grid),temparg1)
+#   temparg1<-outer(x.grid,temparg1)
+#   dmatsfull[,(2:(J+1)),(2:(J+1))]<-sin(pi*temparg1)/(pi*temparg2)-(1-cos(pi*temparg2))/(pi*temparg2)^2
+#   temparg1<-outer((1:J),(1:J),'-')
+#   temparg2<-outer(rep(1,times=n.grid),temparg1)
+#   temparg1<-outer(x.grid,temparg1)
+#   dmatsfull[,(2:(J+1)),(2:(J+1))]<-dmatsfull[,(2:(J+1)),(2:(J+1))]+sin(pi*temparg1)/(pi*temparg2)-(1-cos(pi*temparg2))/(pi*temparg2)^2
+#   temparg1<-outer(x.grid,(1:J))
+#   temparg2<-outer(rep(1,times=n.grid),(1:J))
+#   temparg3<-outer(x.grid,rep(1,times=J))
+#   tempmat<-sin(2*pi*temparg1)/(2*pi*temparg2)+temparg3-0.5
+#   for(j in 2:(J+1)) {
+#     dmatsfull[,j,j]<-tempmat[,(j-1)]
+#   }
+#   dmatsfull
+# }
 
 
 VB <- function(y, x, W, J, delta, r0s, s0s, r0t, s0t, w0, muBeta0, SigmaBeta0, muTheta0, SigmaTheta0, sigma0, tol = 1.0e-04) {
@@ -188,23 +215,23 @@ VB <- function(y, x, W, J, delta, r0s, s0s, r0t, s0t, w0, muBeta0, SigmaBeta0, m
 
   ## Initialize variational parameters
   rqt <- r0t + J
-  sqt <- s0t
+  sqt <- s0t + 100
   rqt_half <- 0.5 * rqt
   sqt_half <- 0.5 * sqt
   rqt_over_sqt <- rqt/sqt
-  muBetaq <- rep(0, p)
-  SigmaBetaq <- diag(1, p)
-  muThetaq <- rep(1, J+1)
-  SigmaThetaq <- diag(1, J+1)
-  SigmaThetaOldInv <- solve(SigmaThetaq)
+  muBetaq <- rep(0.1, p)
+  SigmaBetaq <- diag(0.1, p)
+  muThetaq <- rep(0.1, J+1)
+  SigmaThetaq <- diag(0.1, J+1)
+  SigmaThetaOldInv <- diag(J+1)
   muPsi <- 1
-  sigmaPsi2 <- 0.01
+  sigmaPsi2 <- 1/(J*J)
   sigmaPsi <- sqrt(sigmaPsi2)
-  muYStar <- rep(0, n)
-  muYStarq <- rep(0, n)
+  muYStar <- rep(0.1, n)
+  muYStarq <- rep(0.1, n)
   a <- 0.25 * (J+1) + r0s_half + 0.5 * p + 1
-  b <- 1
-  c <- 1
+  b <- 0.01
+  c <- 0.01
   lbold <- LB(y, varphi, W, delta, SigmaBeta0, SigmaBetaq, muThetaq, SigmaThetaq, muYStar, a, b, c, sigma0, muPsi, sigmaPsi2, w0, muBetaq, muBeta0, r0t_half, s0t_half, r0s_half, s0s_half, rqt_half, sqt_half)
   lbnew <- 0
   dif <- tol + 1
@@ -270,22 +297,6 @@ VB <- function(y, x, W, J, delta, r0s, s0s, r0t, s0t, w0, muBeta0, SigmaBeta0, m
     sigmaPsi = sqrt(sigmaPsi2)
     muPsi = muPsi + step_psi * sigmaPsi2 * temp
 
-    # Update y*
-    for (i in 1:n) {
-      muYStar[i] <- sum(W[i,] * muBetaq) + delta * sum(varphi[,,i] * SigmaThetaq) + delta * sum(varphi[,,i] * tcrossprod(muThetaq))
-      # cat('delta * sum(varphi[,,i] * SigmaThetaq): ', delta * sum(varphi[,,i] * SigmaThetaq), '\n')
-      # cat('delta * sum(varphi[,,i] * tcrossprod(muThetaq): ', delta * sum(varphi[,,i] * tcrossprod(muThetaq)), '\n')
-    }
-    muYStarq <- muYStar + dnorm(muYStar)/((pnorm(muYStar)^y)*(pnorm(muYStar)-1)^(1-y))
-    cat('sum of muYStarq: ', sum(muYStarq), '\n')
-    # Update beta
-    SigmaBetaq <- solve(E1overSigma2(a, b, c) * SigmaBeta0_inv + WtW)
-
-    tempBeta <- rep(0, p)
-    for (i in 1:n) {
-      tempBeta <- tempBeta + (sum(varphi[,,i] * SigmaThetaq) + sum(varphi[,,i] * tcrossprod(muThetaq))) * W[i]
-    }
-    muBetaq <- SigmaBetaq %*% (E1overSigma2(a, b, c) * SigmaBeta0_inv_muBeta0 + c(crossprod(W, muYStarq)) - delta * tempBeta)
     # cat("Trace of SigmaBetaq: ", sum(diag(SigmaBetaq)), '\n')
     # cat("Sum of squared muBetaq: ", sum(muBetaq^2), '\n')
     # cat("E1overSigma2: ", E1overSigma2(a, b, c), '\n')
@@ -306,10 +317,32 @@ VB <- function(y, x, W, J, delta, r0s, s0s, r0t, s0t, w0, muBeta0, SigmaBeta0, m
     b <- -0.5 * sum((diag(SigmaThetaq) + muThetaq^2) * c(1/sigma0, rqt_over_sqt * Qj(muPsi, sigmaPsi2, 1:J)))
     c <- 0.5 * (s0s + sum(SigmaBeta0_inv * tcrossprod(muBetaq - muBeta0)) + sum(SigmaBeta0_inv * SigmaBetaq))
     cat("b: ", b, ", c: ", c, '\n')
+    # cat('muBetaq: ', muBetaq, '\n')
+    # cat('sum(varphi[,,1] * SigmaThetaq): ', sum(varphi[,,1] * SigmaThetaq), '\n')
+    # cat('sum(varphi[,,1] * tcrossprod(muThetaq)): ', sum(varphi[,,1] * tcrossprod(muThetaq)), '\n')
+    # Update y*
+    for (i in 1:n) {
+      muYStar[i] <- sum(W[i,] * muBetaq) + delta * sum(varphi[,,i] * SigmaThetaq) + delta * sum(varphi[,,i] * tcrossprod(muThetaq))
+      cat('muYStar: ', muYStar[i], '\n')
+      # cat('delta * sum(varphi[,,i] * SigmaThetaq): ', delta * sum(varphi[,,i] * SigmaThetaq), '\n')
+      # cat('delta * sum(varphi[,,i] * tcrossprod(muThetaq): ', delta * sum(varphi[,,i] * tcrossprod(muThetaq)), '\n')
+    }
+    plot(density(muYStar))
+    muYStarq <- muYStar + dnorm(muYStar)/((pnorm(muYStar)^y)*(pnorm(muYStar)-1)^(1-y))
+    cat('sum of muYStarq: ', sum(muYStarq), '\n')
+    stop('stopped')
+    # Update beta
+    SigmaBetaq <- solve(E1overSigma2(a, b, c) * SigmaBeta0_inv + WtW)
+
+    tempBeta <- rep(0, p)
+    for (i in 1:n) {
+      tempBeta <- tempBeta + (sum(varphi[,,i] * SigmaThetaq) + sum(varphi[,,i] * tcrossprod(muThetaq))) * W[i]
+    }
+    muBetaq <- SigmaBetaq %*% (E1overSigma2(a, b, c) * SigmaBeta0_inv_muBeta0 + c(crossprod(W, muYStarq)) - delta * tempBeta)
 
     lbnew <- LB(y, varphi, W, delta, SigmaBeta0, SigmaBetaq, muThetaq, SigmaThetaq, muYStar, a, b, c, sigma0, muPsi, sigmaPsi2, w0, muBetaq, muBeta0, r0t_half, s0t_half, r0s_half, s0s_half, rqt_half, sqt_half)
     diff <- lbnew - lbold
-    if (diff < 0) {
+    while (diff < 0) {
       # Update theta
 
       ## SigmaTheta
@@ -387,7 +420,7 @@ VB <- function(y, x, W, J, delta, r0s, s0s, r0t, s0t, w0, muBeta0, SigmaBeta0, m
       diff <- lbnew - lbnew
     }
     dif <- (lbnew - lbold)/abs(lbnew)
-    lbold = lbnew
+    lbold <- lbnew
     lbrecord <- c(lbrecord, lbnew)
     cat("count: ", count, ", lbnew: ", lbnew, ", dif: ", dif, '\n')
   }

@@ -120,7 +120,7 @@ sim_cosine_probit = function(FUN, J, draw = TRUE, intercept = TRUE) {
 
       # Update beta
       sigbq = solve(WtW + rsoverssq * sigb0_inv)
-      mubq = rsoverssq * sigbq %*% (sigb0_inv_sigbq + crossprod(W, muystar - varphi %*% mutq))
+      mubq = sigbq %*% (rsoverssq * sigb0_inv_sigbq + crossprod(W, muystar - varphi %*% mutq))
 
       # Update muystar
       muystar_tmp = W %*% mubq + varphi %*% mutq
@@ -161,7 +161,7 @@ sim_cosine_probit = function(FUN, J, draw = TRUE, intercept = TRUE) {
 
         # Update beta
         sigbq = solve(rsoverssq * (WtW + sigb0_inv))
-        mubq = rsoverssq * sigbq %*% (sigb0_inv_sigbq + crossprod(W, muystar - varphi %*% mutq))
+        mubq = sigbq %*% (rsoverssq * sigb0_inv_sigbq + crossprod(W, muystar - varphi %*% mutq))
 
         # Update muystar
         muystar_tmp = W %*% mubq + varphi %*% mutq
