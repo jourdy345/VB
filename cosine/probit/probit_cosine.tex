@@ -85,6 +85,21 @@ Department of Statistics \\
 Korea University}
 
 \maketitle
+\section{Criteo Dataset}
+\subsection{File descriptions}
+\begin{itemize}
+  \item \textbf{train.csv} - The training set consists of a portion of Criteo's traffic over a period of 7 days. Each row corresponds to a display ad served by Criteo. Positive (clicked) and negatives (non-clicked) examples have both been subsampled at different rates in order to reduce the dataset size. The examples are chronologically ordered.
+  \item \textbf{test.csv} - The test set is computed in the same way as the training set but for events on the day following the training period.
+  \item \textbf{random\_submission.csv} - A sample submission file in the correct format.
+\end{itemize}
+\subsection{Data fields}
+\begin{itemize}
+  \item \textbf{Label} - Target variable that indicates if an ad was clicked (1) or not (0).
+  \item \textbf{I1 - I13} - A total of 13 columns of integer features (mostly count features).
+  \item \textbf{C1 - C26} - A total of 26 columns of categorical features. The values of these features have been hashed onto 32 bits for anonymization purposes.
+\end{itemize}
+
+The semantics of the features is undisclosed. When a value is missing, the field is empty.
 \section{Normal}
 \subsection{Model specifications}
 \begin{align*}
@@ -184,23 +199,36 @@ where
 \end{align*}
 \subsubsection{LB: $\opn{E}\left[\ln p\left(\tau^{2}\right)\right]+\opn{H}\left[\tau^{2}\right]$}
 \begin{align*}
-  \opn{E}\left[\ln p\left(\tau^{2}\right)\right]+\opn{H}\left[\tau^{2}\right] &= \frac{r_{0,\tau}}{2}\ln \frac{s_{0,\tau}}{2} -\ln\Gamma\left(\frac{r_{0,\tau}}{2}\right) +\left(\frac{r_{0,\tau}}{2}+1\right)\left\{\opn{di}\left(\frac{r_{q,\tau}}{2}\right)-\ln\left(\frac{s_{q,\tau}}{2}\right) \right\} -\frac{s_{0,\tau}}{2}\frac{r_{q,\tau}}{s_{q,\tau}}\\
-  &\quad +\frac{r_{q,\tau}}{2} +\ln\frac{s_{q,\tau}}{2} +\ln\Gamma\left(\frac{r_{q,\tau}}{2}\right) -\left(1+\frac{r_{q,\tau}}{2}\right)\opn{di}\left(\frac{r_{q,\tau}}{2}\right)
+  \opn{E}\left[\ln p\left(\tau^{2}\right)\right]+\opn{H}\left[\tau^{2}\right] &= \frac{r_{0,\tau}}{2}\ln\left(\frac{s_{0,\tau}}{2}\right) - \ln\Gamma\left(\frac{r_{0,\tau}}{2}\right) + \left(\frac{r_{0,\tau}}{2} - \frac{r_{q,\tau}}{2}\right)\opn{di}\left(\frac{r_{q,\tau}}{2}\right) - \left(\frac{r_{0,\tau}}{2}+1\right)\ln\left(\frac{s_{q,\tau}}{2}\right)\\
+  &\quad -\frac{s_{0,\tau}}{2}\frac{r_{q,\tau}}{s_{q,\tau}} + \frac{r_{q,\tau}}{2} + \ln\left(\frac{s_{q,\tau}}{2}\right) + \ln\Gamma\left(\frac{r_{q,\tau}}{2}\right)
 \end{align*}
 \subsubsection{LB: $\opn{E}\left[\ln p\left(\sigma^{2}\right)\right]+\opn{H}\left[\sigma^{2}\right]$}
 \begin{align*}
-  \opn{E}\left[\ln p\left(\sigma^{2}\right)\right]+\opn{H}\left[\sigma^{2}\right] &= \frac{r_{0,\sigma}}{2}\ln \frac{s_{0,\sigma}}{2} -\ln\Gamma\left(\frac{r_{0,\sigma}}{2}\right) +\left(\frac{r_{0,\sigma}}{2}+1\right)\left\{\opn{di}\left(\frac{r_{q,\sigma}}{2}\right)-\ln\left(\frac{s_{q,\sigma}}{2}\right) \right\} -\frac{s_{0,\sigma}}{2}\frac{r_{q,\sigma}}{s_{q,\sigma}}\\
-  &\quad +\frac{r_{q,\sigma}}{2} +\ln\frac{s_{q,\sigma}}{2} +\ln\Gamma\left(\frac{r_{q,\sigma}}{2}\right) -\left(1+\frac{r_{q,\sigma}}{2}\right)\opn{di}\left(\frac{r_{q,\sigma}}{2}\right)
+  \opn{E}\left[\ln p\left(\sigma^{2}\right)\right]+\opn{H}\left[\sigma^{2}\right] &= \frac{r_{0,\sigma}}{2}\ln\left(\frac{s_{0,\sigma}}{2}\right) - \ln\Gamma\left(\frac{r_{0,\sigma}}{2}\right) + \left(\frac{r_{0,\sigma}}{2} - \frac{r_{q,\sigma}}{2}\right)\opn{di}\left(\frac{r_{q,\sigma}}{2}\right) - \left(\frac{r_{0,\sigma}}{2}+1\right)\ln\left(\frac{s_{q,\sigma}}{2}\right)\\
+  &\quad -\frac{s_{0,\sigma}}{2}\frac{r_{q,\sigma}}{s_{q,\sigma}} + \frac{r_{q,\sigma}}{2} + \ln\left(\frac{s_{q,\sigma}}{2}\right) + \ln\Gamma\left(\frac{r_{q,\sigma}}{2}\right)
 \end{align*}
 \subsubsection{LB: $\opn{E}\left[\ln p\left(\beta\right)\right]+\opn{H}\left[\beta\right] $}
 \begin{align*}
-  \opn{E}\left[\ln p\left(\beta\right)\right]+\opn{H}\left[\beta\right] &= \frac{p+1}{2} +\frac{1}{2}\left(\opn{di}\left(\frac{r_{q,\sigma}}{2}\right)-\ln\left(\frac{s_{q,\sigma}}{2}\right)\right) +\frac{1}{2}\ln\left|{\Sigma_{\beta}^{0}}^{-1}\Sigma_{\beta}^{q}\right|\\
+  \opn{E}\left[\ln p\left(\beta\right)\right]+\opn{H}\left[\beta\right] &= \frac{p+1}{2} +\frac{p+1}{2}\left(\opn{di}\left(\frac{r_{q,\sigma}}{2}\right)-\ln\left(\frac{s_{q,\sigma}}{2}\right)\right) +\frac{1}{2}\ln\left|{\Sigma_{\beta}^{0}}^{-1}\Sigma_{\beta}^{q}\right|\\
   &\quad -\frac{1}{2}\frac{r_{q,\sigma}}{s_{q,\sigma}}\left\{\Tr\left({\Sigma_{\beta}^{0}}^{-1}\Sigma_{\beta}^{q}\right)+\left(\mu_{\beta}^{q}-\mu_{\beta}^{0}\right)'{\Sigma_{\beta}^{0}}^{-1}\left(\mu_{\beta}^{q}-\mu_{\beta}^{0}\right) \right\}
 \end{align*}
 \subsubsection{LB: $\opn{E}\left[\ln p\left(\psi\right)\right] +\opn{H}\left[\psi\right]$}
 \begin{align*}
   \opn{E}\left[\ln p\left(\psi\right)\right] +\opn{H}\left[\psi\right] &= \ln\frac{\omega_{0}}{2} -\omega_{0}\left\{\sigma_{\psi}^{q}\sqrt{\frac{2}{\pi}} \exp\left(-\frac{{\mu_{\psi}^{q}}^{2}}{2{\sigma_{\psi}^{q}}^{2}}\right) + \mu_{\psi}^{q}\left(1-2\Phi\left(-\frac{\mu_{\psi}^{q}}{\sigma_{\psi}^{q}}\right)\right) \right\}\\
   &\quad +\frac{1}{2}\ln\left(2\pi {\sigma_{\psi}^{q}}^{2}\right) -\frac{1}{2}
+\end{align*}
+\subsubsection{LB}
+\begin{align*}
+  \mathcal{L} &= -\frac{1}{2}\left(\Tr\left(W'W\Sigma_{\beta}^{q}\right) + \Tr\left(\varphi_{J}'\varphi_{J}\Sigma_{\theta}^{q}\right)\right) + \sum_{i=1}^{n}\ln\left(\left\{\Phi\left(w_{i}'\mu_{\beta}^{q} + \varphi_{i}'\mu_{\theta}^{q}\right)\right\}^{y_{i}}\left\{1- \Phi\left(w_{i}'\mu_{\beta}^{q} + \varphi_{i}'\mu_{\theta}^{q}\right) \right\}^{1-y_{i}} \right)\\
+  &\quad -\frac{J}{2}\left\{\ln\left(2\pi\right) -\left(\opn{di}\left(\frac{r_{q,\sigma}}{2}\right)-\ln\left(\frac{s_{q,\sigma}}{2}\right)\right)-\left(\opn{di}\left(\frac{s_{q,\tau}}{2}\right)-\ln\left(\frac{s_{q,\tau}}{2}\right)\right) \right\}\\
+  &\quad S_{2}\left(\mu_{\psi}^{q},{\sigma_{\psi}^{q}}^{2}\right) + \frac{J}{2}\left(1+\ln\left(2\pi\right)\right) + \frac{1}{2}\ln\left|\Sigma_{\theta}^{q}\right|\\
+  &\quad +\frac{r_{0,\tau}}{2}\ln\left(\frac{s_{0,\tau}}{2}\right) - \ln\Gamma\left(\frac{r_{0,\tau}}{2}\right) + \left(\frac{r_{0,\tau}}{2} - \frac{r_{q,\tau}}{2}\right)\opn{di}\left(\frac{r_{q,\tau}}{2}\right) -\left(\frac{r_{0,\tau}}{2}+1\right)\ln\left(\frac{s_{q,\tau}}{2}\right)\\
+  &\quad -\frac{s_{0,\tau}}{2}\frac{r_{q,\tau}}{s_{q,\tau}} + \frac{r_{q,\tau}}{2} + \ln\left(\frac{s_{q,\tau}}{2}\right)  + \ln\Gamma\left(\frac{r_{q,\tau}}{2}\right)\\
+  &\quad +\frac{r_{0,\sigma}}{2}\ln\left(\frac{s_{0,\sigma}}{2}\right) - \ln\Gamma\left(\frac{r_{0,\sigma}}{2}\right) + \left(\frac{r_{0,\sigma}}{2} - \frac{r_{q,\sigma}}{2}\right)\opn{di}\left(\frac{r_{q,\sigma}}{2}\right) -\left(\frac{r_{0,\sigma}}{2}+1\right)\ln\left(\frac{s_{q,\sigma}}{2}\right)\\
+  &\quad -\frac{s_{0,\sigma}}{2}\frac{r_{q,\sigma}}{s_{q,\sigma}} + \frac{r_{q,\sigma}}{2} + \ln\left(\frac{s_{q,\sigma}}{2}\right)  + \ln\Gamma\left(\frac{r_{q,\sigma}}{2}\right)\\
+  &\quad +\frac{p+1}{2} + \frac{p+1}{2}\left(\opn{di}\left(\frac{r_{q,\sigma}}{2}\right)-\ln\left(\frac{s_{q,\sigma}}{2}\right)\right) + \frac{1}{2}\ln\left|{\Sigma_{\beta}^{0}}^{-1}\Sigma_{\beta}^{q}\right|\\
+  &\quad -\frac{1}{2}\frac{r_{q,\sigma}}{s_{q,\sigma}}\left\{\Tr\left({\Sigma_{\beta}^{0}}^{-1}\Sigma_{\beta}^{q}\right) + \left(\mu_{\beta}^{q}-\mu_{\beta}^{0}\right)'{\Sigma_{\beta}^{0}}^{-1}\left(\mu_{\beta}^{q}-\mu_{\beta}^{0}\right) \right\}\\
+  &\quad +\ln\left(\frac{\omega_{0}}{2}\right) + S_{1}\left(\mu_{\psi}^{q},{\sigma_{\psi}^{q}}^{2}\right) + \frac{1}{2}\ln\left(2\pi{\sigma_{\psi}^{q}}^{2}\right) -\frac{1}{2}
 \end{align*}
 \subsection{Update}
 \subsubsection{$\theta_{j}$}
@@ -421,13 +449,13 @@ To distinguish the mean of the normal distribution and the mean of the truncated
   \end{align*}
 Therefore, $q\left(\beta\right) = \mathcal{N}\left(\mu_{\beta}^{q}, \Sigma_{\beta}^{q}\right)$ where
 \begin{align*}
-  \Sigma_{\beta}^{q} &= \left(\opn{E}\left(\frac{1}{\sigma^{2}}\right){\Sigma_{\beta}^{0}}^{-1} + W'W\right)^{-1}\\
-  \mu_{\beta}^{q} &= \Sigma_{\beta}^{q}\left(\opn{E}\left(\frac{1}{\sigma^{2}}\right) {\Sigma_{\beta}^{0}}^{-1}\mu_{\beta}^{0} +W'\mu_{y^{*}}^{q} -\delta\sum_{i=1}^{n}w_{i}\left(\Tr\left(\varphi_{J}^{a}\left(x_{i}\right)\Sigma_{\theta}^{q}\right) + {\mu_{\theta}^{q}}'\varphi_{J}^{a}\left(x_{i}\right)\mu_{\theta}^{q}\right)\right)
+  \Sigma_{\beta}^{q} &\leftarrow \left(\opn{E}\left(\frac{1}{\sigma^{2}}\right){\Sigma_{\beta}^{0}}^{-1} + W'W\right)^{-1}\\
+  \mu_{\beta}^{q} &\leftarrow \Sigma_{\beta}^{q}\left(\opn{E}\left(\frac{1}{\sigma^{2}}\right) {\Sigma_{\beta}^{0}}^{-1}\mu_{\beta}^{0} +W'\mu_{y^{*}}^{q} -\delta\sum_{i=1}^{n}w_{i}\left(\Tr\left(\varphi_{J}^{a}\left(x_{i}\right)\Sigma_{\theta}^{q}\right) + {\mu_{\theta}^{q}}'\varphi_{J}^{a}\left(x_{i}\right)\mu_{\theta}^{q}\right)\right)
 \end{align*}
 \subsubsection{$\tau^{2}$}
   \begin{align*}
-    r_{q,\tau} &= r_{0,\tau} + J\\
-    s_{q,\tau} &= s_{0,\tau} + \opn{E}\left(\frac{1}{\sigma}\right)\Tr\left(\left(\Sigma_{\theta}^{q*} + \mu_{\theta}^{q*}{\mu_{\theta}^{q*}}'\right)\opn{Dg}\left(Q_{1:J}\right)\right)
+    r_{q,\tau} &\leftarrow r_{0,\tau} + J\\
+    s_{q,\tau} &\leftarrow s_{0,\tau} + \opn{E}\left(\frac{1}{\sigma}\right)\Tr\left(\left(\Sigma_{\theta}^{q*} + \mu_{\theta}^{q*}{\mu_{\theta}^{q*}}'\right)\opn{Dg}\left(Q_{1:J}\right)\right)
   \end{align*}
 \subsubsection{$\sigma^{2}$}
   \begin{align*}
@@ -440,9 +468,9 @@ Therefore, $q\left(\beta\right) = \mathcal{N}\left(\mu_{\beta}^{q}, \Sigma_{\bet
   \end{align*}
   where
   \begin{align*}
-    a &= \frac{J+1}{4} + \frac{r_{0,\sigma}+p+1}{2} + 1\\
-    b &= -\frac{1}{2}\Tr\left\{\left(\Sigma_{\theta}^{q}+\mu_{\theta}^{q}{\mu_{\theta}^{q}}'\right)\opn{Dg}\left(\opn{E}\left(\Upsilon^{-1}\right)\right) \right\}\\
-    c &= \frac{1}{2}\left\{s_{0,\sigma} + \left(\mu_{\beta}^{q}-\mu_{\beta}^{0}\right)'{\Sigma_{\beta}^{0}}^{-1}\left(\mu_{\beta}^{q}-\mu_{\beta}^{0}\right)+\Tr\left({\Sigma_{\beta}^{0}}^{-1}\Sigma_{\beta}^{q}\right) \right\}
+    a &\leftarrow \frac{J+1}{4} + \frac{r_{0,\sigma}+p+1}{2} + 1\\
+    b &\leftarrow -\frac{1}{2}\Tr\left\{\left(\Sigma_{\theta}^{q}+\mu_{\theta}^{q}{\mu_{\theta}^{q}}'\right)\opn{Dg}\left(\opn{E}\left(\Upsilon^{-1}\right)\right) \right\}\\
+    c &\leftarrow \frac{1}{2}\left\{s_{0,\sigma} + \left(\mu_{\beta}^{q}-\mu_{\beta}^{0}\right)'{\Sigma_{\beta}^{0}}^{-1}\left(\mu_{\beta}^{q}-\mu_{\beta}^{0}\right)+\Tr\left({\Sigma_{\beta}^{0}}^{-1}\Sigma_{\beta}^{q}\right) \right\}
   \end{align*}
 and $\Upsilon = \left(\sigma_{0}^{2}, \tau^{2}e^{-\gamma}, \ldots , \tau^{2}e^{-J\gamma} \right)'$ which gives $\opn{E}\left(\Upsilon^{-1}\right)=\left(1/\sigma_{0}^{2}, r_{q,\tau}/s_{q,\tau}\opn{E}\left(\Gamma^{-1}\right)\right)$. Lastly, $\opn{E}\left(\Gamma^{-1}\right)=Q_{1:J}$.
 \subsubsection{$\psi$}
@@ -471,7 +499,8 @@ Note that $\sum_{i=1}^{n}\Tr\left(w_{i}w_{i}'\Sigma_{\beta}^{q}\right)=\Tr\left(
 \end{align*}
 \subsubsection{$\opn{E}\left(\ln p\left(\tau^{2}\right)\right) + \opn{H}\left(\tau^{2}\right)$}
   \begin{align*}
-    \opn{E}\left(\ln p\left(\tau^{2}|\text{rest}\right)\right) + \opn{H}\left(\tau^{2}\right) &= -\frac{r_{0,\tau}}{2}\ln \left(\frac{s_{q,\tau}}{2}\right) + \left(\frac{r_{0,\tau}}{2}-\frac{r_{q,\tau}}{2}\right)\opn{di}\left(\frac{r_{q,\tau}}{2}\right) + \left(1-\frac{s_{0,\tau}}{s_{q,\tau}}\right)\frac{r_{q,\tau}}{2} + \ln \Gamma\left(\frac{r_{q,\tau}}{2}\right)
+    \opn{E}\left(\ln p\left(\tau^{2}|\text{rest}\right)\right) + \opn{H}\left(\tau^{2}\right) &= -\frac{r_{0,\tau}}{2}\ln \left(\frac{s_{q,\tau}}{2}\right) + \left(\frac{r_{0,\tau}}{2}-\frac{r_{q,\tau}}{2}\right)\opn{di}\left(\frac{r_{q,\tau}}{2}\right) + \left(1-\frac{s_{0,\tau}}{s_{q,\tau}}\right)\frac{r_{q,\tau}}{2} + \ln \Gamma\left(\frac{r_{q,\tau}}{2}\right)\\
+    &\quad +\frac{r_{0,\tau}}{2}\ln \frac{s_{0,\tau}}{2} - \ln\Gamma\left(\frac{r_{0,\tau}}{2}\right)
   \end{align*}
 \subsubsection{$\opn{E}\left(\ln p\left(\sigma^{2}\right)\right) + \opn{H}\left(\sigma^{2}\right)$}
 \begin{align*}
@@ -485,7 +514,7 @@ Note that $\sum_{i=1}^{n}\Tr\left(w_{i}w_{i}'\Sigma_{\beta}^{q}\right)=\Tr\left(
 \subsubsection{LB}
   \begin{align*}
     \mathcal{L} &= -\frac{1}{2}\left\{\Tr\left(W'W\Sigma_{\beta}^{q}\right) + \delta^{2}\sum_{i=1}^{n}\left(2\Tr\left(\varphi_{J}^{a}\left(x_{i}\right)\Sigma_{\theta}^{q}\right)^{2} +4{\mu_{\theta}^{q}}'\varphi_{J}^{a}\left(x_{i}\right)\Sigma_{\theta}^{q}\varphi_{J}^{a}\left(x_{i}\right)\mu_{\theta}^{q}\right) \right\}\\
-    &\quad + \sum_{i=1}^{n}\left\{\ln\left(\Phi\left(\mu_{y_{i}^{*}}\right)^{y_{i}}\left(1-\Phi\left(\mu_{y_{i}^{*}}\right)\right)^{1-y_{i}}\right) + \left(-1\right)^{y_{i}}\frac{\mu_{y_{i}^{*}}\phi\left(\mu_{y_{i}^{*}}\right)}{2\Phi\left(\mu_{y_{i}^{*}}\right)^{y_{i}}\left(1-\Phi\left(\mu_{y_{i}^{*}}\right)\right)^{1-y_{i}}}\right\}\\
+    &\quad + \sum_{i=1}^{n}\left\{\ln\left(\Phi\left(\mu_{y_{i}^{*}}\right)^{y_{i}}\left(1-\Phi\left(\mu_{y_{i}^{*}}\right)\right)^{1-y_{i}}\right) \right\}\\
     &\quad -\frac{1}{2}\opn{E}\left(\frac{1}{\sigma}\right)\Tr\left\{\left(\Sigma_{\theta}^{q}+\mu_{\theta}^{q}{\mu_{\theta}^{q}}'\right)\opn{Dg}\left(\opn{E}\left(\Upsilon^{-1}\right)\right) \right\} +\frac{1}{2}\ln\left|\Sigma_{\theta}^{q}\right|\\
     &\quad -\frac{1}{2}\opn{E}\left(\frac{1}{\sigma^{2}}\right)\left\{\left(\mu_{\beta}^{q}-\mu_{\beta}^{0}\right)'{\Sigma_{\beta}^{0}}^{-1}\left(\mu_{\beta}^{q}-\mu_{\beta}^{0}\right) + \Tr\left({\Sigma_{\beta}^{0}}^{-1}\Sigma_{\beta}^{q}\right) \right\} + \frac{1}{2}\ln\left|\Sigma_{\beta}^{q}\right|\\
     &\quad +\frac{r_{0,\sigma}}{2}\ln\left(\frac{s_{0,\sigma}}{2}\right)-\ln\Gamma\left(\frac{r_{0,\sigma}}{2}\right) -\frac{s_{0,\sigma}}{2}\opn{E}\left(\frac{1}{\sigma^{2}}\right) -b\opn{E}\left(\frac{1}{\sigma}\right) +c\opn{E}\left(\frac{1}{\sigma^{2}}\right)\\
@@ -519,11 +548,25 @@ However, we must note that the expectation behaves extremely pathologically. For
 \begin{equation*}
   \lim_{t\to-\infty} \frac{\exp\left(-t^{2}/2\right)}{\int_{-\infty}^{t}\exp\left(-x^{2}/2\right)\, dx} = \infty.
 \end{equation*}
-This becomes clearer when we look at the Laurent series of $\phi\left(t\right)/\Phi\left(t\right)$:
+Even though this does not transpire quite often for in actual computations since we do not deal with infinity in real life. However, we must not simply code \texttt{dnorm(x)/pnorm(x)} since \texttt{pnorm(x)} returns zero for even as reasonably small a value as $-40$, notwithstanding the true value of the quotient being $\phi\left(-40\right)/\Phi\left(-40\right)=40.02496884$. Therefore, we should use the following identity:
 \begin{equation*}
-  \frac{\exp\left(-t^{2}/2\right)}{\int_{-\infty}^{t}\exp\left(-x^{2}/2\right)\, dx} = -t-\frac{1}{t}+\frac{2}{t^{3}} -\frac{10}{t^{5}} + \mathcal{O}\left(\left(\frac{1}{t}\right)^{6}\right)\qquad \text{at $t=-\infty$}.
+  \frac{\phi\left(x\right)}{\Phi\left(x\right)} = \frac{\left(2/\pi\right)^{1/2}\exp\left(-x^{2}/2\right)}{\opn{erf}\left(x/\sqrt{2}\right)+1}.
 \end{equation*}
-For such a reason, even for as fairly reasonably small a value as $-40$, \texttt{dnorm(-40)/pnorm(-40)=NaN}.
+The problem is, even the RHS of the identity fails if $x$ is $-9$. We thus turn to the Laurent series of $\phi\left(t\right)/\Phi\left(t\right)$:
+\begin{equation*}
+  \frac{\exp\left(-t^{2}/2\right)}{\int_{-\infty}^{t}\exp\left(-x^{2}/2\right)\, dx} = -t-\frac{1}{t}+\frac{2}{t^{3}} -\frac{10}{t^{5}} + \mathcal{O}\left(\left(\frac{1}{t}\right)^{6}\right)\qquad \text{at $t=-\infty$}
+\end{equation*}
+for values smaller than $-8$.
+\subsubsection{$\phi\left(x\right)/\left(\Phi\left(x\right)-1\right)$}
+This is much better than the previous one.
+\begin{equation*}
+  \lim_{t\to\infty} \frac{\exp\left(-t^{2}/2\right)}{\int_{-\infty}^{t} \exp\left(-x^{2}/2\right)\, dx -1} = 0.
+\end{equation*}
+The only problem for this calculation is that when we code the expression, we will be relying on \texttt{pnorm} which will give 1 for quite large values, immediately rendering the whole expression indefinite since it makes the denominator zero. Therefore, we again come up with another identity:
+\begin{equation*}
+  \frac{\phi\left(x\right)}{\Phi\left(x\right)-1} = \frac{\exp\left(-x^{2}/2\right)}{\left(\pi/2\right)^{1/2}\left(\opn{erf}\left(x/\sqrt{2}\right)+1\right)-1}.
+\end{equation*}
+Unlike the identity in the previous subsection, we do not have to consider large values since it will tend to zero as $x$ grows larger.
 \subsection{Corrections}
 \subsubsection{Original Paper: Linear model}
 There are some mistakes in the original paper so I provide the calculation. $S_{2}\left(\mu_{\theta}^{q}, \Sigma_{\theta}^{q}\right) = \opn{E}\left(\ln p\left(y|\beta, \theta_{J}, \sigma^{2}\right)\right)$. Let's do this.

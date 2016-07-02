@@ -38,7 +38,7 @@ simCosineProbitMonotone <- function(FUN, J, delta) {
 
 
 
-dOverp <- function(t) {
-  temp <- sqrt(2/pi)
-  temp/((temp * (-1/t + 1/t^3 - 1/t^5)) + 2 * exp(t^2/2))
-}
+# dOverp <- function(t) {
+#   temp <- sqrt(2/pi)
+#   temp/((temp * (-1/t + 1/t^3 - 1/t^5)) + 2 * exp(t^2/2))
+# }

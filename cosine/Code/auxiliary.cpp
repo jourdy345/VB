@@ -34,3 +34,9 @@ arma::cube setVarPhi(arma::vec x, int J) {
   }
   return varphi;
 }
+
+
+// [[Rcpp::export]]
+double erf(double x) {
+  return std::erf(x);
+}
