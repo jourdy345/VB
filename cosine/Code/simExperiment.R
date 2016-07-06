@@ -546,17 +546,17 @@ VB_experiment <- function(x, y, W, muBeta0, SigmaBeta0, w0, r0s, s0s, r0t, s0t, 
         muPsi_try <- sigmaPsi2_try * (muPsi_old / sigmaPsi2_old + a * (muPsi / sigmaPsi2 - muPsi_old / sigmaPsi2_old))
 
         # Update theta
-        SigmaThetaq <- solve(varphitvarphi + rqs / sqs * rqt / sqt * diag(Qj(muPsi, sigmaPsi2, sigmaPsi, 1:J)))
+        SigmaThetaq <- solve(varphitvarphi + rqs / sqs * rqt / sqt * diag(Qj(muPsi, sigmaPsi2_try, sigmaPsi_try, 1:J)))
         muThetaq <- SigmaThetaq %*% crossprod(varphi, muYStarq - W %*% muBetaq)
 
         # Update tau
-        sqt <- s0t + rqs / sqs * sum((diag(SigmaThetaq) + muThetaq^2) * Qj(muPsi, sigmaPsi2, sigmaPsi, 1:J))
+        sqt <- s0t + rqs / sqs * sum((diag(SigmaThetaq) + muThetaq^2) * Qj(muPsi_try, sigmaPsi2_try, sigmaPsi_try, 1:J))
         sqt_half <- 0.5 * sqt
 
         # Update sigma
         cat('sum((diag(SigmaThetaq) + muThetaq^2) * Qj(muPsi, sigmaPsi2, sigmaPsi, 1:J)):', sum((diag(SigmaThetaq) + muThetaq^2) * Qj(muPsi, sigmaPsi2, sigmaPsi, 1:J)), '\n')
         cat('sum(SigmaBeta0_inv * SigmaBetaq): ', sum(SigmaBeta0_inv * SigmaBetaq), '\n')
-        sqs <- s0s + rqt / sqt * sum((diag(SigmaThetaq) + muThetaq^2) * Qj(muPsi, sigmaPsi2, sigmaPsi, 1:J)) + sum(SigmaBeta0_inv * SigmaBetaq) + sum((muBetaq - muBeta0) * (SigmaBeta0_inv %*% (muBetaq - muBeta0)))
+        sqs <- s0s + rqt / sqt * sum((diag(SigmaThetaq) + muThetaq^2) * Qj(muPsi_try, sigmaPsi2_try, sigmaPsi_try, 1:J)) + sum(SigmaBeta0_inv * SigmaBetaq) + sum((muBetaq - muBeta0) * (SigmaBeta0_inv %*% (muBetaq - muBeta0)))
 
         # Update beta
         cat('rqs/sqs: ', rqs/sqs, '\n')
@@ -580,7 +580,7 @@ VB_experiment <- function(x, y, W, muBeta0, SigmaBeta0, w0, r0s, s0s, r0t, s0t, 
         muYStarq <- muYStar + dnorm(muYStar)/((pnorm(muYStar)^y)*(pnorm(muYStar)-1)^(1-y))
 
 
-        lbnew <- LB_experiment(y, W, varphi, WtW, varphitvarphi, muPsi, sigmaPsi2, sigmaPsi, w0, J, SigmaThetaq, muThetaq, SigmaBetaq, muBetaq, SigmaBeta0_inv, muBeta0, rqt, sqt, rqt_half, sqt_half, rqs, sqs, rqs_half, sqs_half, r0t_half, s0t_half, r0s_half, s0s_half)
+        lbnew <- LB_experiment(y, W, varphi, WtW, varphitvarphi, muPsi_try, sigmaPsi2_try, sigmaPsi_try, w0, J, SigmaThetaq, muThetaq, SigmaBetaq, muBetaq, SigmaBeta0_inv, muBeta0, rqt, sqt, rqt_half, sqt_half, rqs, sqs, rqs_half, sqs_half, r0t_half, s0t_half, r0s_half, s0s_half)
         dif_try <- lbnew - lbfull
       }
 
