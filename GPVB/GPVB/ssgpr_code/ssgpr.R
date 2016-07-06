@@ -34,14 +34,13 @@ minim <- function (X, f, .length, x, y)
     }
     i.m = 0
     ls_failed = 0
-    print('min>')
     f_out = eval(call(f, X, x, y))
     f0 = c(f_out[1][[1]])
     df0 = c(f_out[2][[1]])
     fX = f0
     i.m = i.m + (.length < 0)
     s = -df0
-    s = round(s * 10000)/10000
+    s = round(s * 100000)/100000
     d0 = -c(crossprod(s))
     x3 = red/(1 - d0)
     mainloop = TRUE
@@ -68,12 +67,11 @@ minim <- function (X, f, .length, x, y)
                 M = M - 1
                 i.m = i.m + (.length < 0)
                 options(show.error.messages = FALSE)
-                print('min>>')
                 f_out2 = eval(call(f, c(X + x3[1] * s), x, y))
                 f3 = c(f_out2[1][[1]])
                 df3 = c(f_out2[2][[1]])
-                f3 = round(f3 * 10000)/10000
-                df3 = round(df3 * 10000)/10000
+                f3 = round(f3 * 100000)/100000
+                df3 = round(df3 * 100000)/100000
                 if (is.na(f3) || is.infinite(f3) || is.nan(f3) ||
                   any(is.nan(df3) || is.na(df3) || is.infinite(df3))) {
                   cat(" ")
@@ -115,7 +113,7 @@ minim <- function (X, f, .length, x, y)
             else if (x3 < x2 + INT * (x2 - x1)) {
                 x3 = x2 + INT * (x2 - x1)
             }
-            x3 = round(x3 * 10000)/10000
+            x3 = round(x3 * 100000)/100000
         }
         while ((abs(d3) > -SIG * d0 || f3 > f0 + x3 * RHO * d0) &&
             M > 0) {
@@ -144,9 +142,8 @@ minim <- function (X, f, .length, x, y)
             }
             x3 = max(min(x3, x4 - INT * (x4 - x2)), x2 + INT *
                 (x4 - x2))
-            print('min>>>')
             f_out3 = eval(call(f, c(X + x3 * s), x, y))
-            f3 = f_out3[1][[1]][[1]]
+            f3 = c(f_out3[1][[1]])
             df3 = c(f_out3[2][[1]])
             if (f3 < F0) {
                 x3 = x3[[1]]
@@ -162,14 +159,15 @@ minim <- function (X, f, .length, x, y)
             x3 = x3[[1]]
             X = X + x3 * s
             f0 = f3
-            fX = t(cbind(t(fX), f0))
+            fX = c(fX, f0)
+            cat(S, i.m, "; Value ", f0, '\n')
             s = (((c(crossprod(df3)) - c(crossprod(df0, df3)))[1])/((c(crossprod(df0)))[[1]]) * s) - df3
             df0 = df3
             d3 = d0
-            d0 = t(df0) %*% s
+            d0 = c(crossprod(df0, s))
             if (d0 > 0) {
                 s = -df0
-                d0 = -t(s) %*% s
+                d0 = -c(crossprod(s))
             }
             x3 = x3 * min(RATIO, d3/(d0 - (2^(-1022))))
             ls_failed = 0
@@ -231,7 +229,7 @@ ssgpr <- function(optimizeparams, x_tr, y_tr, x_tst = NULL) {
       out2[(D+2+(d-1)*m+1):(D+2+d*m)] <- 0.5 * 2 * sf2 / m * (c(crossprod(x_tr[,d], B)) / ell[d])
     }
   } else {
-    ns <- dim(x_tst)[2]
+    ns <- dim(x_tst)[1]
     out1 <- out2 <- rep(0, ns)
     alfa <- sf2 / m * (solve(R, Rtiphity))
     
@@ -297,22 +295,20 @@ ssgpr_ui <- function(x_tr, y_tr, x_tst, y_tst, m, iteropt = NULL, loghyper = NUL
     optimizeparams <- loghyper[1:(D+2)]
     otherparams <- loghyper[(D+3):(D+2+D*m)]
   }
-  print('>')
   if (is.null(iteropt)) iteropt <- -1000
   
-  print('>>')
   optimizeparams <- c(optimizeparams, otherparams)
   temp <- minim(optimizeparams, 'ssgpr', iteropt, x_tr, y_tr)
-  print('>>>')
+
   optimizeparams <- temp$X
   convergence <- temp$fX
   loghyper <- optimizeparams
-  print('>>>>')
+
   res <- ssgpr(optimizeparams, x_tr, y_tr, x_tst)
-  print('>>>>>')
+
   mu <- res$out1
   S2 <- res$out2
-  
+  mu <- mu + meanp  
   NMSE <- mean((mu-y_tst)^2) / mean((meanp - y_tst)^2)
   
   NMLP <- -0.5 * mean((-(mu - y_tst)^2) / S2 - log(2 * pi) - log(S2))
