@@ -8,6 +8,9 @@ X_tr <- unname(as.matrix(X_tr))
 X_tst <- unname(as.matrix(X_tst))
 T_tr <- unname(as.matrix(T_tr))
 T_tst <- unname(as.matrix(T_tst))
+
+source('~/Desktop/Github/VB/cosine/demo/vbgpspectral.R')
+
 minim <- function (X, f, .length, x, y)
 {
     toprint = FALSE
@@ -193,14 +196,18 @@ minim <- function (X, f, .length, x, y)
 ssgpr <- function(optimizeparams, x_tr, y_tr, x_tst = NULL) {
   n <- dim(x_tr)[1]
   D <- dim(x_tr)[2]
-  
   m <- (length(optimizeparams) - D - 2) / D
   ell <- exp(optimizeparams[1:D])
   sf2 <- exp(2 * optimizeparams[D+1])
   sn2 <- exp(2 * optimizeparams[D+2])
   w <- matrix(c(optimizeparams[(D+3):length(optimizeparams)]), nrow = m, ncol = D)
-  w <- w %*% diag(1 / ell) # divide each row of w by ell element-wise
-  
+  # cat('dim of w: ', dim(w), '\n')
+  # cat('diag(1/ell): ', diag(ell), '\n')
+  # cat('ell: ', ell, '\n')
+  # w <- w %*% diag(1 / ell) # divide each row of w by ell element-wise
+
+  w <- w / ell # dividing each row of w by ell element-wise... needs to be revised if dimension of w changes
+
   phi <- tcrossprod(x_tr, w)
   phi <- cbind(cos(phi), sin(phi))
   
@@ -253,12 +260,11 @@ ssgpr <- function(optimizeparams, x_tr, y_tr, x_tst = NULL) {
 
 
 ssgpr_ui <- function(x_tr, y_tr, x_tst, y_tst, m, iteropt = NULL, loghyper = NULL) {
-  meanp <- apply(y_tr, 2, mean)
+  meanp <- mean(apply(y_tr, 2, mean))
   y_tr <- scale(y_tr, scale = FALSE)
   n <- dim(x_tr)[1]
   D <- dim(x_tr)[2]
-  
-  if ((!is.null(loghyper)) & (length(loghyper) == D+2)) {
+  if ((!is.null(loghyper)) & (length(loghyper) == (D+2))) {
     lengthscales <- loghyper[1:D]
     covpower <- loghyper[D+1]
     noisepower <- loghyper[D+2]
@@ -315,6 +321,106 @@ ssgpr_ui <- function(x_tr, y_tr, x_tst, y_tst, m, iteropt = NULL, loghyper = NUL
   list(NMSE = NMSE, mu = mu, S2 = S2, NMLP = NMLP, loghyper = loghyper, convergence = convergence)
 }
 
-fit <- ssgpr_ui(X_tr, T_tr, X_tst, T_tst, 100, -1000, loghyp)
+# # fit <- ssgpr_ui(X_tr, T_tr, X_tst, T_tst, 100, -1000, loghyp)
+# fit <- ssgpr_ui(X_tr, T_tr, X_tr, T_tr, 100, -1000, loghyp)
+
+# library(glmnet)
+# cvfit <- glmnet::cv.glmnet(X_tr, T_tr)
+# coef(cvfit, s = 'lambda.1se')
+
+# # Set up prior parameters
+# J <- 20
+# rsig.0<-0.01
+# ssig.0<-0.01
+# rtau.0<-0.01
+# stau.0<-0.01
+# w0<-1
+# #mubeta.0<-c(0,0)
+# #sigbeta.0<-diag(2)
+# mubeta.0<-0
+# sigbeta.0<-matrix(1,nrow=1,ncol=1)
+# prior.parms<-list(rsig.0=rsig.0,ssig.0=ssig.0,rtau.0=rtau.0,stau.0=stau.0,w0=w0,mubeta.0=mubeta.0,sigbeta.0=sigbeta.0)
+# fit2 <- vbgpspectral(T_tr, X_tr[,1], rep(1, length(T_tr)), 20, 1.0e-05, prior.parms = prior.parms, mupsi.q.start = 1)
+# x <- X_tr[,7]
+# vphi<-sqrt(2)*cos(outer(x,pi*(1:J)))
+# fitted2<-(vphi[,1:length(fit2$mutheta.q)]%*%fit2$mutheta.q)
+# # fitted2<-fitted2-mean(fitted2)
+# # fitted2 <- vphi %*% fit2$mutheta.q + fit2$mubeta.q
+# o <- order(X_tr[,1])
+# plot(x[o], T_tr[o], type = 'l', lwd = 2, lty = 6, col = 'darkgreen')
+# lines(x[o], fitted2[o], lwd = 2, lty = 3, col = 'red')
+# lines(x[o], fit$mu[o], lwd = 2, lty = 1)
+
+
+
+# set.seed(1)
+# n<-500
+# x<-0.1+0.8*runif(n)
+# loghyper = rep(1,3)
+# #Z<-cbind(rep(1,times=n),runif(n))
+# #y<-sin(x*pi)+Z%*%c(1,1)+0.1*rnorm(n)
+# Z<-rep(1,times=n)
+# y<-sin(x*pi)+Z+0.1*rnorm(n)
+# rsig.0<-0.01
+# ssig.0<-0.01
+# rtau.0<-0.01
+# stau.0<-0.01
+# w0<-1
+# #mubeta.0<-c(0,0)
+# #sigbeta.0<-diag(2)
+# mubeta.0<-0
+# sigbeta.0<-matrix(1,nrow=1,ncol=1)
+# prior.parms<-list(rsig.0=rsig.0,ssig.0=ssig.0,rtau.0=rtau.0,stau.0=stau.0,w0=w0,mubeta.0=mubeta.0,sigbeta.0=sigbeta.0)
+
+
+# t1 <- Sys.time()
+# fitt <- ssgpr_ui(as.matrix(x), as.matrix(y), as.matrix(x), as.matrix(y), 100, -100, rep(1, 3))
+# t2 <- Sys.time()
+# z1 <- difftime(t2, t1)
+# class(z1) <- NA
+# z1 <- round(z1[1], digits = 4)
+# t3 <- Sys.time()
+# fitt2 <- vbgpspectral(y, x, Z = rep(1, n), T = 20, tol = 1.0e-05, prior.parms = prior.parms, mupsi.q.start = 1)
+# t4 <- Sys.time()
+# z2 <- difftime(t4, t2)
+# class(z2) <- NA
+# z2 <- round(z2[1], digits = 4)
+# vphi2 <- sqrt(2)*cos(outer(x,pi*(1:J)))
+# fitted22 <- vphi2[,1:length(fitt2$mutheta.q)]%*%fitt2$mutheta.q
+# fitted22 <- fitted22 - mean(fitted22)
+# o <- order(x)
+# y2 <- y - mean(y)
+# fitmu <- fitt$mu - mean(fitt$mu)
+# plot(x[o], y2[o], ylim = range(c(fitted22, fitmu, y2)), xlab = '', ylab = '', main = paste('Simulation: sin(',expression(pi), 'x)+Z+0.1', expression(N(0,1))))
+# lines(x[o], fitted22[o], lwd = 2, lty = 3, col = 'red')
+# lines(x[o], fitmu[o], lwd = 2, lty = 6, col = 'darkgreen')
+# legend('topright', lty = c(NA, 3, 6), pch = c(1, NA, NA),  col = c(1, 'red', 'darkgreen'), legend = c('true', paste('BSAR =',z2,'s'), paste('SSGP=',z1,'s')), bg = 'gray90')
+
+y <- T_tr
+x <- X_tr[,7]
+
+
+t1 <- Sys.time()
+fitt <- ssgpr_ui(as.matrix(x), as.matrix(y), as.matrix(x), as.matrix(y), 100, -100, rep(1, 3))
+t2 <- Sys.time()
+z1 <- difftime(t2, t1)
+class(z1) <- NA
+z1 <- round(z1[1], digits = 4)
+t3 <- Sys.time()
+fitt2 <- vbgpspectral(y, x, Z = rep(1, length(c(y))), T = 20, tol = 1.0e-05, prior.parms = prior.parms, mupsi.q.start = 1)
+t4 <- Sys.time()
+z2 <- difftime(t4, t2)
+class(z2) <- NA
+z2 <- round(z2[1], digits = 4)
+vphi2 <- sqrt(2)*cos(outer(x,pi*(1:J)))
+fitted22 <- vphi2[,1:length(fitt2$mutheta.q)]%*%fitt2$mutheta.q
+fitted22 <- fitted22 - mean(fitted22)
+o <- order(x)
+y2 <- y - mean(y)
+fitmu <- fitt$mu - mean(fitt$mu)
+plot(x[o], y2[o], ylim = range(c(fitted22, fitmu, y2)), xlab = '', ylab = '', main = '7th variable of pendulum')
+lines(x[o], fitted22[o], lwd = 2, lty = 3, col = 'red')
+lines(x[o], fitmu[o], lwd = 2, lty = 6, col = 'darkgreen')
+legend('topright', lty = c(NA, 3, 6), pch = c(1, NA, NA),  col = c(1, 'red', 'darkgreen'), legend = c('true', paste('BSAR =',z2,'s'), paste('SSGP=',z1,'s')), bg = 'gray90')
 
 
