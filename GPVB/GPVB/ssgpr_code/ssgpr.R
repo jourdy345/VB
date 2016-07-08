@@ -353,51 +353,24 @@ ssgpr_ui <- function(x_tr, y_tr, x_tst, y_tst, m, iteropt = NULL, loghyper = NUL
 
 
 
-# set.seed(1)
-# n<-500
-# x<-0.1+0.8*runif(n)
-# loghyper = rep(1,3)
-# #Z<-cbind(rep(1,times=n),runif(n))
-# #y<-sin(x*pi)+Z%*%c(1,1)+0.1*rnorm(n)
-# Z<-rep(1,times=n)
-# y<-sin(x*pi)+Z+0.1*rnorm(n)
-# rsig.0<-0.01
-# ssig.0<-0.01
-# rtau.0<-0.01
-# stau.0<-0.01
-# w0<-1
-# #mubeta.0<-c(0,0)
-# #sigbeta.0<-diag(2)
-# mubeta.0<-0
-# sigbeta.0<-matrix(1,nrow=1,ncol=1)
-# prior.parms<-list(rsig.0=rsig.0,ssig.0=ssig.0,rtau.0=rtau.0,stau.0=stau.0,w0=w0,mubeta.0=mubeta.0,sigbeta.0=sigbeta.0)
-
-
-# t1 <- Sys.time()
-# fitt <- ssgpr_ui(as.matrix(x), as.matrix(y), as.matrix(x), as.matrix(y), 100, -100, rep(1, 3))
-# t2 <- Sys.time()
-# z1 <- difftime(t2, t1)
-# class(z1) <- NA
-# z1 <- round(z1[1], digits = 4)
-# t3 <- Sys.time()
-# fitt2 <- vbgpspectral(y, x, Z = rep(1, n), T = 20, tol = 1.0e-05, prior.parms = prior.parms, mupsi.q.start = 1)
-# t4 <- Sys.time()
-# z2 <- difftime(t4, t2)
-# class(z2) <- NA
-# z2 <- round(z2[1], digits = 4)
-# vphi2 <- sqrt(2)*cos(outer(x,pi*(1:J)))
-# fitted22 <- vphi2[,1:length(fitt2$mutheta.q)]%*%fitt2$mutheta.q
-# fitted22 <- fitted22 - mean(fitted22)
-# o <- order(x)
-# y2 <- y - mean(y)
-# fitmu <- fitt$mu - mean(fitt$mu)
-# plot(x[o], y2[o], ylim = range(c(fitted22, fitmu, y2)), xlab = '', ylab = '', main = paste('Simulation: sin(',expression(pi), 'x)+Z+0.1', expression(N(0,1))))
-# lines(x[o], fitted22[o], lwd = 2, lty = 3, col = 'red')
-# lines(x[o], fitmu[o], lwd = 2, lty = 6, col = 'darkgreen')
-# legend('topright', lty = c(NA, 3, 6), pch = c(1, NA, NA),  col = c(1, 'red', 'darkgreen'), legend = c('true', paste('BSAR =',z2,'s'), paste('SSGP=',z1,'s')), bg = 'gray90')
-
-y <- T_tr
-x <- X_tr[,7]
+set.seed(1)
+n<-500
+x<-0.1+0.8*runif(n)
+loghyper = rep(1,3)
+#Z<-cbind(rep(1,times=n),runif(n))
+#y<-sin(x*pi)+Z%*%c(1,1)+0.1*rnorm(n)
+Z<-rep(1,times=n)
+y<-sin(x*pi)+Z+0.1*rnorm(n)
+rsig.0<-0.01
+ssig.0<-0.01
+rtau.0<-0.01
+stau.0<-0.01
+w0<-1
+#mubeta.0<-c(0,0)
+#sigbeta.0<-diag(2)
+mubeta.0<-0
+sigbeta.0<-matrix(1,nrow=1,ncol=1)
+prior.parms<-list(rsig.0=rsig.0,ssig.0=ssig.0,rtau.0=rtau.0,stau.0=stau.0,w0=w0,mubeta.0=mubeta.0,sigbeta.0=sigbeta.0)
 
 
 t1 <- Sys.time()
@@ -407,7 +380,7 @@ z1 <- difftime(t2, t1)
 class(z1) <- NA
 z1 <- round(z1[1], digits = 4)
 t3 <- Sys.time()
-fitt2 <- vbgpspectral(y, x, Z = rep(1, length(c(y))), T = 20, tol = 1.0e-05, prior.parms = prior.parms, mupsi.q.start = 1)
+fitt2 <- vbgpspectral(y, x, Z = rep(1, n), T = 20, tol = 1.0e-05, prior.parms = prior.parms, mupsi.q.start = 1)
 t4 <- Sys.time()
 z2 <- difftime(t4, t2)
 class(z2) <- NA
@@ -418,9 +391,36 @@ fitted22 <- fitted22 - mean(fitted22)
 o <- order(x)
 y2 <- y - mean(y)
 fitmu <- fitt$mu - mean(fitt$mu)
-plot(x[o], y2[o], ylim = range(c(fitted22, fitmu, y2)), xlab = '', ylab = '', main = '7th variable of pendulum')
+plot(x[o], y2[o], ylim = range(c(fitted22, fitmu, y2)), xlab = '', ylab = '', main = expression(paste('sin(',pi, 'x)+Z+0.1N(0,1)')))
 lines(x[o], fitted22[o], lwd = 2, lty = 3, col = 'red')
 lines(x[o], fitmu[o], lwd = 2, lty = 6, col = 'darkgreen')
 legend('topright', lty = c(NA, 3, 6), pch = c(1, NA, NA),  col = c(1, 'red', 'darkgreen'), legend = c('true', paste('BSAR =',z2,'s'), paste('SSGP=',z1,'s')), bg = 'gray90')
+
+
+
+# y <- T_tr
+# x <- X_tr[,7]
+# t1 <- Sys.time()
+# fitt <- ssgpr_ui(as.matrix(x), as.matrix(y), as.matrix(x), as.matrix(y), 100, -100, rep(1, 3))
+# t2 <- Sys.time()
+# z1 <- difftime(t2, t1)
+# class(z1) <- NA
+# z1 <- round(z1[1], digits = 4)
+# t3 <- Sys.time()
+# fitt2 <- vbgpspectral(y, x, Z = rep(1, length(c(y))), T = 20, tol = 1.0e-05, prior.parms = prior.parms, mupsi.q.start = 1)
+# t4 <- Sys.time()
+# z2 <- difftime(t4, t2)
+# class(z2) <- NA
+# z2 <- round(z2[1], digits = 4)
+# vphi2 <- sqrt(2)*cos(outer(x,pi*(1:J)))
+# fitted22 <- vphi2[,1:length(fitt2$mutheta.q)]%*%fitt2$mutheta.q
+# fitted22 <- fitted22 - mean(fitted22)
+# o <- order(x)
+# y2 <- y - mean(y)
+# fitmu <- fitt$mu - mean(fitt$mu)
+# plot(x[o], y2[o], ylim = range(c(fitted22, fitmu, y2)), xlab = '', ylab = '', main = '7th variable of pendulum')
+# lines(x[o], fitted22[o], lwd = 2, lty = 3, col = 'red')
+# lines(x[o], fitmu[o], lwd = 2, lty = 6, col = 'darkgreen')
+# legend('topright', lty = c(NA, 3, 6), pch = c(1, NA, NA),  col = c(1, 'red', 'darkgreen'), legend = c('true', paste('BSAR =',z2,'s'), paste('SSGP=',z1,'s')), bg = 'gray90')
 
 
