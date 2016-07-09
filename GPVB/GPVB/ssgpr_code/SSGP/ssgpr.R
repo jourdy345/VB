@@ -204,9 +204,11 @@ ssgpr <- function(optimizeparams, x_tr, y_tr, x_tst = NULL) {
   # cat('dim of w: ', dim(w), '\n')
   # cat('diag(1/ell): ', diag(ell), '\n')
   # cat('ell: ', ell, '\n')
-  # w <- w %*% diag(1 / ell) # divide each row of w by ell element-wise
-
-  w <- w / ell # dividing each row of w by ell element-wise... needs to be revised if dimension of w changes
+  if (length(ell) == 1) {
+    w <- w / ell # dividing each row of w by ell element-wise... needs to be revised if dimension of w changes
+  } else {
+    w <- w %*% diag(1 / ell) # divide each row of w by ell element-wise
+  }
 
   phi <- tcrossprod(x_tr, w)
   phi <- cbind(cos(phi), sin(phi))
@@ -355,6 +357,7 @@ ssgpr_ui <- function(x_tr, y_tr, x_tst, y_tst, m, iteropt = NULL, loghyper = NUL
 
 set.seed(1)
 n<-500
+J <- 20
 x<-0.1+0.8*runif(n)
 loghyper = rep(1,3)
 #Z<-cbind(rep(1,times=n),runif(n))

@@ -1,0 +1,12 @@
+useDynLib(VA, .registration = TRUE)
+  
+# functions
+export(bsplines, lin, random, risk, spatial, va)
+
+S3method(plot, va)
+S3method(print, va)
+S3method(summary, va)
+S3method(print, summary.va)
+S3method(coef, va)
+S3method(predict, va)
+S3method(residuals, va)

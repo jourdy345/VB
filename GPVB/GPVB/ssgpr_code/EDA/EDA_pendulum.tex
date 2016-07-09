@@ -1,0 +1,166 @@
+\documentclass[11pt]{article}
+
+% This first part of the file is called the PREAMBLE. It includes
+% customizations and command definitions. The preamble is everything
+% between \documentclass and \begin{document}.
+
+\usepackage[margin=0.6in]{geometry} % set the margins to 1in on all sides
+\usepackage{graphicx} % to include figures
+\usepackage{amsmath} % great math stuff
+\usepackage{amsfonts} % for blackboard bold, etc
+\usepackage{amsthm} % better theorem environments
+% various theorems, numbered by section
+\usepackage{amssymb}
+\usepackage[utf8]{inputenc}
+\usepackage{booktabs}
+\usepackage{array}
+\usepackage{courier}
+\usepackage[usenames, dvipsnames]{color}
+\usepackage{titlesec}
+\usepackage{empheq}
+\usepackage{tikz}
+
+\newcommand\encircle[1]{%
+  \tikz[baseline=(X.base)] 
+    \node (X) [draw, shape=circle, inner sep=0] {\strut #1};}
+ 
+% Command "alignedbox{}{}" for a box within an align environment
+% Source: http://www.latex-community.org/forum/viewtopic.php?f=46&t=8144
+\newlength\dlf  % Define a new measure, dlf
+\newcommand\alignedbox[2]{
+% Argument #1 = before & if there were no box (lhs)
+% Argument #2 = after & if there were no box (rhs)
+&  % Alignment sign of the line
+{
+\settowidth\dlf{$\displaystyle #1$}  
+    % The width of \dlf is the width of the lhs, with a displaystyle font
+\addtolength\dlf{\fboxsep+\fboxrule}  
+    % Add to it the distance to the box, and the width of the line of the box
+\hspace{-\dlf}  
+    % Move everything dlf units to the left, so that & #1 #2 is aligned under #1 & #2
+\boxed{#1 #2}
+    % Put a box around lhs and rhs
+}
+}
+
+
+\newtheorem{thm}{Theorem}[section]
+\newtheorem{lem}[thm]{Lemma}
+\newtheorem{prop}[thm]{Proposition}
+\newtheorem{cor}[thm]{Corollary}
+\newtheorem{conj}[thm]{Conjecture}
+
+\setcounter{secnumdepth}{4}
+
+\titleformat{\paragraph}
+{\normalfont\normalsize\bfseries}{\theparagraph}{1em}{}
+\titlespacing*{\paragraph}
+{0pt}{3.25ex plus 1ex minus .2ex}{1.5ex plus .2ex}
+
+\definecolor{myblue}{RGB}{72, 165, 226}
+\definecolor{myorange}{RGB}{222, 141, 8}
+
+\setlength{\heavyrulewidth}{1.5pt}
+\setlength{\abovetopsep}{4pt}
+
+
+\DeclareMathOperator{\id}{id}
+\DeclareMathOperator{\argmin}{\arg\!\min}
+\DeclareMathOperator{\Tr}{Tr}
+
+\newcommand{\bd}[1]{\mathbf{#1}} % for bolding symbols
+\newcommand{\RR}{\mathbb{R}} % for Real numbers
+\newcommand{\ZZ}{\mathbb{Z}} % for Integers
+\newcommand{\col}[1]{\left[\begin{matrix} #1 \end{matrix} \right]}
+\newcommand{\comb}[2]{\binom{#1^2 + #2^2}{#1+#2}}
+\newcommand{\bs}{\boldsymbol}
+\newcommand{\opn}{\operatorname}
+\begin{document}
+\nocite{*}
+
+\title{Exploratory data analysis}
+
+\author{Daeyoung Lim\thanks{Prof. Taeryon Choi} \\
+Department of Statistics \\
+Korea University}
+
+\maketitle
+\section{Pendulum Data}
+\subsection{Data Description}
+The pendulum data obtained from the paper of David Nott consists of 9 covariates and one target variable. As described in the original paper, it is a simulated data of mechanical pendulum, covariates of which are different parameters of the system and the target variable is the angular velocity.
+\subsection{Angular Velocity}
+According to Wikipedia, an angular velocity is \textit{``defined as the rate of change of angular displacement and is a vector quantity (more precisely, a pseudovector) which specifies the angular speed of an object and the axis about which the object is rotating''}. The unit is radians per second.
+\section{SSGP}
+  For a short summary of Lazaro Gredilla's SSGP, the paper comes up with a decomposition of the function into
+  \begin{equation}
+    f\left(\mathbf{x}\right) = \sum_{r=1}^{m}a_{r}\cos\left(2\pi \mathbf{s}_{r}^{\top}\mathbf{x}\right) + b_{r}\sin\left(2\pi\mathbf{s}_{r}^{\top}\mathbf{x}\right)
+  \end{equation}
+  where $a_{r}\sim \mathcal{N}\left(0, m^{-1}\sigma_{0}^{2}\right)$, $b_{r} \sim \mathcal{N}\left(0,m^{-1}\sigma_{0}^{2}\right)$. Then, by transforming $\mathbf{x}$ into
+  \begin{equation}
+    \phi\left(\mathbf{x}\right) = \begin{bmatrix} \cos\left(2\pi\mathbf{s}_{1}^{\top}\mathbf{x}\right) & \sin\left(2\pi\mathbf{s}_{1}^{\top}\mathbf{x}\right) & \cdots & \cos\left(2\pi\mathbf{s}_{m}^{\top}\mathbf{x}\right) & \sin\left(2\pi\mathbf{s}_{m}^{\top}\mathbf{x}\right) \end{bmatrix},
+  \end{equation}
+  the end result becomes similar to linear Gaussian process regression model:
+  \begin{align}
+    \opn{E}\left(\mathbf{y}_{*}\right) &= \phi\left(\mathbf{x}_{*}\right)^{\top}A^{-1}\mathbf{\Phi}\mathbf{y}\\
+    \opn{Var}\left(\mathbf{y}_{*}\right) &= \sigma_{n}^{2}+\sigma_{n}^{2}\phi\left(\mathbf{x}_{*}\right)^{\top}A^{-1}\phi\left(\mathbf{x}_{*}\right).
+  \end{align}
+  The author suggests learning the parameters via optimizing the log-marginal likelihood:
+  \begin{equation}
+    \log p\left(\mathbf{y}|\theta\right) = -\frac{1}{2\sigma_{n}^{2}}\left(\mathbf{y}^{\top}\mathbf{y}-\mathbf{y}^{\top}\mathbf{\Phi}^{\top}A^{-1}\mathbf{\Phi y}\right)-\frac{1}{2}\log \left|A\right| +m\log\frac{m\sigma_{m}^{2}}{\sigma_{0}^{2}}-\frac{n}{2}\log\left(2\pi\sigma_{n}^{2}\right)
+  \end{equation}
+  by means of the conjugate gradient method.
+\subsection{Sidenote}
+  The predictive mean of Gaussian process regression model is
+  \begin{align}
+    p\left(f_{*}|\mathbf{x}_{*}, X, \mathbf{y}\right) &= \int p\left(f_{*}|\mathbf{x}_{*}, \mathbf{w}\right)p\left(\mathbf{w}|X,\mathbf{y}\right)\,d\mathbf{w} = \int \mathbf{x}_{*}^{\top}\mathbf{w}p\left(\mathbf{w}|X,\mathbf{y}\right)\,d\mathbf{w}\\
+    &=\mathcal{N}\left(\frac{1}{\sigma_{n}^{2}}\mathbf{x}_{*}^{\top}A^{-1}X\mathbf{y}, \mathbf{x}_{*}^{\top}A^{-1}\mathbf{x}_{*}\right).
+  \end{align}
+  The posterior distribution of the weights $\mathbf{w}$ is
+  \begin{equation}
+    p\left(\mathbf{w}|X,\mathbf{y}\right) \sim \mathcal{N}\left(\overline{\mathbf{w}}=\frac{1}{\sigma_{n}^{2}}A^{-1}X\mathbf{y}, A^{-1}\right)
+  \end{equation}
+  where $A = \sigma_{n}^{-2}XX^{\top}+\Sigma_{p}^{-1}$. Therefore, this is the reason why we can plug in the test data $\overset{\sim}{X}$ into the predictive distribution's $\mathbf{x}_{*}$ to get the fitted values of the unknown function, $\hat{f}$. (In the case of sparse spectrum decomposition, the design matrix is no longer $X$ but rather $\Phi$.)
+\section{VA for partially linear additive models}
+The paper suggests a model of the form
+\begin{equation}
+  y_{i} = \mu + \sum_{j=1}^{p}f_{j}\left(x_{ij}\right) + \epsilon_{i}, \quad i = 1, \ldots , n.
+\end{equation}
+\begin{itemize}
+  \item In the authors' exact words, \textit{for simplicity of exposition}, they assumed all covariates to be continuous with support $\left[0, 1\right]$.
+  \item Discrete variables are put into the linear part.
+  \item Impose $\opn{E}\left(f_{j}\left(x_{j}\right)\right)=0$ constraint to achieve identiability.
+  \item Transform the basis functions in such a way that they are orthogonal to the linear basis functions.
+  \item Essentially VB for parameter estimation but offered some degree of freedom between Monte Carlo estimation and Laplace approximation for the intractable integration terms.
+\end{itemize}
+The real data analysis section of the original paper mentions that the crime data in \textsf{R} package \{\textsf{Ecdat}\} was used, which has 630 observations and 22 variables. 
+\subsection{BPLAM code review}
+  \begin{itemize}
+  \item Since one of the purposes of this paper was to propose a novel way of selecting variables using variational approximation, the code assumes there would be more than one covariate. The code crashes with only \texttt{x} of one column.
+  \item The code still worked even though one of the covariates was outside of the range $\left[0,1\right]$. 
+  \end{itemize}
+\section{Kneib VA}
+Model:
+\begin{equation}
+  y_{i} = \mathbf{x}^{\top}\bs{\beta}+f_{1}\left(\text{herdsize}_{i}\right)+f_{2}\left(\text{capital}_{i}\right)+f_{\text{spat}}\left(\text{county}_{i}\right) + \epsilon_{i}.
+\end{equation}
+Code doesn't work...
+\section{To be done}
+\begin{itemize}
+  \item Fix Kneib's code
+  \item EDA Miguel's datasets:
+    \begin{itemize}
+      \item \texttt{elevators} data
+      \item \texttt{pumadyn32nm} data
+      \item \texttt{pendulum} data
+      \item \texttt{kin40k} data
+      \item \texttt{pol} data
+    \end{itemize}
+    and BPLAM real data set: \textsf{Ecdat} crime data.
+  \item Run BSAR VB/MCMC (no restriction/shape restriction), SSGP, spline VB, Kneib VB
+    \begin{itemize}
+      \item real data sets (listed above)
+      \item simulated data: 3 models in Kneib's paper, 1 model in BPLAM etc
+    \end{itemize}
+    and compare RMSE, code execution time etc.
+\end{itemize}
+\end{document}

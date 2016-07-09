@@ -1,0 +1,55 @@
+\indexentry{VA-package@\texttt  {VA-package}|hyperpage}{1}
+\indexentry{VA@\texttt  {VA} \textit  {(\texttt  {VA-package})}|hyperpage}{1}
+\indexentry{$*$Topic{\relax \fontsize  {12}{14}\selectfont  \ \textbf  {Variational Approximation}}!VA-package@\texttt  {VA-package}|hyperpage}{1}
+\indexentry{$*$Topic{\relax \fontsize  {12}{14}\selectfont  \ \textbf  {Quantile Regression}}!VA-package@\texttt  {VA-package}|hyperpage}{1}
+\indexentry{$*$Topic{\relax \fontsize  {12}{14}\selectfont  \ \textbf  {Additive Regression}}!VA-package@\texttt  {VA-package}|hyperpage}{1}
+\indexentry{va@\texttt  {va}|hyperindexformat{\textit}}{1}
+\indexentry{lin@\texttt  {lin}|hyperindexformat{\textit}}{1}
+\indexentry{bsplines@\texttt  {bsplines}|hyperindexformat{\textit}}{1}
+\indexentry{spatial@\texttt  {spatial}|hyperindexformat{\textit}}{1}
+\indexentry{risk@\texttt  {risk}|hyperindexformat{\textit}}{1}
+\indexentry{bsplines@\texttt  {bsplines}|hyperpage}{2}
+\indexentry{$*$Topic{\relax \fontsize  {12}{14}\selectfont  \ \textbf  {\textbackslash {}textasciitilde{}kwd1}}!bsplines@\texttt  {bsplines}|hyperpage}{2}
+\indexentry{$*$Topic{\relax \fontsize  {12}{14}\selectfont  \ \textbf  {\textbackslash {}textasciitilde{}kwd2}}!bsplines@\texttt  {bsplines}|hyperpage}{2}
+\indexentry{spline.des@\texttt  {spline.des}|hyperindexformat{\textit}}{2}
+\indexentry{lin@\texttt  {lin}|hyperindexformat{\textit}}{3}
+\indexentry{spatial@\texttt  {spatial}|hyperindexformat{\textit}}{3}
+\indexentry{random@\texttt  {random}|hyperindexformat{\textit}}{3}
+\indexentry{lin@\texttt  {lin}|hyperpage}{3}
+\indexentry{$*$Topic{\relax \fontsize  {12}{14}\selectfont  \ \textbf  {\textbackslash {}textasciitilde{}kwd1}}!lin@\texttt  {lin}|hyperpage}{3}
+\indexentry{$*$Topic{\relax \fontsize  {12}{14}\selectfont  \ \textbf  {\textbackslash {}textasciitilde{}kwd2}}!lin@\texttt  {lin}|hyperpage}{3}
+\indexentry{bsplines@\texttt  {bsplines}|hyperindexformat{\textit}}{3}
+\indexentry{spatial@\texttt  {spatial}|hyperindexformat{\textit}}{3}
+\indexentry{plot.va@\texttt  {plot.va}|hyperpage}{4}
+\indexentry{$*$Topic{\relax \fontsize  {12}{14}\selectfont  \ \textbf  {\textbackslash {}textasciitilde{}kwd1}}!plot.va@\texttt  {plot.va}|hyperpage}{4}
+\indexentry{$*$Topic{\relax \fontsize  {12}{14}\selectfont  \ \textbf  {\textbackslash {}textasciitilde{}kwd2}}!plot.va@\texttt  {plot.va}|hyperpage}{4}
+\indexentry{drawmap@\texttt  {drawmap}|hyperindexformat{\textit}}{4}
+\indexentry{predict.va@\texttt  {predict.va}|hyperpage}{5}
+\indexentry{$*$Topic{\relax \fontsize  {12}{14}\selectfont  \ \textbf  {\textbackslash {}textasciitilde{}kwd1}}!predict.va@\texttt  {predict.va}|hyperpage}{5}
+\indexentry{$*$Topic{\relax \fontsize  {12}{14}\selectfont  \ \textbf  {\textbackslash {}textasciitilde{}kwd2}}!predict.va@\texttt  {predict.va}|hyperpage}{5}
+\indexentry{random@\texttt  {random}|hyperpage}{5}
+\indexentry{$*$Topic{\relax \fontsize  {12}{14}\selectfont  \ \textbf  {\textbackslash {}textasciitilde{}kwd1}}!random@\texttt  {random}|hyperpage}{5}
+\indexentry{$*$Topic{\relax \fontsize  {12}{14}\selectfont  \ \textbf  {\textbackslash {}textasciitilde{}kwd2}}!random@\texttt  {random}|hyperpage}{5}
+\indexentry{lin@\texttt  {lin}|hyperindexformat{\textit}}{6}
+\indexentry{bsplines@\texttt  {bsplines}|hyperindexformat{\textit}}{6}
+\indexentry{spatial@\texttt  {spatial}|hyperindexformat{\textit}}{6}
+\indexentry{residuals.va@\texttt  {residuals.va}|hyperpage}{6}
+\indexentry{$*$Topic{\relax \fontsize  {12}{14}\selectfont  \ \textbf  {\textbackslash {}textasciitilde{}kwd1}}!residuals.va@\texttt  {residuals.va}|hyperpage}{6}
+\indexentry{$*$Topic{\relax \fontsize  {12}{14}\selectfont  \ \textbf  {\textbackslash {}textasciitilde{}kwd2}}!residuals.va@\texttt  {residuals.va}|hyperpage}{6}
+\indexentry{risk@\texttt  {risk}|hyperpage}{7}
+\indexentry{spatial@\texttt  {spatial}|hyperpage}{7}
+\indexentry{$*$Topic{\relax \fontsize  {12}{14}\selectfont  \ \textbf  {\textbackslash {}textasciitilde{}kwd1}}!spatial@\texttt  {spatial}|hyperpage}{7}
+\indexentry{$*$Topic{\relax \fontsize  {12}{14}\selectfont  \ \textbf  {\textbackslash {}textasciitilde{}kwd2}}!spatial@\texttt  {spatial}|hyperpage}{7}
+\indexentry{lin@\texttt  {lin}|hyperindexformat{\textit}}{8}
+\indexentry{bsplines@\texttt  {bsplines}|hyperindexformat{\textit}}{8}
+\indexentry{summary.va@\texttt  {summary.va}|hyperpage}{8}
+\indexentry{$*$Topic{\relax \fontsize  {12}{14}\selectfont  \ \textbf  {\textbackslash {}textasciitilde{}kwd1}}!summary.va@\texttt  {summary.va}|hyperpage}{8}
+\indexentry{$*$Topic{\relax \fontsize  {12}{14}\selectfont  \ \textbf  {\textbackslash {}textasciitilde{}kwd2}}!summary.va@\texttt  {summary.va}|hyperpage}{8}
+\indexentry{va@\texttt  {va}|hyperpage}{9}
+\indexentry{$*$Topic{\relax \fontsize  {12}{14}\selectfont  \ \textbf  {\textbackslash {}textasciitilde{}kwd1}}!va@\texttt  {va}|hyperpage}{9}
+\indexentry{$*$Topic{\relax \fontsize  {12}{14}\selectfont  \ \textbf  {\textbackslash {}textasciitilde{}kwd2}}!va@\texttt  {va}|hyperpage}{9}
+\indexentry{bsplines@\texttt  {bsplines}|hyperindexformat{\textit}}{9}
+\indexentry{spatial@\texttt  {spatial}|hyperindexformat{\textit}}{9}
+\indexentry{lin@\texttt  {lin}|hyperindexformat{\textit}}{9}
+\indexentry{random@\texttt  {random}|hyperindexformat{\textit}}{9}
+\indexentry{plot.va@\texttt  {plot.va}|hyperindexformat{\textit}}{11}

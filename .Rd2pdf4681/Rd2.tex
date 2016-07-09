@@ -1,0 +1,671 @@
+\documentclass[a4paper]{book}
+\usepackage[times,inconsolata,hyper]{Rd}
+\usepackage{makeidx}
+\usepackage[utf8,latin1]{inputenc}
+% \usepackage{graphicx} % @USE GRAPHICX@
+\makeindex{}
+\begin{document}
+\chapter*{}
+\begin{center}
+{\textbf{\huge \R{} documentation}} \par\bigskip{{\Large of \file{/Users/daeyounglim/Downloads/VA/man/VA-package.Rd} etc.}}
+\par\bigskip{\large \today}
+\end{center}
+\inputencoding{utf8}
+\HeaderA{VA-package}{Variational Approximations and its evaluations in geoadditive (quantile) regression}{VA.Rdash.package}
+\aliasA{VA}{VA-package}{VA}
+\keyword{Variational Approximation}{VA-package}
+\keyword{Quantile Regression}{VA-package}
+\keyword{Additive Regression}{VA-package}
+%
+\begin{Description}\relax
+This package gives the possibility to estimate Bayesian additive (quantile) regression estimated via variational approximations.
+\end{Description}
+%
+\begin{Details}\relax
+
+\Tabular{ll}{
+Package: & VA\\{}
+Type: & Package\\{}
+Version: & 1.0\\{}
+Date: & 2011-10-17\\{}
+License: 2.14.0
+LazyLoad: & yes\\{}
+}
+The main function of this package is \LinkA{va}{va}, a function which uses the theory of variational approximations to calculate the parameters for Bayesian geoadditive regression models for mean regression as well as for quantile regression. The other functions are or for data preperation for the different effects (\LinkA{lin}{lin}, \LinkA{bsplines}{bsplines}, \LinkA{spatial}{spatial})and (\LinkA{risk}{risk})for model evaluation.
+\end{Details}
+%
+\begin{Author}\relax
+Elisabeth Waldmann \\{}
+University of Goettingen \\{}
+\email{ewaldma@uni-goettingen.de}\\{}
+
+with contributions from\\{}
+\\{}
+Thomas Kneib\\{}
+Universtity of Goettingen\\{}
+\url{http://www.uni-goettingen.de/de/264255.html}\\{}
+
+Udo Schroeder\\{}
+University of Oldenburg\\{}
+\url{http://www.uni-oldenburg.de/index/personen/?username=USchroeder1}\\{}
+
+Maintainer: Elisabeth Waldmann
+\end{Author}
+%
+\begin{References}\relax
+Yue, R.Y., Rue, H. \emph{Bayesian inference for additive mixed quantile regression models} Computational Statistics \& Data Analysis, (2011),   55, 84-96.
+
+
+Ormerod, J.T. and Wand, M.P.
+\emph{Explaining Variational Approximations}.
+The American Statistician, (2010), 64, 140-153. 
+
+Wand, M. P.; Ormerod, J. T.; Padoan, S. A.; and Fruhwirth, R., \emph{Variational Bayes for Elaborate Distributions},
+\url{http://ro.uow.edu.au/cssmwp/56} (working paper).
+
+
+\end{References}
+%
+\begin{SeeAlso}\relax
+\pkg{BayesX}
+\end{SeeAlso}
+\inputencoding{utf8}
+\HeaderA{bsplines}{B-Splines Basis for Bayesian Inference}{bsplines}
+\keyword{\textbackslash{}textasciitilde{}kwd1}{bsplines}
+\keyword{\textbackslash{}textasciitilde{}kwd2}{bsplines}
+%
+\begin{Description}\relax
+
+Generates a b-spline basis matrix with attributes for Bayesian inference (such as the penalisation matrix and prior parameters). This function is based on the function \LinkA{spline.des}{spline.des} from the package \pkg{splines}.
+\end{Description}
+%
+\begin{Usage}
+\begin{verbatim}
+bsplines(x, M = 20, degree = 3, order = 2, a_1=1, b_1=.00001, knots=NULL, mx=NULL)
+\end{verbatim}
+\end{Usage}
+%
+\begin{Arguments}
+\begin{ldescription}
+\item[\code{x}] data
+\item[\code{M}] number of knots
+\item[\code{degree}] the degree of splines
+\item[\code{order}] the order of the random walk prior
+\item[\code{a\_1}] shape parameter for the gamma-prior for the smoothing parameter
+\item[\code{b\_1}] scale parameter for the gamma-prior for the smoothing parameter
+\item[\code{knots}] knots at which the spline is to be evaluated
+\item[\code{mx}] value the spline is centered around, default is mean(x)
+\end{ldescription}
+\end{Arguments}
+%
+\begin{Value}
+
+
+The matrix returned is the basis matrix. The attributes are
+K (the penalisation matrix with differences of order "order") and the class of the effect ("splines") as well as the prior parameters a\_1 and b\_1.
+
+\end{Value}
+%
+\begin{Author}\relax
+Elisabeth Waldmann
+
+\email{ewaldma@uni-goettingen.de}
+
+\end{Author}
+%
+\begin{References}\relax
+
+Fahrmeir L., Kneib T. and Lang S. (2009) \emph{Regression} Springer, New York
+\end{References}
+%
+\begin{SeeAlso}\relax
+\LinkA{lin}{lin}, \LinkA{spatial}{spatial}, \LinkA{random}{random}
+\end{SeeAlso}
+%
+\begin{Examples}
+\begin{ExampleCode}
+x <- runif(100,-3,3)
+Z <- bsplines(x)
+K <- attr(Z, "K")
+attr(Z, "class")
+\end{ExampleCode}
+\end{Examples}
+\inputencoding{utf8}
+\HeaderA{lin}{Linear effects for Bayesian inference}{lin}
+\keyword{\textbackslash{}textasciitilde{}kwd1}{lin}
+\keyword{\textbackslash{}textasciitilde{}kwd2}{lin}
+%
+\begin{Description}\relax
+
+Simplifies the access to prior parameters given in a formula type object.
+\end{Description}
+%
+\begin{Usage}
+\begin{verbatim}
+lin(x, mu0=0, sig0=10000)
+\end{verbatim}
+\end{Usage}
+%
+\begin{Arguments}
+\begin{ldescription}
+\item[\code{x}] 
+data
+
+\item[\code{mu0}] 
+mean for the gaussian prior for the linear effect
+
+\item[\code{sig0}] 
+variance for the gaussian prior for the linear effect
+
+
+\end{ldescription}
+\end{Arguments}
+%
+\begin{Value}
+The vector returned only comprises the data. The attributes are the class of the effect("linear"), and the prior parameters.  
+\end{Value}
+%
+\begin{Author}\relax
+Elisabeth Waldmann
+
+\end{Author}
+%
+\begin{SeeAlso}\relax
+\LinkA{bsplines}{bsplines}, \LinkA{spatial}{spatial}
+
+\end{SeeAlso}
+%
+\begin{Examples}
+\begin{ExampleCode}
+x <- runif(100,-3,3)
+Z <- lin(x)
+attr(Z, "class")
+\end{ExampleCode}
+\end{Examples}
+\inputencoding{utf8}
+\HeaderA{plot.va}{Plots for VA}{plot.va}
+\keyword{\textbackslash{}textasciitilde{}kwd1}{plot.va}
+\keyword{\textbackslash{}textasciitilde{}kwd2}{plot.va}
+%
+\begin{Description}\relax
+
+Plots the different effects of a va object.
+\end{Description}
+%
+\begin{Usage}
+\begin{verbatim}
+## S3 method for class 'va'
+plot(x,map=NULL,ask=TRUE,linear=TRUE,bsplines=TRUE,spatial=TRUE,random=TRUE,...)
+\end{verbatim}
+\end{Usage}
+%
+\begin{Arguments}
+\begin{ldescription}
+\item[\code{x}] 
+object of va-type
+\item[\code{map}] 
+if there is a spatial effect, the map has to be given as boundary file (i.e. .bnd)
+\item[\code{ask}] 
+if \code{ask=TRUE}, the user will be asked before the page changes to the following plot
+\item[\code{linear}] if \code{linear = FALSE} there will be no plot of the linear effects, even though there are linear effects in the model
+\item[\code{bsplines}] if \code{bsplines = FALSE}, there will be no plot of the nonlinear effects, even though there are nonlinear effects in the model
+\item[\code{spatial}] if \code{spatial = FALSE}, there will be no plot of the spatial effects, even though there are spatial effects in the model
+\item[\code{random}] if \code{random = FALSE}, there will be no plot of the random effects, even though there are random effects in the model
+\item[\code{...}] Additional arguments
+\end{ldescription}
+\end{Arguments}
+%
+\begin{Details}\relax
+The function returns a plot of densities of the linear effects, the fitted curve of the centralized b-splines (plotted against the covariates), a map with colors refering to the spatial effects and barplots of the random effects. The map is plotted with the function \LinkA{drawmap}{drawmap} of the package \pkg{BayesX}.
+
+\end{Details}
+%
+\begin{Author}\relax
+Elisabeth Waldmann \\{}
+\email{ewaldma@uni-goettingen.de}
+\end{Author}
+\inputencoding{utf8}
+\HeaderA{predict.va}{Predict method for Variational Approximations}{predict.va}
+\keyword{\textbackslash{}textasciitilde{}kwd1}{predict.va}
+\keyword{\textbackslash{}textasciitilde{}kwd2}{predict.va}
+%
+\begin{Description}\relax
+
+Predicts values based on a variational approximation object
+\end{Description}
+%
+\begin{Usage}
+\begin{verbatim}
+## S3 method for class 'va'
+predict(object, newdata=NULL, ...)
+\end{verbatim}
+\end{Usage}
+%
+\begin{Arguments}
+\begin{ldescription}
+\item[\code{object}] 
+object of va-type
+\item[\code{newdata}] 
+data for which the prediction is to be done. The data has to be passed in form of matrix or dataframe. The colnames have to be the ones, to which the formula referes. If newdata=NULL the prediction of the va object is returned 
+(usually this is the prediction based on the estimation data set, if the pred-Argument was NULL in the estimation. 
+If there was a prediction-dataset, predict returns the prediction for this dataset)
+
+\item[\code{...}] Additional arguments
+
+\end{ldescription}
+\end{Arguments}
+%
+\begin{Value}
+The prediction is returned as a vector
+\end{Value}
+%
+\begin{Note}\relax
+Random effects are set to zero in the prediction.
+\end{Note}
+%
+\begin{Author}\relax
+Elisabeth Waldmann
+\end{Author}
+\inputencoding{utf8}
+\HeaderA{random}{Random effects}{random}
+\keyword{\textbackslash{}textasciitilde{}kwd1}{random}
+\keyword{\textbackslash{}textasciitilde{}kwd2}{random}
+%
+\begin{Description}\relax
+
+Generates a basis matrix for a random effect facilitating the access to parameters in a formula type object
+for Bayesian inference (such as the prior parameters)
+\end{Description}
+%
+\begin{Usage}
+\begin{verbatim}
+random(ind, a_1=1, b_1=1e-5)
+\end{verbatim}
+\end{Usage}
+%
+\begin{Arguments}
+\begin{ldescription}
+\item[\code{ind}] 
+information about the individuals or group
+\item[\code{a\_1}] 
+shape parameter for the gamma-prior for the smoothing parameter
+\item[\code{b\_1}] 
+scale parameter for the gamma-prior for the smoothing parameter
+
+\end{ldescription}
+\end{Arguments}
+%
+\begin{Value}
+
+
+The matrix returned is the basis matrix. The attributes are
+K (the neighbouring matrix) and the class of the effect ("random") as well as the prior parameters a\_1 and b\_1.
+
+\end{Value}
+%
+\begin{Author}\relax
+Elisabeth Waldmann
+
+\email{ewaldma@uni-goettingen.de}
+
+\end{Author}
+%
+\begin{References}\relax
+
+Fahrmeir L., Kneib T. and Lang S. (2009) \emph{Regression} Springer, New York
+\end{References}
+%
+\begin{SeeAlso}\relax
+\LinkA{lin}{lin}, \LinkA{bsplines}{bsplines}, \LinkA{spatial}{spatial}
+\end{SeeAlso}
+\inputencoding{utf8}
+\HeaderA{residuals.va}{Residuals for Variational Approximations}{residuals.va}
+\keyword{\textbackslash{}textasciitilde{}kwd1}{residuals.va}
+\keyword{\textbackslash{}textasciitilde{}kwd2}{residuals.va}
+%
+\begin{Description}\relax
+residuals values based on a variational approximation object
+\end{Description}
+%
+\begin{Usage}
+\begin{verbatim}
+## S3 method for class 'va'
+residuals(object, ...)
+\end{verbatim}
+\end{Usage}
+%
+\begin{Arguments}
+\begin{ldescription}
+\item[\code{object}] 
+object of va-type
+\item[\code{...}] Additional arguments
+\end{ldescription}
+\end{Arguments}
+%
+\begin{Value}
+The residuals are returned as a vector
+\end{Value}
+%
+\begin{Author}\relax
+Elisabeth Waldmann \\{}
+\email{ewaldma@uni-goettingen.de}
+\end{Author}
+\inputencoding{utf8}
+\HeaderA{risk}{Risk for mean and quantile estimations}{risk}
+%
+\begin{Description}\relax
+This functions can be used to evaluate the estimation of mean or quantile regression models. It or returns the MSE or the risk function calculated by the checkfunction.
+
+\end{Description}
+%
+\begin{Usage}
+\begin{verbatim}
+risk(y, pred, quant = FALSE, tau = 0.5)
+\end{verbatim}
+\end{Usage}
+%
+\begin{Arguments}
+\begin{ldescription}
+\item[\code{y}] 
+numeric vector of data  
+
+
+\item[\code{pred}] 
+numeric value or vector of the prediction for y
+
+
+\item[\code{quant}] 
+logical. If TRUE the checkfunction is calculated (the default is FALSE)
+
+
+\item[\code{tau}] 
+numerical. The quantile for which the risk is to be calculated. This value has to be between 0 and 1 (the default value is 0.5).
+
+
+\end{ldescription}
+\end{Arguments}
+%
+\begin{Examples}
+\begin{ExampleCode}
+y <- rnorm(1000,3,5)
+x <- mean(y)
+## MSE of the mean
+risk(y,x)
+
+x <- quantile(y, .4)
+###
+risk(y,x,quant=TRUE, tau=.4)
+
+\end{ExampleCode}
+\end{Examples}
+\inputencoding{utf8}
+\HeaderA{spatial}{Gaussian random fields}{spatial}
+\keyword{\textbackslash{}textasciitilde{}kwd1}{spatial}
+\keyword{\textbackslash{}textasciitilde{}kwd2}{spatial}
+%
+\begin{Description}\relax
+
+Generates a basis matrix for a Gaussian random field facilitating the access to parameters in a formula type object
+for Bayesian inference (such as the prior parameters)
+\end{Description}
+%
+\begin{Usage}
+\begin{verbatim}
+spatial(geo, map,a_1=1, b_1=.0001)
+\end{verbatim}
+\end{Usage}
+%
+\begin{Arguments}
+\begin{ldescription}
+\item[\code{geo}] 
+spatial information
+\item[\code{map}] 
+the corresponding map (given as .gra or .bnd) 
+\item[\code{a\_1}] 
+shape parameter for the gamma-prior for the smoothing parameter
+\item[\code{b\_1}] 
+scale parameter for the gamma-prior for the smoothing parameter
+
+\end{ldescription}
+\end{Arguments}
+%
+\begin{Value}
+
+
+The matrix returned is the basis matrix. The attributes are
+K (the neighbouring matrix) and the class of the effect ("spatial") as well as the prior parameters a\_1 and b\_1.
+
+\end{Value}
+%
+\begin{Author}\relax
+Elisabeth Waldmann
+
+\email{ewaldma@uni-goettingen.de}
+
+\end{Author}
+%
+\begin{References}\relax
+
+Fahrmeir L., Kneib T. and Lang S. (2009) \emph{Regression} Springer, New York
+\end{References}
+%
+\begin{SeeAlso}\relax
+\LinkA{lin}{lin}, \LinkA{bsplines}{bsplines}
+\end{SeeAlso}
+%
+\begin{Examples}
+\begin{ExampleCode}
+germany <- read.bnd(system.file("examples/germany.bnd", package="BayesX"))
+gramap<-bnd2gra(germany)
+centroids <- get.centroids(germany)
+geo_ind <- c(sample(1:310,size=1000,replace=TRUE))
+geo <- row.names(centroids)[geo_ind]
+Z <- spatial(geo, gramap)
+K <- attr(Z, "K")
+attr(Z, "class")
+\end{ExampleCode}
+\end{Examples}
+\inputencoding{utf8}
+\HeaderA{summary.va}{Summary for VA-Regression}{summary.va}
+\keyword{\textbackslash{}textasciitilde{}kwd1}{summary.va}
+\keyword{\textbackslash{}textasciitilde{}kwd2}{summary.va}
+%
+\begin{Description}\relax
+
+Summarizes the results of the VA-Regerssion
+\end{Description}
+%
+\begin{Usage}
+\begin{verbatim}
+## S3 method for class 'va'
+summary(object, ...)
+\end{verbatim}
+\end{Usage}
+%
+\begin{Arguments}
+\begin{ldescription}
+\item[\code{object}] 
+object of va-type
+\item[\code{...}] Additional arguments
+
+\end{ldescription}
+\end{Arguments}
+%
+\begin{Details}\relax
+This function returns the formula-object, the quantile the regression was done for (if \code{quant=TRUE}),
+a table of the linear coefficients, containing the standard deviation as well as the 
+0.025 and the 0.975-quantile of the corresponding Gaussian distribution. 
+The nonlinear, spatial and random effects are mentioned with their meaning.
+\end{Details}
+%
+\begin{Author}\relax
+Elisabeth Waldmann \\{}
+\email{ewaldma@uni-goettingen.de}
+
+\end{Author}
+\inputencoding{utf8}
+\HeaderA{va}{Estimation of Parameters of Bayesian Additive (Quantile) Regression}{va}
+\keyword{\textbackslash{}textasciitilde{}kwd1}{va}
+\keyword{\textbackslash{}textasciitilde{}kwd2}{va}
+%
+\begin{Description}\relax
+
+function to estimate parameters of bayesian additive (quantile) regression
+\end{Description}
+%
+\begin{Usage}
+\begin{verbatim}
+va(formula, data = NULL, intercept = TRUE, quant = FALSE, ta = 0.5,
+k = 100, sto = 1e-04,
+a_0 = 1, b_0 = 1e-05, 
+plotmse = FALSE, norm = TRUE, pred = NULL, ...)
+\end{verbatim}
+\end{Usage}
+%
+\begin{Arguments}
+\begin{ldescription}
+\item[\code{formula}] 
+a formula object, with the response on the left of a \textasciitilde{} operator, and the terms, separated by + operators, on the right, by default calculated as linear effects. The effects can be changed by using different functions, \LinkA{bsplines}{bsplines}, \LinkA{spatial}{spatial}, \LinkA{lin}{lin} or \LinkA{random}{random}.
+
+
+
+\item[\code{data}] 
+a matrix containing the data
+
+
+\item[\code{intercept}] 
+logical value if an intercept should be included (the default value is TRUE)
+
+
+
+\item[\code{quant}] 
+logical value indicating if quantile regression is to be calculated (the default value is FALSE)
+
+
+\item[\code{ta}] 
+numerical. The quantile to be estimated. This value has to be between 0 and 1 (the default value is 0.5).
+
+
+\item[\code{k}] 
+maximal number of iterations used
+
+
+\item[\code{sto}] 
+stoping criterion, using the relative change of the risk to stop the program before reaching k iterations
+
+
+\item[\code{a\_0}] 
+shape-parameter for gamma-prior for modelprecision parameter
+
+
+\item[\code{b\_0}] 
+rate-parameter for gamma-prior for modelprecision parameter
+
+
+\item[\code{plotmse}] 
+logical value, indicating if the risk should be plotted in each iteration (default value is FALSE). Note that the plotted risk refers to the data used for estimation (i.e. defaultwise the normalised data) and therefore might differ highly from the risk calculated afterwards.
+
+\item[\code{norm}] 
+logical value, indicating if the data are to be normalized before calculation (default value is TRUE)
+
+\item[\code{pred}] 
+matrix of data used for prediction. If there are no data for prediction, the prediction will be done on the data which were used for estimation
+
+
+\item[\code{...}] 
+Extra parameters needed
+
+\end{ldescription}
+\end{Arguments}
+%
+\begin{Value}
+
+
+\begin{ldescription}
+\item[\code{beta }] the estimated linear effects
+\item[\code{sig\_bet}] the covariance matrix of the linear effects
+\item[\code{Xlinear}] a matrix containing all the linear information
+\item[\code{Z}] the designmatrix of the nonlinear effects
+\item[\code{gamma}] list of vectors of ALL estimated nonlinear effects (i.e. bsplines, spatial and random effects)
+\item[\code{sig\_gam}] the covariance matrix of all nonlinear effects
+\item[\code{Xnonlinear}] a data matrix containing all the nonlinear information
+\item[\code{tau\_inv}] a vector of the inverse of the smoothing parameters
+\item[\code{delta}] the model precision
+\item[\code{i}] the number of iterations until the stopping criterion or the maximal number of iterations was reached (note that there is a warning if k is reached before the stopping criterion is fulfilled)
+\item[\code{call}] formula given to the function
+\item[\code{prediction}] a vector with the predicted values for either the data the estimation was based on (if \code{pred=NULL}) or for the data given in pred
+\item[\code{tau}] the quantile the estimation was done for (of \code{quant = TRUE})
+\item[\code{residuals}] a vector of the difference between y and the prediction
+\item[\code{replace}] a vector which stores the numbers of the iterations in which the parameters in the distribution of the modelprecision were replaced in order to make the numerical integration possible. See section note for further information.
+
+\end{ldescription}
+
+
+\end{Value}
+%
+\begin{Note}\relax
+If you estimate the coeffecients for a quantile regression, the approximated precision of the model is calculated via numerical integration using a subroutine in C. If values in this subroutine get too big, the step is repeated with the compensatory values for the parameters of the precision. This only happens for very sparse regions in the datasets (i.e. usually in the margins) and even in these cases the integral will normally be calculated for the real values before convergence. If the real values were not used throughout the whole iterating process, there will be a warning. If the results of your estimations are somehow akward even though there was no warning, you should check \code{va\$replace}, which returns a vector, telling you in which iteration the parameters were replaced. If you set \code{plotmse=TRUE}, the points in which the parameters are replaced are marked in red. If they are replaced in an iteration close to the last iteration, you might want to think about the sparsity of the data in the quantile you tried to estimate (estimating the .01-quantile of a dataset containing 50 observations might not be very sensible anyway). If you want to use the estimations anyway, you should know that even if the point estimators (such as the beta-vector)  still seem trustworthy, the covariances get to big (you might consider taking the last estimation BEFORE the replacement to be the closest to the "truth").
+\end{Note}
+%
+\begin{Author}\relax
+Elisabeth Waldmann \\{}
+University of Goettingen \\{}
+\email{ewaldma@uni-goettingen.de}
+
+\end{Author}
+%
+\begin{References}\relax
+
+Ormerod, J.T. and Wand, M.P.
+\emph{Explaining Variational Approximations}.
+The American Statistician, (2010), 64, 140-153. 
+
+Wand, M. P.; Ormerod, J. T.; Padoan, S. A.; and Fruhwirth, R., \emph{Variational Bayes for Elaborate Distributions},
+\url{http://ro.uow.edu.au/cssmwp/56} (working paper).
+
+
+\end{References}
+%
+\begin{SeeAlso}\relax
+Graphical presentation can be done by using \LinkA{plot.va}{plot.va}.
+\end{SeeAlso}
+%
+\begin{Examples}
+\begin{ExampleCode}
+#data(cars)
+#va(dist~speed, data=cars)
+
+## Example for using linear and nonlinear effects
+set.seed(123)
+x <- runif(100,-3,3)
+x2 <- runif(100,-3,3)
+x3 <- runif(100,-3,3)
+x4 <- runif(100,0,3)
+y <- 3 + 3*sin(x)+3*x2+4*x3+log(x4)+rnorm(100,0,1)
+
+L<-va(y~bsplines(x)+x2 +x3 +bsplines(x4), quant=TRUE)
+summary(L)
+plot(L)
+
+## Example using different quantiles in a heteroscedastic scenario
+
+set.seed(123)
+x <- runif(500,0,3)
+y <- 3 + 1.5*x+rnorm(500,0,.3*x)
+
+L1<-va(y~x, quant=TRUE, ta=.1)
+L3<-va(y~x, quant=TRUE, ta=.3)
+L5<-va(y~x, quant=TRUE, ta=.5)
+L7<-va(y~x, quant=TRUE, ta=.7)
+L9<-va(y~x, quant=TRUE, ta=.9)
+plot(x,y, col="lightgrey")
+lines(sort(x), L1$pred[order(x)])
+lines(sort(x), L3$pred[order(x)])
+lines(sort(x), L5$pred[order(x)])
+lines(sort(x), L7$pred[order(x)])
+lines(sort(x), L9$pred[order(x)])
+
+\end{ExampleCode}
+\end{Examples}
+\printindex{}
+\end{document}
