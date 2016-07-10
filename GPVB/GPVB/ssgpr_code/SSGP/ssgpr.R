@@ -9,6 +9,7 @@ X_tst <- unname(as.matrix(X_tst))
 T_tr <- unname(as.matrix(T_tr))
 T_tst <- unname(as.matrix(T_tst))
 
+
 source('~/Desktop/Github/VB/cosine/demo/vbgpspectral.R')
 
 minim <- function (X, f, .length, x, y)
@@ -355,54 +356,51 @@ ssgpr_ui <- function(x_tr, y_tr, x_tst, y_tst, m, iteropt = NULL, loghyper = NUL
 
 
 
-set.seed(1)
-n<-500
-J <- 20
-x<-0.1+0.8*runif(n)
-loghyper = rep(1,3)
-#Z<-cbind(rep(1,times=n),runif(n))
-#y<-sin(x*pi)+Z%*%c(1,1)+0.1*rnorm(n)
-Z<-rep(1,times=n)
-y<-sin(x*pi)+Z+0.1*rnorm(n)
-rsig.0<-0.01
-ssig.0<-0.01
-rtau.0<-0.01
-stau.0<-0.01
-w0<-1
-#mubeta.0<-c(0,0)
-#sigbeta.0<-diag(2)
-mubeta.0<-0
-sigbeta.0<-matrix(1,nrow=1,ncol=1)
-prior.parms<-list(rsig.0=rsig.0,ssig.0=ssig.0,rtau.0=rtau.0,stau.0=stau.0,w0=w0,mubeta.0=mubeta.0,sigbeta.0=sigbeta.0)
+# set.seed(1)
+# n<-500
+# J <- 20
+# x<-0.1+0.8*runif(n)
+# vphi2 <- sqrt(2)*cos(outer(x,pi*(1:J)))
+# loghyper = rep(1,3)
+# #Z<-cbind(rep(1,times=n),runif(n))
+# #y<-sin(x*pi)+Z%*%c(1,1)+0.1*rnorm(n)
+# Z<-rep(1,times=n)
+# yStar <- sin(x*pi)+Z
+# y<-yStar+0.1*rnorm(n)
+# rsig.0<-0.01
+# ssig.0<-0.01
+# rtau.0<-0.01
+# stau.0<-0.01
+# w0<-1
+# #mubeta.0<-c(0,0)
+# #sigbeta.0<-diag(2)
+# mubeta.0<-0
+# sigbeta.0<-matrix(1,nrow=1,ncol=1)
+# prior.parms<-list(rsig.0=rsig.0,ssig.0=ssig.0,rtau.0=rtau.0,stau.0=stau.0,w0=w0,mubeta.0=mubeta.0,sigbeta.0=sigbeta.0)
+
+# fit_SSGP <- c()
+# for (i in seq(from = 20, to = 200, by = 10)) {
+#   fit_SSGP <- c(fit_SSGP, (ssgpr_ui(as.matrix(x), as.matrix(y), as.matrix(x), as.matrix(yStar), i, -1000, rep(1, 3)))$NMSE)
+# }
+
+# fit_BSAR <- c()
+# for (j in seq(from = 20, to = 200, by = 10)) {
+#   temp <- vbgpspectral(y, x, Z = rep(1, n), T = i, tol = 1.0e-05, prior.parms = prior.parms, mupsi.q.start = 1)
+#   fitted_BSAR <- vphi2[,1:length(temp$mutheta.q)]%*%temp$mutheta.q
+#   res <- mean((fitted_BSAR - yStar)^2) / mean((yStar - mean(y))^2)
+#   fit_BSAR <- c(fit_BSAR, res)
+# }
+
+# temp <- vbgpspectral(y, x, Z = rep(1, n), T = 20, tol = 1.0e-05, prior.parms = prior.parms, mupsi.q.start = 1)
+# fitted_BSAR <- vphi2[,1:length(temp$mutheta.q)]%*%temp$mutheta.q
+# res <- mean((fitted_BSAR - yStar)^2) / mean((yStar - mean(y))^2)
+
+# plot(seq_along(fit_SSGP), fit_SSGP, pch = 1, ylim = range(c(fit_SSGP, fit_BSAR)), col = 'darkgreen', xlab = '# of basis functions', ylab = 'NMSE', main = 'SSGP vs BSAR')
+# lines(seq_along(fit_SSGP), fit_SSGP, lty = 2, col = 'darkgreen')
+# points(seq_along(fit_BSAR), fit_BSAR, pch = 2, col = 'purple')
+# lines(seq_along(fit_BSAR), fit_BSAR, lty = 3, col = 'purple')
 
 
-t1 <- Sys.time()
-fitt <- ssgpr_ui(as.matrix(x), as.matrix(y), as.matrix(x), as.matrix(y), 100, -100, rep(1, 3))
-t2 <- Sys.time()
-z1 <- difftime(t2, t1)
-class(z1) <- NA
-z1 <- round(z1[1], digits = 4)
-t3 <- Sys.time()
-fitt2 <- vbgpspectral(y, x, Z = rep(1, n), T = 20, tol = 1.0e-05, prior.parms = prior.parms, mupsi.q.start = 1)
-t4 <- Sys.time()
-z2 <- difftime(t4, t2)
-class(z2) <- NA
-z2 <- round(z2[1], digits = 4)
-vphi2 <- sqrt(2)*cos(outer(x,pi*(1:J)))
-fitted22 <- vphi2[,1:length(fitt2$mutheta.q)]%*%fitt2$mutheta.q
-fitted22 <- fitted22 - mean(fitted22)
-o <- order(x)
-y2 <- y - mean(y)
-fitmu <- fitt$mu - mean(fitt$mu)
-plot(x[o], y2[o], ylim = range(c(fitted22, fitmu, y2)), xlab = '', ylab = '', main = expression(paste('sin(',pi, 'x)+Z+0.1N(0,1)')))
-lines(x[o], fitted22[o], lwd = 2, lty = 3, col = 'red')
-lines(x[o], fitmu[o], lwd = 2, lty = 6, col = 'darkgreen')
-legend('topright', lty = c(NA, 3, 6), pch = c(1, NA, NA),  col = c(1, 'red', 'darkgreen'), legend = c('true', paste('BSAR =',z2,'s'), paste('SSGP=',z1,'s')), bg = 'gray90')
-
-
-
-# y <- T_tr
-# x <- X_tr[,7]
 # t1 <- Sys.time()
 # fitt <- ssgpr_ui(as.matrix(x), as.matrix(y), as.matrix(x), as.matrix(y), 100, -100, rep(1, 3))
 # t2 <- Sys.time()
@@ -410,7 +408,7 @@ legend('topright', lty = c(NA, 3, 6), pch = c(1, NA, NA),  col = c(1, 'red', 'da
 # class(z1) <- NA
 # z1 <- round(z1[1], digits = 4)
 # t3 <- Sys.time()
-# fitt2 <- vbgpspectral(y, x, Z = rep(1, length(c(y))), T = 20, tol = 1.0e-05, prior.parms = prior.parms, mupsi.q.start = 1)
+# fitt2 <- vbgpspectral(y, x, Z = rep(1, n), T = 20, tol = 1.0e-05, prior.parms = prior.parms, mupsi.q.start = 1)
 # t4 <- Sys.time()
 # z2 <- difftime(t4, t2)
 # class(z2) <- NA
@@ -421,9 +419,51 @@ legend('topright', lty = c(NA, 3, 6), pch = c(1, NA, NA),  col = c(1, 'red', 'da
 # o <- order(x)
 # y2 <- y - mean(y)
 # fitmu <- fitt$mu - mean(fitt$mu)
-# plot(x[o], y2[o], ylim = range(c(fitted22, fitmu, y2)), xlab = '', ylab = '', main = '7th variable of pendulum')
+# plot(x[o], y2[o], ylim = range(c(fitted22, fitmu, y2)), xlab = '', ylab = '', main = expression(paste('sin(',pi, 'x)+Z+0.1N(0,1)')))
 # lines(x[o], fitted22[o], lwd = 2, lty = 3, col = 'red')
 # lines(x[o], fitmu[o], lwd = 2, lty = 6, col = 'darkgreen')
 # legend('topright', lty = c(NA, 3, 6), pch = c(1, NA, NA),  col = c(1, 'red', 'darkgreen'), legend = c('true', paste('BSAR =',z2,'s'), paste('SSGP=',z1,'s')), bg = 'gray90')
+y <- T_tr
+x <- X_tr[,7]
+x_rest <- X_tr[,-7]
+J <- 20
+rsig.0<-0.01
+ssig.0<-0.01
+rtau.0<-0.01
+stau.0<-0.01
+w0<-1
+# mubeta.0<-c(0,0)
+# sigbeta.0<-diag(2)
+mubeta.0<-rep(0, times = ncol(x_rest))
+# sigbeta.0<-matrix(1,nrow=length(mubeta.0),ncol=length(mubeta.0))
+sigbeta.0 <- diag(1, length(mubeta.0))
+print(solve(sigbeta.0))
+prior.parms<-list(rsig.0=rsig.0,ssig.0=ssig.0,rtau.0=rtau.0,stau.0=stau.0,w0=w0,mubeta.0=mubeta.0,sigbeta.0=sigbeta.0)
+
+t1 <- Sys.time()
+fitt <- ssgpr_ui(X_tr, as.matrix(y), X_tr, as.matrix(y), 100, -1000, rep(1, 11))
+t2 <- Sys.time()
+z1 <- difftime(t2, t1)
+class(z1) <- NA
+z1 <- round(z1[1], digits = 4)
+t3 <- Sys.time()
+fitt2 <- vbgpspectral(y, x, Z = x_rest, T = 20, tol = 1.0e-05, prior.parms = prior.parms, mupsi.q.start = 1)
+t4 <- Sys.time()
+z2 <- difftime(t4, t2)
+class(z2) <- NA
+z2 <- round(z2[1], digits = 4)
+vphi2 <- sqrt(2)*cos(outer(x,pi*(1:J)))
+fitted22 <- vphi2[,1:length(fitt2$mutheta.q)]%*%fitt2$mutheta.q
+fitted22 <- fitted22 - mean(fitted22)
+o <- order(x)
+y2 <- y - mean(y)
+fitmu <- fitt$mu - mean(fitt$mu)
+plot(x[o], y2[o], ylim = range(c(fitted22, fitmu, y2)), xlab = '', ylab = '', main = '7th variable of pendulum')
+lines(x[o], fitted22[o], lwd = 2, lty = 3, col = 'red')
+lines(x[o], fitmu[o], lwd = 2, lty = 6, col = 'darkgreen')
+legend('topright', lty = c(NA, 3, 6), pch = c(1, NA, NA),  col = c(1, 'red', 'darkgreen'), legend = c('true', paste('BSAR =',z2,'s'), paste('SSGP=',z1,'s')), bg = 'gray90')
 
 
+
+# LASSOselectedVariable <- glmnet::cv.glmnet(elevator_X_tr, c(elevator_T_tr))
+# coefficients <- coef(LASSOselectedVariable, s = "lambda.1se")

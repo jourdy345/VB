@@ -1,4 +1,4 @@
-Rdelta <- function(vektor) .C("R_delta",x=as.double(vektor), w=numeric(1), w1=numeric(1),PACKAGE="VA")
+Rdelta <- function(vektor) .C("R_delta",x=as.double(vektor), w=numeric(1), w1=numeric(1)) #,PACKAGE="VA")
 ### Einführen der Checkfunktion zur Bewertung der Quantile
 
 checkf <- function(u, tau){
@@ -482,14 +482,14 @@ if(names(mu_gam)[j]=="random"){names(Z)[j]<- "random"}
   }
 if(li){
 rownames(mu_bet)<-colnames(Xlinear)}
-  
+print('last')
 ###########################################
 ## Rückgabe der Werte  ####################
 ###########################################	  
     if(is.null(pred)){prediction <- Zg%*%mu_gamG+Xlinear%*%mu_bet}  
 	l<- list(
-    "pqr"<-vektor,
-    "w"=wend,
+    # "pqr"=vektor,
+    # "w"=wend,
     "lambda"=4*ta*(1-ta),
     "delli"=delli,
     "call"=formula,

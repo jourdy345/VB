@@ -32,7 +32,7 @@ double quadratur( double h, unsigned long int p, double q, double r, double eps,
     M=h*M;
     T=0.5*(T+M);
     h=0.5*h;
-  }while(abs(T-M)>eps);
+  }while(fabs(T-M)>eps);
 return(T);
 }
 void R_delta( double* x, double* w, double* w2) {
