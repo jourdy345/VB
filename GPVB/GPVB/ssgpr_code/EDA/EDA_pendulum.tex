@@ -88,8 +88,6 @@ Korea University}
 \section{Pendulum Data}
 \subsection{Data Description}
 The pendulum data obtained from the paper of David Nott consists of 9 covariates and one target variable. As described in the original paper, it is a simulated data of mechanical pendulum, covariates of which are different parameters of the system and the target variable is the angular velocity.
-\subsection{Angular Velocity}
-According to Wikipedia, an angular velocity is \textit{``defined as the rate of change of angular displacement and is a vector quantity (more precisely, a pseudovector) which specifies the angular speed of an object and the axis about which the object is rotating''}. The unit is radians per second.
 \section{SSGP}
   For a short summary of Lazaro Gredilla's SSGP, the paper comes up with a decomposition of the function into
   \begin{equation}
@@ -136,7 +134,8 @@ The real data analysis section of the original paper mentions that the crime dat
 \subsection{BPLAM code review}
   \begin{itemize}
   \item Since one of the purposes of this paper was to propose a novel way of selecting variables using variational approximation, the code assumes there would be more than one covariate. The code crashes with only \texttt{x} of one column.
-  \item The code still worked even though one of the covariates was outside of the range $\left[0,1\right]$. 
+  \item The code still worked even though one of the covariates was outside of the range $\left[0,1\right]$.\\
+  \item Functions are not self-contained!!!!! Who codes like this!?
   \end{itemize}
 \section{Kneib VA}
 Model:
@@ -144,25 +143,6 @@ Model:
   y_{i} = \mathbf{x}^{\top}\bs{\beta}+f_{1}\left(\text{herdsize}_{i}\right)+f_{2}\left(\text{capital}_{i}\right)+f_{\text{spat}}\left(\text{county}_{i}\right) + \epsilon_{i}.
 \end{equation}
 Code doesn't work...
-\section{To be done}
-\begin{itemize}
-  \item Fix Kneib's code
-  \item EDA Miguel's datasets:
-    \begin{itemize}
-      \item \texttt{elevators} data
-      \item \texttt{pumadyn32nm} data
-      \item \texttt{pendulum} data
-      \item \texttt{kin40k} data
-      \item \texttt{pol} data
-    \end{itemize}
-    and BPLAM real data set: \textsf{Ecdat} crime data.
-  \item Run BSAR VB/MCMC (no restriction/shape restriction), SSGP, spline VB, Kneib VB
-    \begin{itemize}
-      \item real data sets (listed above)
-      \item simulated data: 3 models in Kneib's paper, 1 model in BPLAM etc
-    \end{itemize}
-    and compare RMSE, code execution time etc.
-\end{itemize}
 \section{Datasets}
 \subsection{Pole Telecomm and Elevators}
   According to Lazaro Gredilla, the data sets are taken from \texttt{http://www.liaad.up.pt/~ltorgo/Regression/DataSets.html}. 
@@ -190,4 +170,57 @@ Comparing with the one with support $\left[0,1\right]$ suggested in the original
   \int\limits_{0}^{x}\varphi_{j}\left(s\right)\overline{\varphi}_{k}\left(s\right)\,ds = \frac{\sqrt{2}}{\pi j}\sin\left(\pi j x\right)
 \end{equation}
 there is another term added and care must be taken in that we shouldn't simply apply the cdf to the data and do the rest equally. The math tells us it becomes different.
+\section{\texttt{ssgpr.R} manual}
+List of functions:
+\begin{itemize}
+  \item \texttt{vbgpspectral}
+  \item \texttt{minim}
+  \item \texttt{ssgpr}
+  \item \texttt{ssgpr\_ui}
+  \item \texttt{compareSSGPvsBSAR}
+\end{itemize}
+
+Core function is \texttt{compareSSGPvsBSAR} and all else can be ignored.
+\subsection{\texttt{compareSSGPvsBSAR}}
+  Arguments:
+  \begin{itemize}
+    \item \texttt{data}
+      \begin{itemize}
+        \item Choose one from \texttt{c(`pendulum', `elevators', `kin', `pol', `pumadyn', `simul')}.
+        \item All function similarly except for \texttt{`simul'} since it is the only option for simulation. All else are real data.
+        \item If \texttt{data} is set to other than \texttt{simul}, only the main title of the plot generated is affected.
+        \item \textbf{(Caution!)} If you choose one other than \texttt{simul} and set other path variable and filenames differently, then the function will not throw any error message, which could in the end be misleading! 
+      \end{itemize}
+    \item \texttt{fit}
+      \begin{itemize}
+        \item Choose one from \texttt{c(`training', `test')}.
+        \item If \texttt{fit} is set to \texttt{`training'}, two of the subsequents will be ignored: \texttt{c(`fileName\_X\_tst', `fileName\_T\_tst')}. It also means one is free to not provide the argument which will then automatically be set to \texttt{NULL}.
+        \item If \texttt{fit} is set to \texttt{`test'}, the function will complain if you do not supply \texttt{`fileName\_X\_tst'} and \texttt{`fileName\_T\_tst'}.
+      \end{itemize}
+    \item \texttt{path}
+      \begin{itemize}
+        \item It is a string which is assigned the absolute/relative path to the directory that contains the desired data sets. All the files should be contained in the same directory.
+        \item The \texttt{path} variable should end with a forward slash \texttt{`\/'}.
+      \end{itemize}
+    \item \texttt{fileName\_*\_tr}, \texttt{fileName\_*\_tst}
+      \begin{itemize}
+        \item String variables which are assigned the respective data set names.
+        \item The function will automatically concatenate \texttt{path} and \texttt{fileName\_*\_tr/fileName\_*\_tst} to load data sets.
+      \end{itemize}
+  \end{itemize}
+  Return values
+    %res_SSGP, res_BSAR, mu_BSAR, mu_SSGP , centred_SSGP, centred_BSAR
+    \begin{itemize}
+      \item Most importantly, it generates a plot of the fitted/predicted values of SSGP and BSAR alongside the true values displayed in points.
+      \item \texttt{res\_SSGP}: Values returned from SSGP.
+      \item \texttt{res\_BSAR}: Estimated parameters returned from BSAR.
+      \item \texttt{mu\_SSGP}: Fitted value of SSGP if the argument \texttt{fit} is \texttt{`training'}. Predicted value if the argument \texttt{fit} is \texttt{`test'}.
+      \item \texttt{mu\_BSAR}: Fitted value of BSAR if the argument \texttt{fit} is \texttt{`training'}. Predicted value if the argument \texttt{fit} is \texttt{`test'}.
+      \item \texttt{centred\_SSGP}: Self-evident.
+      \item \texttt{centred\_BSAR}: Self-evident.
+    \end{itemize}
+For an example code, refer to \texttt{demo.R}. If you pick \texttt{`simul'} for \texttt{data}, \textsf{R} will ask you to define a function that you want estimated. Use correct \textsf{R} syntax when defining your own function. For example,
+\texttt{f <- function(x) tan(x) - sin(x * pi)}.
+\section{Data set review}
+  
 \end{document}

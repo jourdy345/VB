@@ -40,12 +40,12 @@ tpspline<-function(X,l)
 BPLAM_VB<-function (X,Y,l) 
 {
     s <- 1                              #iteration counter
-    n <- dim(X)[1];p <- dim(X)[2]
+    n <- sample_size <- dim(X)[1];p <- dim(X)[2]
     k <- length(seq(0, 1, l)) - 2
     q <- 3;K <- q + k - 1
     a1 <- 0.5;a2 <- 0.5
     A_delta0.sq <- 1;B_delta0.sq <- 1
-
+    print('>')
     A_sigma.sq <-rep(1,p);
     B_sigma.sq <-rep(1,p);
     A_tau.sq <-rep(1,p);
@@ -66,6 +66,7 @@ BPLAM_VB<-function (X,Y,l)
            B_sigma.sq,A_tau.sq,B_tau.sq,A_delta0.sq,B_delta0.sq)
     error=100;indicator=0               #terminate the algorithm if indicator becomes nonzero
 
+    print('>>')
     omega <- matrix(NA, ncol = q + k - 1, nrow = k + q - 1)
     for (i in 1:(q - 2)) {
         for (j in 1:(q - 2)) {
@@ -76,6 +77,7 @@ BPLAM_VB<-function (X,Y,l)
                 1) * integrate(f, 0, 1)$value
         }
     }
+    print('>>>')
     for (i in (q - 1):(q + k - 1)) {
         for (j in 1:(q - 2)) {
             f <- function(x) {
@@ -86,6 +88,7 @@ BPLAM_VB<-function (X,Y,l)
             omega[j, i] <- omega[i, j]
         }
     }
+    print('>>>>')
     for (i in (q - 1):(q + k - 1)) {
         for (j in (q - 1):(q + k - 1)) {
             f <- function(x) {
@@ -96,6 +99,7 @@ BPLAM_VB<-function (X,Y,l)
                 (i - q + 1), l * (j - q + 1)), 1)$value
         }
     }
+    print('>>>>>')
     omega<-omega/100
 
 #--------------initialization---------------#
@@ -116,6 +120,7 @@ BPLAM_VB<-function (X,Y,l)
                chol(xi_b[,(K*(i-1)+1):(K*i)]) + outer(rep(1,sample_size),mu_b[,i],FUN='*'))
      }
 
+     print('>>>>>>')
 #------------------y_stars-------------------#
 
     p1 <- B0 * t(matrix(outer(p_gamma.a*mu_a, rep(1, n), FUN = "*"),ncol = n))
