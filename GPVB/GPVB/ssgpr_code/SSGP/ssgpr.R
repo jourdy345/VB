@@ -1,13 +1,13 @@
 require('gpr') # for 'minimize'
-X_tr <- read.table(file = '~/Desktop/Github/VB/GPVB/GPVB/PendulumData/X_tr.txt')
-X_tst <- read.table(file = '~/Desktop/Github/VB/GPVB/GPVB/PendulumData/X_tst.txt')
-T_tr <- read.table(file = '~/Desktop/Github/VB/GPVB/GPVB/PendulumData/T_tr.txt')
-T_tst <- read.table(file = '~/Desktop/Github/VB/GPVB/GPVB/PendulumData/T_tst.txt')
+# X_tr <- read.table(file = '~/Desktop/Github/VB/GPVB/GPVB/PendulumData/X_tr.txt')
+# X_tst <- read.table(file = '~/Desktop/Github/VB/GPVB/GPVB/PendulumData/X_tst.txt')
+# T_tr <- read.table(file = '~/Desktop/Github/VB/GPVB/GPVB/PendulumData/T_tr.txt')
+# T_tst <- read.table(file = '~/Desktop/Github/VB/GPVB/GPVB/PendulumData/T_tst.txt')
 loghyp <- rep(1, 11)
-X_tr <- unname(as.matrix(X_tr))
-X_tst <- unname(as.matrix(X_tst))
-T_tr <- unname(as.matrix(T_tr))
-T_tst <- unname(as.matrix(T_tst))
+# X_tr <- unname(as.matrix(X_tr))
+# X_tst <- unname(as.matrix(X_tst))
+# T_tr <- unname(as.matrix(T_tr))
+# T_tst <- unname(as.matrix(T_tst))
 
 
 source('~/Desktop/Github/VB/cosine/demo/vbgpspectral.R')
@@ -436,51 +436,453 @@ compareSSGPvsBSAR <- function(data = 'pendulum', fit = 'training') {
   ############       c('training', 'test')                                        ############
   ############################################################################################
   ############################################################################################
-  switch()
+  call_SSGPR_tr  <- call('ssgpr_ui', quote(X_tr), quote(T_tr), quote(X_tr), quote(T_tr), 100, -100, quote(rep(1,ncol(X_tr)+2)))
+  call_SSGPR_tst <- call('ssgpr_ui', quote(X_tr), quote(T_tr), quote(X_tst), quote(T_tst), 100, -100, quote(rep(1,ncol(X_tr)+2)))
+  call_BSAR      <- call('vbgpspectral', quote(y), quote(x), quote(x_rest), quote(J), quote(tol), quote(prior.parms), 1)
+  
+  J      <- 20
+  rsig.0 <- 0.01
+  ssig.0 <- 0.01
+  rtau.0 <- 0.01
+  stau.0 <- 0.01
+  w0     <- 1
+  tol    <- 1.0e-05
+
+  q_mubeta.0     <- quote( mubeta.0    <- rep(0, times = ncol(x_rest)) )
+  q_sigbeta.0    <- quote( sigbeta.0   <- diag(1, ncol(x_rest)) )
+  q_prior.params <- quote( prior.parms <- list(rsig.0=rsig.0,ssig.0=ssig.0,rtau.0=rtau.0,stau.0=stau.0,w0=w0,mubeta.0=mubeta.0,sigbeta.0=sigbeta.0) )
+
+
+  switch(data,
+               'pendulum' = {
+                              X_tr  <<- unname(as.matrix(read.table('~/Desktop/Github/VB/GPVB/GPVB/ssgpr_code/Miguel_dataset/PendulumData/X_tr.txt')))
+                              T_tr  <<- unname(as.matrix(read.table('~/Desktop/Github/VB/GPVB/GPVB/ssgpr_code/Miguel_dataset/PendulumData/T_tr.txt')))
+                              X_tst <<- unname(as.matrix(read.table('~/Desktop/Github/VB/GPVB/GPVB/ssgpr_code/Miguel_dataset/PendulumData/X_tst.txt')))
+                              T_tst <<- unname(as.matrix(read.table('~/Desktop/Github/VB/GPVB/GPVB/ssgpr_code/Miguel_dataset/PendulumData/T_tst.txt')))
+                              if (fit == 'training') {
+                                res_SSGP      <- eval(call_SSGPR_tr)
+                                centred_SSGP  <- res_SSGP$mu - res_SSGP$mu
+
+                                ind           <- which.min(cov(T_tr, X_tr))
+                                x             <- X_tr[,ind]
+
+                                # squish x into [0,1]
+                                if (!all(x < 1 & x > 0)) {
+                                  x <- pnorm(x)
+                                }
+
+                                x_rest        <- X_tr[,-ind]
+                                y             <- c(T_tr)
+                                y_centred     <- y - mean(y)
+
+                                eval(q_mubeta.0)
+                                eval(q_sigbeta.0)
+                                eval(q_prior.params)
+                                
+                                res_BSAR      <- eval(call_BSAR)
+                                vphi          <- sqrt(2)*cos(outer(x,pi*(1:J)))
+                                mu_BSAR       <- vphi[,1:length(res_BSAR$mutheta.q)] %*% res_BSAR$mutheta.q + x_rest %*% res_BSAR$mubeta.q
+                                centred_BSAR  <- mu_BSAR - mean(mu_BSAR)
+                                o             <- order(x)
+                                plot(x[o], y_centred[o], xlab = '', ylab = 'fitted', main = 'Pendulum data / training')
+                                lines(x[o], centred_SSGP[o], lwd = 2, lty = 2, col = 'red')
+                                lines(x[o], centred_BSAR[o], lwd = 2, lty = 3, col = 'darkgreen')
+                                legend('topright', lty = c(NA, 2, 3), pch = c(1, NA, NA), col = c(1, 'red', 'darkgreen'), legend = c('true', 'SSGP', 'BSAR'))
+                                return(list(res_SSGP = res_SSGP, res_BSAR = res_BSAR))
+                              } else if (fit == 'test') {
+                                res_SSGP     <- eval(cal_SSGPR_tst)
+                                centred_SSGP <- res_SSGP$mu - res_SSGP$mu
+
+                                ind          <- which.min(cov(T_tr, X_tr))
+                                x            <- X_tr[,ind]
+
+                                # squish x into [0,1]
+                                if (!all(x < 1 & x > 0)) {
+                                  x <- pnorm(x)
+                                }
+
+                                x_rest       <- X_tr[,-ind]
+                                y            <- c(T_tr)
+                                y_centred    <- y - mean(y)
+
+                                eval(q_mubeta.0)
+                                eval(q_sigbeta.0)
+                                eval(q_prior.params)
+
+                                res_BSAR     <- eval(call_BSAR)
+                                vphi         <- sqrt(2)*cos(outer(X_tst[ind],pi*(1:J)))
+                                mu_BSAR      <- vphi[,1:length(res_BSAR$mutheta.q)]%*%res_BSAR$mutheta.q + X_tst[,-ind] %*% res_BSAR$mubeta.q
+                                centred_BSAR <- mu_BSAR - mean(mu_BSAR)
+                                o            <- order(x)
+                                plot(x[o], y_centred[o], xlab = '', ylab = 'fitted', main = 'Pendulum data / test')
+                                lines(x[o], centred_SSGP[o], lwd = 2, lty = 2, col = 'red')
+                                lines(x[o], centred_BSAR[o], lwd = 2, lty = 3, col = 'darkgreen')
+                                legend('topright', lty = c(NA, 2, 3), pch = c(1, NA, NA), col = c(1, 'red', 'darkgreen'), legend = c('true', 'SSGP', 'BSAR'))
+                                return(list(res_SSGP = res_SSGP, res_BSAR = res_BSAR))
+                              } else {
+                                stop("You've inserted the wrong option. Please pick between 'training' and 'test'.")
+                              }
+               },
+               'elevators' = {
+                              X_tr  <<- unname(as.matrix(read.table('~/Desktop/Github/VB/GPVB/GPVB/ssgpr_code/Miguel_dataset/elevator/elevator_X_tr.txt')))
+                              X_tst <<- unname(as.matrix(read.table('~/Desktop/Github/VB/GPVB/GPVB/ssgpr_code/Miguel_dataset/elevator/elevator_X_tst.txt')))
+                              T_tr  <<- unname(as.matrix(read.table('~/Desktop/Github/VB/GPVB/GPVB/ssgpr_code/Miguel_dataset/elevator/elevator_T_tr.txt')))
+                              T_tst <<- unname(as.matrix(read.table('~/Desktop/Github/VB/GPVB/GPVB/ssgpr_code/Miguel_dataset/elevator/elevator_T_tst.txt')))
+
+                              if (fit == 'training') {
+                                res_SSGP      <- eval(call_SSGPR_tr)
+                                centred_SSGP  <- res_SSGP$mu - res_SSGP$mu
+
+                                ind           <- which.min(cov(T_tr, X_tr))
+                                x             <- X_tr[,ind]
+
+                                # squish x into [0,1]
+                                if (!all(x < 1 & x > 0)) {
+                                  x <- pnorm(x)
+                                }
+
+                                x_rest        <- X_tr[,-ind]
+                                y             <- c(T_tr)
+                                y_centred     <- y - mean(y)
+                                
+                                eval(q_mubeta.0)
+                                eval(q_sigbeta.0)
+                                eval(q_prior.params)
+                                
+                                res_BSAR      <- eval(call_BSAR)
+                                vphi          <- sqrt(2)*cos(outer(x,pi*(1:J)))
+                                mu_BSAR       <- vphi[,1:length(res_BSAR$mutheta.q)] %*% res_BSAR$mutheta.q + x_rest %*% res_BSAR$mubeta.q
+                                centred_BSAR  <- mu_BSAR - mean(mu_BSAR)
+                                o             <- order(x)
+                                plot(x[o], y_centred[o], xlab = '', ylab = 'fitted', main = 'Elevators data / training')
+                                lines(x[o], centred_SSGP[o], lwd = 2, lty = 2, col = 'red')
+                                lines(x[o], centred_BSAR[o], lwd = 2, lty = 3, col = 'darkgreen')
+                                legend('topright', lty = c(NA, 2, 3), pch = c(1, NA, NA), col = c(1, 'red', 'darkgreen'), legend = c('true', 'SSGP', 'BSAR'))
+                                return(list(res_SSGP = res_SSGP, res_BSAR = res_BSAR))
+                              } else if (fit == 'test') {
+                                res_SSGP     <- eval(cal_SSGPR_tst)
+                                centred_SSGP <- res_SSGP$mu - res_SSGP$mu
+
+                                ind          <- which.min(cov(T_tr, X_tr))
+                                x            <- X_tr[,ind]
+
+                                # squish x into [0,1]
+                                if (!all(x < 1 & x > 0)) {
+                                  x <- pnorm(x)
+                                }
+                                
+                                x_rest       <- X_tr[,-ind]
+                                y            <- c(T_tr)
+                                y_centred    <- y - mean(y)
+
+                                eval(q_mubeta.0)
+                                eval(q_sigbeta.0)
+                                eval(q_prior.params)
+
+                                res_BSAR     <- eval(call_BSAR)
+                                vphi         <- sqrt(2)*cos(outer(X_tst[ind],pi*(1:J)))
+                                mu_BSAR      <- vphi[,1:length(res_BSAR$mutheta.q)]%*%res_BSAR$mutheta.q + X_tst[,-ind] %*% res_BSAR$mubeta.q
+                                centred_BSAR <- mu_BSAR - mean(mu_BSAR)
+                                o            <- order(x)
+                                plot(x[o], y_centred[o], xlab = '', ylab = 'fitted', main = 'Elevators data / test')
+                                lines(x[o], centred_SSGP[o], lwd = 2, lty = 2, col = 'red')
+                                lines(x[o], centred_BSAR[o], lwd = 2, lty = 3, col = 'darkgreen')
+                                legend('topright', lty = c(NA, 2, 3), pch = c(1, NA, NA), col = c(1, 'red', 'darkgreen'), legend = c('true', 'SSGP', 'BSAR'))
+                                return(list(res_SSGP = res_SSGP, res_BSAR = res_BSAR))
+                              } else {
+                                stop("You've inserted the wrong option. Please pick between 'training' and 'test'.")
+                              }
+               },
+               'kin'       = {
+                              X_tr  <<- unname(as.matrix(read.table('~/Desktop/Github/VB/GPVB/GPVB/ssgpr_code/Miguel_dataset/kin/kin_X_tr.txt')))
+                              X_tst <<- unname(as.matrix(read.table('~/Desktop/Github/VB/GPVB/GPVB/ssgpr_code/Miguel_dataset/kin/kin_X_tst.txt')))
+                              T_tr  <<- unname(as.matrix(read.table('~/Desktop/Github/VB/GPVB/GPVB/ssgpr_code/Miguel_dataset/kin/kin_T_tr.txt')))
+                              T_tst <<- unname(as.matrix(read.table('~/Desktop/Github/VB/GPVB/GPVB/ssgpr_code/Miguel_dataset/kin/kin_T_tst.txt')))
+
+                              if (fit == 'training') {
+                                res_SSGP      <- eval(call_SSGPR_tr)
+                                centred_SSGP  <- res_SSGP$mu - res_SSGP$mu
+
+                                ind           <- which.min(cov(T_tr, X_tr))
+                                x             <- X_tr[,ind]
+
+                                # squish x into [0,1]
+                                if (!all(x < 1 & x > 0)) {
+                                  x <- pnorm(x)
+                                }
+
+                                x_rest        <- X_tr[,-ind]
+                                y             <- c(T_tr)
+                                y_centred     <- y - mean(y)
+                                
+                                eval(q_mubeta.0)
+                                eval(q_sigbeta.0)
+                                eval(q_prior.params)
+                                
+                                res_BSAR      <- eval(call_BSAR)
+                                vphi          <- sqrt(2)*cos(outer(x,pi*(1:J)))
+                                mu_BSAR       <- vphi[,1:length(res_BSAR$mutheta.q)] %*% res_BSAR$mutheta.q + x_rest %*% res_BSAR$mubeta.q
+                                centred_BSAR  <- mu_BSAR - mean(mu_BSAR)
+                                o             <- order(x)
+                                plot(x[o], y_centred[o], xlab = '', ylab = 'fitted', main = 'Kin data / training')
+                                lines(x[o], centred_SSGP[o], lwd = 2, lty = 2, col = 'red')
+                                lines(x[o], centred_BSAR[o], lwd = 2, lty = 3, col = 'darkgreen')
+                                legend('topright', lty = c(NA, 2, 3), pch = c(1, NA, NA), col = c(1, 'red', 'darkgreen'), legend = c('true', 'SSGP', 'BSAR'))
+                                return(list(res_SSGP = res_SSGP, res_BSAR = res_BSAR))
+                              } else if (fit == 'test') {
+                                res_SSGP     <- eval(cal_SSGPR_tst)
+                                centred_SSGP <- res_SSGP$mu - res_SSGP$mu
+
+                                ind          <- which.min(cov(T_tr, X_tr))
+                                x            <- X_tr[,ind]
+
+                                # squish x into [0,1]
+                                if (!all(x < 1 & x > 0)) {
+                                  x <- pnorm(x)
+                                }
+                                
+                                x_rest       <- X_tr[,-ind]
+                                y            <- c(T_tr)
+                                y_centred    <- y - mean(y)
+
+                                eval(q_mubeta.0)
+                                eval(q_sigbeta.0)
+                                eval(q_prior.params)
+
+                                res_BSAR     <- eval(call_BSAR)
+                                vphi         <- sqrt(2)*cos(outer(X_tst[ind],pi*(1:J)))
+                                mu_BSAR      <- vphi[,1:length(res_BSAR$mutheta.q)]%*%res_BSAR$mutheta.q + X_tst[,-ind] %*% res_BSAR$mubeta.q
+                                centred_BSAR <- mu_BSAR - mean(mu_BSAR)
+                                o            <- order(x)
+                                plot(x[o], y_centred[o], xlab = '', ylab = 'fitted', main = 'Kin data / test')
+                                lines(x[o], centred_SSGP[o], lwd = 2, lty = 2, col = 'red')
+                                lines(x[o], centred_BSAR[o], lwd = 2, lty = 3, col = 'darkgreen')
+                                legend('topright', lty = c(NA, 2, 3), pch = c(1, NA, NA), col = c(1, 'red', 'darkgreen'), legend = c('true', 'SSGP', 'BSAR'))
+                                return(list(res_SSGP = res_SSGP, res_BSAR = res_BSAR))
+                              } else {
+                                stop("You've inserted the wrong option. Please pick between 'training' and 'test'.")
+                              }
+               },
+               'pol'       = {
+                              X_tr  <<- unname(as.matrix(read.table('~/Desktop/Github/VB/GPVB/GPVB/ssgpr_code/Miguel_dataset/pol/pol_X_tr.txt')))
+                              X_tst <<- unname(as.matrix(read.table('~/Desktop/Github/VB/GPVB/GPVB/ssgpr_code/Miguel_dataset/pol/pol_X_tst.txt')))
+                              T_tr  <<- unname(as.matrix(read.table('~/Desktop/Github/VB/GPVB/GPVB/ssgpr_code/Miguel_dataset/pol/pol_T_tr.txt')))
+                              T_tst <<- unname(as.matrix(read.table('~/Desktop/Github/VB/GPVB/GPVB/ssgpr_code/Miguel_dataset/pol/pol_T_tst.txt')))
+
+                              if (fit == 'training') {
+                                res_SSGP      <- eval(call_SSGPR_tr)
+                                centred_SSGP  <- res_SSGP$mu - res_SSGP$mu
+
+                                ind           <- which.min(cov(T_tr, X_tr))
+                                x             <- X_tr[,ind]
+
+                                # squish x into [0,1]
+                                if (!all(x < 1 & x > 0)) {
+                                  x <- pnorm(x)
+                                }
+
+                                x_rest        <- X_tr[,-ind]
+                                y             <- c(T_tr)
+                                y_centred     <- y - mean(y)
+                                
+                                eval(q_mubeta.0)
+                                eval(q_sigbeta.0)
+                                eval(q_prior.params)
+                                
+                                res_BSAR      <- eval(call_BSAR)
+                                vphi          <- sqrt(2)*cos(outer(x,pi*(1:J)))
+                                mu_BSAR       <- vphi[,1:length(res_BSAR$mutheta.q)] %*% res_BSAR$mutheta.q + x_rest %*% res_BSAR$mubeta.q
+                                centred_BSAR  <- mu_BSAR - mean(mu_BSAR)
+                                o             <- order(x)
+                                plot(x[o], y_centred[o], xlab = '', ylab = 'fitted', main = 'Pol data / training')
+                                lines(x[o], centred_SSGP[o], lwd = 2, lty = 2, col = 'red')
+                                lines(x[o], centred_BSAR[o], lwd = 2, lty = 3, col = 'darkgreen')
+                                legend('topright', lty = c(NA, 2, 3), pch = c(1, NA, NA), col = c(1, 'red', 'darkgreen'), legend = c('true', 'SSGP', 'BSAR'))
+                                return(list(res_SSGP = res_SSGP, res_BSAR = res_BSAR))
+                              } else if (fit == 'test') {
+                                res_SSGP     <- eval(cal_SSGPR_tst)
+                                centred_SSGP <- res_SSGP$mu - res_SSGP$mu
+
+                                ind          <- which.min(cov(T_tr, X_tr))
+                                x            <- X_tr[,ind]
+
+                                # squish x into [0,1]
+                                if (!all(x < 1 & x > 0)) {
+                                  x <- pnorm(x)
+                                }
+                                
+                                x_rest       <- X_tr[,-ind]
+                                y            <- c(T_tr)
+                                y_centred    <- y - mean(y)
+
+                                eval(q_mubeta.0)
+                                eval(q_sigbeta.0)
+                                eval(q_prior.params)
+
+                                res_BSAR     <- eval(call_BSAR)
+                                vphi         <- sqrt(2)*cos(outer(X_tst[ind],pi*(1:J)))
+                                mu_BSAR      <- vphi[,1:length(res_BSAR$mutheta.q)]%*%res_BSAR$mutheta.q + X_tst[,-ind] %*% res_BSAR$mubeta.q
+                                centred_BSAR <- mu_BSAR - mean(mu_BSAR)
+                                o            <- order(x)
+                                plot(x[o], y_centred[o], xlab = '', ylab = 'fitted', main = 'Pol data / test')
+                                lines(x[o], centred_SSGP[o], lwd = 2, lty = 2, col = 'red')
+                                lines(x[o], centred_BSAR[o], lwd = 2, lty = 3, col = 'darkgreen')
+                                legend('topright', lty = c(NA, 2, 3), pch = c(1, NA, NA), col = c(1, 'red', 'darkgreen'), legend = c('true', 'SSGP', 'BSAR'))
+                                return(list(res_SSGP = res_SSGP, res_BSAR = res_BSAR))
+                              } else {
+                                stop("You've inserted the wrong option. Please pick between 'training' and 'test'.")
+                              }
+               },
+               'pumadyn'   = {
+                              X_tr  <<- unname(as.matrix(read.table('~/Desktop/Github/VB/GPVB/GPVB/ssgpr_code/Miguel_dataset/pumadyn/pumadyn_X_tr.txt')))
+                              X_tst <<- unname(as.matrix(read.table('~/Desktop/Github/VB/GPVB/GPVB/ssgpr_code/Miguel_dataset/pumadyn/pumadyn_X_tst.txt')))
+                              T_tr  <<- unname(as.matrix(read.table('~/Desktop/Github/VB/GPVB/GPVB/ssgpr_code/Miguel_dataset/pumadyn/pumadyn_T_tr.txt')))
+                              T_tst <<- unname(as.matrix(read.table('~/Desktop/Github/VB/GPVB/GPVB/ssgpr_code/Miguel_dataset/pumadyn/pumadyn_T_tst.txt')))
+
+                              if (fit == 'training') {
+                                res_SSGP      <- eval(call_SSGPR_tr)
+                                centred_SSGP  <- res_SSGP$mu - res_SSGP$mu
+
+                                ind           <- which.min(cov(T_tr, X_tr))
+                                x             <- X_tr[,ind]
+
+                                # squish x into [0,1]
+                                if (!all(x < 1 & x > 0)) {
+                                  x <- pnorm(x)
+                                }
+
+                                x_rest        <- X_tr[,-ind]
+                                y             <- c(T_tr)
+                                y_centred     <- y - mean(y)
+                                
+                                eval(q_mubeta.0)
+                                eval(q_sigbeta.0)
+                                eval(q_prior.params)
+                                
+                                res_BSAR      <- eval(call_BSAR)
+                                vphi          <- sqrt(2)*cos(outer(x,pi*(1:J)))
+                                mu_BSAR       <- vphi[,1:length(res_BSAR$mutheta.q)] %*% res_BSAR$mutheta.q + x_rest %*% res_BSAR$mubeta.q
+                                centred_BSAR  <- mu_BSAR - mean(mu_BSAR)
+                                o             <- order(x)
+                                plot(x[o], y_centred[o], xlab = '', ylab = 'fitted', main = 'Pumadyn data / training')
+                                lines(x[o], centred_SSGP[o], lwd = 2, lty = 2, col = 'red')
+                                lines(x[o], centred_BSAR[o], lwd = 2, lty = 3, col = 'darkgreen')
+                                legend('topright', lty = c(NA, 2, 3), pch = c(1, NA, NA), col = c(1, 'red', 'darkgreen'), legend = c('true', 'SSGP', 'BSAR'))
+                                return(list(res_SSGP = res_SSGP, res_BSAR = res_BSAR))
+                              } else if (fit == 'test') {
+                                res_SSGP     <- eval(cal_SSGPR_tst)
+                                centred_SSGP <- res_SSGP$mu - res_SSGP$mu
+
+                                ind          <- which.min(cov(T_tr, X_tr))
+                                x            <- X_tr[,ind]
+
+                                # squish x into [0,1]
+                                if (!all(x < 1 & x > 0)) {
+                                  x <- pnorm(x)
+                                }
+                                
+                                x_rest       <- X_tr[,-ind]
+                                y            <- c(T_tr)
+                                y_centred    <- y - mean(y)
+
+                                eval(q_mubeta.0)
+                                eval(q_sigbeta.0)
+                                eval(q_prior.params)
+
+                                res_BSAR     <- eval(call_BSAR)
+                                vphi         <- sqrt(2)*cos(outer(X_tst[ind],pi*(1:J)))
+                                mu_BSAR      <- vphi[,1:length(res_BSAR$mutheta.q)]%*%res_BSAR$mutheta.q + X_tst[,-ind] %*% res_BSAR$mubeta.q
+                                centred_BSAR <- mu_BSAR - mean(mu_BSAR)
+                                o            <- order(x)
+                                plot(x[o], y_centred[o], xlab = '', ylab = 'fitted', main = 'Pumadyn data / test')
+                                lines(x[o], centred_SSGP[o], lwd = 2, lty = 2, col = 'red')
+                                lines(x[o], centred_BSAR[o], lwd = 2, lty = 3, col = 'darkgreen')
+                                legend('topright', lty = c(NA, 2, 3), pch = c(1, NA, NA), col = c(1, 'red', 'darkgreen'), legend = c('true', 'SSGP', 'BSAR'))
+                                return(list(res_SSGP = res_SSGP, res_BSAR = res_BSAR))
+                              } else {
+                                stop("You've inserted the wrong option. Please pick between 'training' and 'test'.")
+                              }
+               },
+               'simul' = {
+                          e         <- readline(prompt = "Define a function to be simulated.\n")
+                          f         <- eval(parse(text = e))
+                          n         <- 500
+                          x         <- 0.1 + 0.8 * runif(n)
+                          J         <- 20
+                          vphi      <- sqrt(2) * cos(outer(x, pi * (1:J)))
+                          loghyper  <- rep(1, 3)
+                          Z         <- rep(1, times = n)
+                          yStar     <- f(x) + Z
+                          y         <- yStar + 0.1 * rnorm(n)
+                          y_centred <- y - mean(y)
+
+                          X_tr      <- X_tst <- as.matrix(x)
+                          T_tr      <- as.matrix(y)
+                          T_tst     <- as.matrix(yStar)
+                          x_rest    <- as.matrix(Z)
+
+                          eval(q_mubeta.0)
+                          eval(q_sigbeta.0)
+                          eval(q_prior.params)
+
+                          res_SSGP     <- eval(call_SSGPR_tst)
+                          res_BSAR     <- eval(call_BSAR)
+                          mu_BSAR      <- vphi[,1:length(res_BSAR$mutheta.q)]%*%res_BSAR$mutheta.q + res_BSAR$mubeta.q
+                          centred_SSGP <- res_SSGP$mu - res_SSGP$mu
+                          centred_BSAR <- mu_BSAR - mean(mu_BSAR)
+                          o            <- order(x)
+                          plot(x[o], y_centred[o], xlab = '', ylab = 'fitted', main = 'Simulated data / test')
+                          lines(x[o], centred_SSGP[o], lwd = 2, lty = 2, col = 'red')
+                          lines(x[o], centred_BSAR[o], lwd = 2, lty = 3, col = 'darkgreen')
+                          legend('topright', lty = c(NA, 2, 3), pch = c(1, NA, NA), col = c(1, 'red', 'darkgreen'), legend = c('true', 'SSGP', 'BSAR'))
+                          return(list(res_SSGP = res_SSGP, res_BSAR = res_BSAR))
+               })
+
+  stop("You've inserted an nonexistent option. Please pick from:\n c('pendulum', 'elevators', 'kin', 'pol', 'pumadyn', 'simul').")
 }
 #########################################################
 ##########                                ###############
 ##########  Pendulum data: Training data  ###############
 ##########                                ############### 
 #########################################################
-y <- T_tr
-x <- X_tr[,7]
-x <- pnorm(x)
-x_rest <- X_tr[,-7]
-J <- 20
-rsig.0<-0.01
-ssig.0<-0.01
-rtau.0<-0.01
-stau.0<-0.01
-w0<-1
-mubeta.0<-rep(0, times = ncol(x_rest))
-sigbeta.0 <- diag(1, length(mubeta.0))
-prior.parms<-list(rsig.0=rsig.0,ssig.0=ssig.0,rtau.0=rtau.0,stau.0=stau.0,w0=w0,mubeta.0=mubeta.0,sigbeta.0=sigbeta.0)
-t1 <- Sys.time()
-fitt <- ssgpr_ui(X_tr, as.matrix(y), X_tr, as.matrix(y), 100, -100, rep(1, 11))
-t2 <- Sys.time()
-z1 <- difftime(t2, t1)
-class(z1) <- NA
-z1 <- round(z1[1], digits = 4)
-t3 <- Sys.time()
-fitt2 <- vbgpspectral(y, x, Z = x_rest, T = 20, tol = 1.0e-05, prior.parms = prior.parms, mupsi.q.start = 1)
-t4 <- Sys.time()
-z2 <- difftime(t4, t3)
-class(z2) <- NA
-z2 <- round(z2[1], digits = 4)
-vphi2 <- sqrt(2) * cos(outer(x, pi * (1:J)))
-fitted22 <- vphi2[,1:length(fitt2$mutheta.q)] %*% fitt2$mutheta.q
-fitted22 <- fitted22 - mean(fitted22)
-o <- order(x)
-y2 <- y - mean(y)
-fitmu <- fitt$mu - mean(fitt$mu)
-plot(x[o], y2[o], ylim = range(c(fitted22, fitmu, y2)), xlab = '', ylab = '', main = 'Pendulum training data')
-lines(x[o], fitted22[o], lwd = 2, lty = 3, col = 'red')
-lines(x[o], fitmu[o], lwd = 2, lty = 6, col = 'darkgreen')
-legend('topright', lty = c(NA, 3, 6), pch = c(1, NA, NA),  col = c(1, 'red', 'darkgreen'), legend = c('true', paste('BSAR =',z2,'s'), paste('SSGP=',z1,'s')), bg = 'gray90')
+# y <- T_tr
+# x <- X_tr[,7]
+# x <- pnorm(x)
+# x_rest <- X_tr[,-7]
+# J <- 20
+# rsig.0<-0.01
+# ssig.0<-0.01
+# rtau.0<-0.01
+# stau.0<-0.01
+# w0<-1
+# mubeta.0<-rep(0, times = ncol(x_rest))
+# sigbeta.0 <- diag(1, length(mubeta.0))
+# prior.parms<-list(rsig.0=rsig.0,ssig.0=ssig.0,rtau.0=rtau.0,stau.0=stau.0,w0=w0,mubeta.0=mubeta.0,sigbeta.0=sigbeta.0)
+# t1 <- Sys.time()
+# fitt <- ssgpr_ui(X_tr, as.matrix(y), X_tr, as.matrix(y), 100, -100, rep(1, 11))
+# t2 <- Sys.time()
+# z1 <- difftime(t2, t1)
+# class(z1) <- NA
+# z1 <- round(z1[1], digits = 4)
+# t3 <- Sys.time()
+# fitt2 <- vbgpspectral(y, x, Z = x_rest, T = 20, tol = 1.0e-05, prior.parms = prior.parms, mupsi.q.start = 1)
+# t4 <- Sys.time()
+# z2 <- difftime(t4, t3)
+# class(z2) <- NA
+# z2 <- round(z2[1], digits = 4)
+# vphi2 <- sqrt(2) * cos(outer(x, pi * (1:J)))
+# fitted22 <- vphi2[,1:length(fitt2$mutheta.q)] %*% fitt2$mutheta.q
+# fitted22 <- fitted22 - mean(fitted22)
+# o <- order(x)
+# y2 <- y - mean(y)
+# fitmu <- fitt$mu - mean(fitt$mu)
+# plot(x[o], y2[o], ylim = range(c(fitted22, fitmu, y2)), xlab = '', ylab = '', main = 'Pendulum training data')
+# lines(x[o], fitted22[o], lwd = 2, lty = 3, col = 'red')
+# lines(x[o], fitmu[o], lwd = 2, lty = 6, col = 'darkgreen')
+# legend('topright', lty = c(NA, 3, 6), pch = c(1, NA, NA),  col = c(1, 'red', 'darkgreen'), legend = c('true', paste('BSAR =',z2,'s'), paste('SSGP=',z1,'s')), bg = 'gray90')
 
 
 
 
-# LASSOselectedVariable <- glmnet::cv.glmnet(elevator_X_tr, c(elevator_T_tr))
-# coefficients <- coef(LASSOselectedVariable, s = "lambda.1se")
+# # LASSOselectedVariable <- glmnet::cv.glmnet(elevator_X_tr, c(elevator_T_tr))
+# # coefficients <- coef(LASSOselectedVariable, s = "lambda.1se")
