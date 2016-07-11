@@ -166,4 +166,28 @@ Code doesn't work...
 \section{Datasets}
 \subsection{Pole Telecomm and Elevators}
   According to Lazaro Gredilla, the data sets are taken from \texttt{http://www.liaad.up.pt/~ltorgo/Regression/DataSets.html}. 
+\section{Transforming data with support $\mathcal{S}$}
+Normally, the data don't lie within the interval $\left[0,1\right]$. Therefore, we must transform them according to their support. One of the distributions with universal support is the Cauchy distribution. The pdf and cdf are
+\begin{align}
+  q\left(x\right) &= \frac{1}{\pi\left(1+x^{2}\right)}\\
+  Q\left(x\right) &= \frac{1}{\pi}\tan^{-1}\left(x\right) + \frac{1}{2}.
+\end{align}
+Now define $\varphi_{0}\left(x\right) = \sqrt{q\left(x\right)}$ and $\varphi_{j}\left(x\right) = \sqrt{2q\left(x\right)}\cos\left[\pi jQ\left(x\right)\right]$. Let's do one of the shape restriction models. Recall
+\begin{equation}
+  \varphi_{j,k}^{a}\left(x\right) = \int\limits_{0}^{x}\varphi_{j}\left(s\right)\overline{\varphi}_{k}\left(s\right)\,dx - \int\limits_{0}^{1}\int\limits_{0}^{s}\varphi_{j}\left(t\right)\overline{\varphi}_{k}\left(t\right)\,dt\,ds\;\; \text{for $j, k \geq 0$}.
+\end{equation}
+With the defined basis functions above,
+\begin{align}
+  \int\limits_{0}^{x}\varphi_{j}\left(s\right)\overline{\varphi}_{k}\left(s\right)\,dx &= \sqrt{2}\int\limits_{0}^{x} \frac{1}{\pi\left(1+x^{2}\right)}\cos \left[j\tan^{-1}\left(s\right)+\frac{\pi j}{2}\right]\,ds\\
+  &= \sqrt{2}\int\limits_{Q\left(0\right)}^{Q\left(x\right)}\cos\left[\pi ju\right]\,du\quad \left(u = Q\left(x\right)\right)\\
+  &= \frac{\sqrt{2}}{\pi j}\left\{\sin\left(j\tan^{-1}\left(x\right) + \frac{\pi j}{2}\right) - \sin \left(\frac{\pi j}{2}\right) \right\}\\
+  \int\limits_{0}^{1}\int\limits_{0}^{s} \varphi_{j}\left(t\right)\overline{\varphi}_{k}\left(t\right)\,dt\,ds &= \int\limits_{0}^{1}\int\limits_{Q\left(0\right)}^{Q\left(s\right)}2\cos\left[\pi ju\right]\cos\left[\pi ku\right]\,du\,ds \\
+  &= \int\limits_{0}^{1}\frac{\sin\left(\pi\left(j-k\right)Q\left(s\right)\right)}{\pi\left(j-k\right)}+\frac{\sin\left(\pi\left(j+k\right)Q\left(s\right)\right)}{\pi\left(j+k\right)} \,ds\\
+  &\quad - \frac{\sin\left(\pi\left(j-k\right)/2\right)}{\pi\left(j-k\right)}-\frac{\sin\left(\pi\left(j+k\right)/2\right)}{\pi\left(j+k\right)}
+\end{align}
+Comparing with the one with support $\left[0,1\right]$ suggested in the original paper,
+\begin{equation}
+  \int\limits_{0}^{x}\varphi_{j}\left(s\right)\overline{\varphi}_{k}\left(s\right)\,ds = \frac{\sqrt{2}}{\pi j}\sin\left(\pi j x\right)
+\end{equation}
+there is another term added and care must be taken in that we shouldn't simply apply the cdf to the data and do the rest equally. The math tells us it becomes different.
 \end{document}

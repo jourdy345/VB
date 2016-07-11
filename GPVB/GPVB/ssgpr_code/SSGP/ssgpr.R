@@ -343,13 +343,13 @@ ssgpr_ui <- function(x_tr, y_tr, x_tst, y_tst, m, iteropt = NULL, loghyper = NUL
 # mubeta.0<-0
 # sigbeta.0<-matrix(1,nrow=1,ncol=1)
 # prior.parms<-list(rsig.0=rsig.0,ssig.0=ssig.0,rtau.0=rtau.0,stau.0=stau.0,w0=w0,mubeta.0=mubeta.0,sigbeta.0=sigbeta.0)
-# fit2 <- vbgpspectral(T_tr, X_tr[,1], rep(1, length(T_tr)), 20, 1.0e-05, prior.parms = prior.parms, mupsi.q.start = 1)
+# fit2 <- vbgpspectral(T_tr, X_tr[,7], rep(1, length(T_tr)), 20, 1.0e-05, prior.parms = prior.parms, mupsi.q.start = 1)
 # x <- X_tr[,7]
 # vphi<-sqrt(2)*cos(outer(x,pi*(1:J)))
 # fitted2<-(vphi[,1:length(fit2$mutheta.q)]%*%fit2$mutheta.q)
 # # fitted2<-fitted2-mean(fitted2)
 # # fitted2 <- vphi %*% fit2$mutheta.q + fit2$mubeta.q
-# o <- order(X_tr[,1])
+# o <- order(X_tr[,7])
 # plot(x[o], T_tr[o], type = 'l', lwd = 2, lty = 6, col = 'darkgreen')
 # lines(x[o], fitted2[o], lwd = 2, lty = 3, col = 'red')
 # lines(x[o], fit$mu[o], lwd = 2, lty = 1)
@@ -423,8 +423,29 @@ ssgpr_ui <- function(x_tr, y_tr, x_tst, y_tst, m, iteropt = NULL, loghyper = NUL
 # lines(x[o], fitted22[o], lwd = 2, lty = 3, col = 'red')
 # lines(x[o], fitmu[o], lwd = 2, lty = 6, col = 'darkgreen')
 # legend('topright', lty = c(NA, 3, 6), pch = c(1, NA, NA),  col = c(1, 'red', 'darkgreen'), legend = c('true', paste('BSAR =',z2,'s'), paste('SSGP=',z1,'s')), bg = 'gray90')
+
+
+
+compareSSGPvsBSAR <- function(data = 'pendulum', fit = 'training') {
+  ############################################################################################
+  ############################################################################################
+  ############     data: which data,                                              ############
+  ############       c('pendulum', 'elevators', 'kin', 'pol', 'pumadyn', 'simul') ############
+  ############                                                                    ############
+  ############     fit: return training MSE or test MSE?                          ############
+  ############       c('training', 'test')                                        ############
+  ############################################################################################
+  ############################################################################################
+  switch()
+}
+#########################################################
+##########                                ###############
+##########  Pendulum data: Training data  ###############
+##########                                ############### 
+#########################################################
 y <- T_tr
 x <- X_tr[,7]
+x <- pnorm(x)
 x_rest <- X_tr[,-7]
 J <- 20
 rsig.0<-0.01
@@ -432,16 +453,11 @@ ssig.0<-0.01
 rtau.0<-0.01
 stau.0<-0.01
 w0<-1
-# mubeta.0<-c(0,0)
-# sigbeta.0<-diag(2)
 mubeta.0<-rep(0, times = ncol(x_rest))
-# sigbeta.0<-matrix(1,nrow=length(mubeta.0),ncol=length(mubeta.0))
 sigbeta.0 <- diag(1, length(mubeta.0))
-print(solve(sigbeta.0))
 prior.parms<-list(rsig.0=rsig.0,ssig.0=ssig.0,rtau.0=rtau.0,stau.0=stau.0,w0=w0,mubeta.0=mubeta.0,sigbeta.0=sigbeta.0)
-
 t1 <- Sys.time()
-fitt <- ssgpr_ui(X_tr, as.matrix(y), X_tr, as.matrix(y), 100, -1000, rep(1, 11))
+fitt <- ssgpr_ui(X_tr, as.matrix(y), X_tr, as.matrix(y), 100, -100, rep(1, 11))
 t2 <- Sys.time()
 z1 <- difftime(t2, t1)
 class(z1) <- NA
@@ -449,19 +465,20 @@ z1 <- round(z1[1], digits = 4)
 t3 <- Sys.time()
 fitt2 <- vbgpspectral(y, x, Z = x_rest, T = 20, tol = 1.0e-05, prior.parms = prior.parms, mupsi.q.start = 1)
 t4 <- Sys.time()
-z2 <- difftime(t4, t2)
+z2 <- difftime(t4, t3)
 class(z2) <- NA
 z2 <- round(z2[1], digits = 4)
-vphi2 <- sqrt(2)*cos(outer(x,pi*(1:J)))
-fitted22 <- vphi2[,1:length(fitt2$mutheta.q)]%*%fitt2$mutheta.q
+vphi2 <- sqrt(2) * cos(outer(x, pi * (1:J)))
+fitted22 <- vphi2[,1:length(fitt2$mutheta.q)] %*% fitt2$mutheta.q
 fitted22 <- fitted22 - mean(fitted22)
 o <- order(x)
 y2 <- y - mean(y)
 fitmu <- fitt$mu - mean(fitt$mu)
-plot(x[o], y2[o], ylim = range(c(fitted22, fitmu, y2)), xlab = '', ylab = '', main = '7th variable of pendulum')
+plot(x[o], y2[o], ylim = range(c(fitted22, fitmu, y2)), xlab = '', ylab = '', main = 'Pendulum training data')
 lines(x[o], fitted22[o], lwd = 2, lty = 3, col = 'red')
 lines(x[o], fitmu[o], lwd = 2, lty = 6, col = 'darkgreen')
 legend('topright', lty = c(NA, 3, 6), pch = c(1, NA, NA),  col = c(1, 'red', 'darkgreen'), legend = c('true', paste('BSAR =',z2,'s'), paste('SSGP=',z1,'s')), bg = 'gray90')
+
 
 
 
