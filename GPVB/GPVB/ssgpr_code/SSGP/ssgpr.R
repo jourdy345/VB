@@ -49,7 +49,11 @@ vbgpspectral<-function(y,x,Z,T,tol,prior.parms,mupsi.q.start) {
 
   Tfull<-T
   T.old<-T
-  vphifull<-sqrt(2)*cos(outer(x,pi*(1:T)))
+  if (any(x < 0 | x > 1)) {
+    vphifull <- sqrt(2 * dnorm(x)) * cos(outer(pnorm(x), pi * (1:T)))
+  } else {
+    vphifull<-sqrt(2)*cos(outer(x,pi*(1:T)))
+  }
   vphitvphifull<-t(vphifull)%*%vphifull
   sigbeta.term<-solve(ZtZ+sigbeta0.inv)
 
@@ -611,10 +615,10 @@ compareSSGPvsBSAR <- function(data = 'pendulum', fit = 'training', path = NULL, 
                                 ind           <- which.min(cov(T_tr, X_tr))
                                 x             <- X_tr[,ind]
 
-                                # squish x into [0,1]
-                                if (!all(x < 1 & x > 0)) {
-                                  x <- pnorm(x)
-                                }
+                                # # squish x into [0,1]
+                                # if (!all(x < 1 & x > 0)) {
+                                #   x <- pnorm(x)
+                                # }
 
                                 x_rest        <- X_tr[,-ind]
                                 y             <- c(T_tr)
@@ -644,10 +648,10 @@ compareSSGPvsBSAR <- function(data = 'pendulum', fit = 'training', path = NULL, 
                                 ind          <- which.min(cov(T_tr, X_tr))
                                 x            <- X_tr[,ind]
 
-                                # squish x into [0,1]
-                                if (!all(x < 1 & x > 0)) {
-                                  x <- pnorm(x)
-                                }
+                                # # squish x into [0,1]
+                                # if (!all(x < 1 & x > 0)) {
+                                #   x <- pnorm(x)
+                                # }
 
                                 x_rest       <- X_tr[,-ind]
                                 y            <- c(T_tr)
@@ -683,10 +687,10 @@ compareSSGPvsBSAR <- function(data = 'pendulum', fit = 'training', path = NULL, 
                                 ind           <- which.min(cov(T_tr, X_tr))
                                 x             <- X_tr[,ind]
 
-                                # squish x into [0,1]
-                                if (!all(x < 1 & x > 0)) {
-                                  x <- pnorm(x)
-                                }
+                                # # squish x into [0,1]
+                                # if (!all(x < 1 & x > 0)) {
+                                #   x <- pnorm(x)
+                                # }
 
                                 x_rest        <- X_tr[,-ind]
                                 y             <- c(T_tr)
@@ -716,10 +720,10 @@ compareSSGPvsBSAR <- function(data = 'pendulum', fit = 'training', path = NULL, 
                                 ind          <- which.min(cov(T_tr, X_tr))
                                 x            <- X_tr[,ind]
 
-                                # squish x into [0,1]
-                                if (!all(x < 1 & x > 0)) {
-                                  x <- pnorm(x)
-                                }
+                                # # squish x into [0,1]
+                                # if (!all(x < 1 & x > 0)) {
+                                #   x <- pnorm(x)
+                                # }
                                 
                                 x_rest       <- X_tr[,-ind]
                                 y            <- c(T_tr)
@@ -755,10 +759,10 @@ compareSSGPvsBSAR <- function(data = 'pendulum', fit = 'training', path = NULL, 
                                 ind           <- which.min(cov(T_tr, X_tr))
                                 x             <- X_tr[,ind]
 
-                                # squish x into [0,1]
-                                if (!all(x < 1 & x > 0)) {
-                                  x <- pnorm(x)
-                                }
+                                # # squish x into [0,1]
+                                # if (!all(x < 1 & x > 0)) {
+                                #   x <- pnorm(x)
+                                # }
 
                                 x_rest        <- X_tr[,-ind]
                                 y             <- c(T_tr)
@@ -788,10 +792,10 @@ compareSSGPvsBSAR <- function(data = 'pendulum', fit = 'training', path = NULL, 
                                 ind          <- which.min(cov(T_tr, X_tr))
                                 x            <- X_tr[,ind]
 
-                                # squish x into [0,1]
-                                if (!all(x < 1 & x > 0)) {
-                                  x <- pnorm(x)
-                                }
+                                # # squish x into [0,1]
+                                # if (!all(x < 1 & x > 0)) {
+                                #   x <- pnorm(x)
+                                # }
                                 
                                 x_rest       <- X_tr[,-ind]
                                 y            <- c(T_tr)
@@ -827,10 +831,10 @@ compareSSGPvsBSAR <- function(data = 'pendulum', fit = 'training', path = NULL, 
                                 ind           <- which.min(cov(T_tr, X_tr))
                                 x             <- X_tr[,ind]
 
-                                # squish x into [0,1]
-                                if (!all(x < 1 & x > 0)) {
-                                  x <- pnorm(x)
-                                }
+                                # # squish x into [0,1]
+                                # if (!all(x < 1 & x > 0)) {
+                                #   x <- pnorm(x)
+                                # }
 
                                 x_rest        <- X_tr[,-ind]
                                 y             <- c(T_tr)
@@ -860,10 +864,10 @@ compareSSGPvsBSAR <- function(data = 'pendulum', fit = 'training', path = NULL, 
                                 ind          <- which.min(cov(T_tr, X_tr))
                                 x            <- X_tr[,ind]
 
-                                # squish x into [0,1]
-                                if (!all(x < 1 & x > 0)) {
-                                  x <- pnorm(x)
-                                }
+                                # # squish x into [0,1]
+                                # if (!all(x < 1 & x > 0)) {
+                                #   x <- pnorm(x)
+                                # }
                                 
                                 x_rest       <- X_tr[,-ind]
                                 y            <- c(T_tr)
@@ -899,10 +903,10 @@ compareSSGPvsBSAR <- function(data = 'pendulum', fit = 'training', path = NULL, 
                                 ind           <- which.min(cov(T_tr, X_tr))
                                 x             <- X_tr[,ind]
 
-                                # squish x into [0,1]
-                                if (!all(x < 1 & x > 0)) {
-                                  x <- pnorm(x)
-                                }
+                                # # squish x into [0,1]
+                                # if (!all(x < 1 & x > 0)) {
+                                #   x <- pnorm(x)
+                                # }
 
                                 x_rest        <- X_tr[,-ind]
                                 y             <- c(T_tr)
@@ -932,10 +936,10 @@ compareSSGPvsBSAR <- function(data = 'pendulum', fit = 'training', path = NULL, 
                                 ind          <- which.min(cov(T_tr, X_tr))
                                 x            <- X_tr[,ind]
 
-                                # squish x into [0,1]
-                                if (!all(x < 1 & x > 0)) {
-                                  x <- pnorm(x)
-                                }
+                                # # squish x into [0,1]
+                                # if (!all(x < 1 & x > 0)) {
+                                #   x <- pnorm(x)
+                                # }
                                 
                                 x_rest       <- X_tr[,-ind]
                                 y            <- c(T_tr)
