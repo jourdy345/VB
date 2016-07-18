@@ -224,7 +224,7 @@ vbgpspectral<-function(y,x,Z,T,tol,prior.parms,mupsi.q.start) {
 
   # Return results
 
-  return(list(lb=lb,mutheta.q=mutheta.q,sigtheta.q=sigtheta.q,rsig.q=rsig.q,ssig.q=ssig.q,rtau.q=rtau.q,stau.q=stau.q,sigbeta.q=sigbeta.q,mubeta.q=mubeta.q,sig2psi.q=sig2psi.q,mupsi.q=mupsi.q))
+  return(list(lb=lb,mutheta.q=mutheta.q,sigtheta.q=sigtheta.q,rsig.q=rsig.q,ssig.q=ssig.q,rtau.q=rtau.q,stau.q=stau.q,sigbeta.q=sigbeta.q,mubeta.q=mubeta.q,sig2psi.q=sig2psi.q,mupsi.q=mupsi.q, vphi = vphifull))
 
 }
 
@@ -629,7 +629,8 @@ compareSSGPvsBSAR <- function(data = 'pendulum', fit = 'training', path = NULL, 
                                 eval(q_prior.params)
                                 
                                 res_BSAR      <- eval(call_BSAR)
-                                vphi          <- sqrt(2)*cos(outer(x,pi*(1:J)))
+                                # vphi          <- sqrt(2)*cos(outer(x,pi*(1:J)))
+                                vphi          <- res_BSAR$vphi
                                 mu_BSAR       <- vphi[,1:length(res_BSAR$mutheta.q)] %*% res_BSAR$mutheta.q + x_rest %*% res_BSAR$mubeta.q
                                 centred_BSAR  <- mu_BSAR - mean(mu_BSAR)
                                 eval(q_SSE_SSGP_tr)
@@ -701,7 +702,8 @@ compareSSGPvsBSAR <- function(data = 'pendulum', fit = 'training', path = NULL, 
                                 eval(q_prior.params)
                                 
                                 res_BSAR      <- eval(call_BSAR)
-                                vphi          <- sqrt(2)*cos(outer(x,pi*(1:J)))
+                                # vphi          <- sqrt(2)*cos(outer(x,pi*(1:J)))
+                                vphi          <- res_BSAR$vphi
                                 mu_BSAR       <- vphi[,1:length(res_BSAR$mutheta.q)] %*% res_BSAR$mutheta.q + x_rest %*% res_BSAR$mubeta.q
                                 centred_BSAR  <- mu_BSAR - mean(mu_BSAR)
                                 eval(q_SSE_SSGP_tr)
@@ -773,7 +775,8 @@ compareSSGPvsBSAR <- function(data = 'pendulum', fit = 'training', path = NULL, 
                                 eval(q_prior.params)
                                 
                                 res_BSAR      <- eval(call_BSAR)
-                                vphi          <- sqrt(2)*cos(outer(x,pi*(1:J)))
+                                # vphi          <- sqrt(2)*cos(outer(x,pi*(1:J)))
+                                vphi          <- res_BSAR$vphi
                                 mu_BSAR       <- vphi[,1:length(res_BSAR$mutheta.q)] %*% res_BSAR$mutheta.q + x_rest %*% res_BSAR$mubeta.q
                                 centred_BSAR  <- mu_BSAR - mean(mu_BSAR)
                                 eval(q_SSE_SSGP_tr)
@@ -845,7 +848,8 @@ compareSSGPvsBSAR <- function(data = 'pendulum', fit = 'training', path = NULL, 
                                 eval(q_prior.params)
                                 
                                 res_BSAR      <- eval(call_BSAR)
-                                vphi          <- sqrt(2)*cos(outer(x,pi*(1:J)))
+                                # vphi          <- sqrt(2)*cos(outer(x,pi*(1:J)))
+                                vphi          <- res_BSAR$vphi
                                 mu_BSAR       <- vphi[,1:length(res_BSAR$mutheta.q)] %*% res_BSAR$mutheta.q + x_rest %*% res_BSAR$mubeta.q
                                 centred_BSAR  <- mu_BSAR - mean(mu_BSAR)
                                 eval(q_SSE_SSGP_tr)
@@ -917,7 +921,8 @@ compareSSGPvsBSAR <- function(data = 'pendulum', fit = 'training', path = NULL, 
                                 eval(q_prior.params)
                                 
                                 res_BSAR      <- eval(call_BSAR)
-                                vphi          <- sqrt(2)*cos(outer(x,pi*(1:J)))
+                                # vphi          <- sqrt(2)*cos(outer(x,pi*(1:J)))
+                                vphi          <- res_BSAR$vphi
                                 mu_BSAR       <- vphi[,1:length(res_BSAR$mutheta.q)] %*% res_BSAR$mutheta.q + x_rest %*% res_BSAR$mubeta.q
                                 centred_BSAR  <- mu_BSAR - mean(mu_BSAR)
                                 eval(q_SSE_SSGP_tr)
