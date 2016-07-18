@@ -20,6 +20,7 @@
 \newcommand {\half}{{\tfrac 12}}
 \newcommand {\bm} [1] {\mbox{\boldmath{$#1$}}}
 \newcommand{\bs}{\boldsymbol}
+\DeclareMathOperator{\Tr}{Tr}
 \begin{document}
 \setstretch{1.4} %줄간격 조정
 \title{Quantile Regression}
@@ -141,6 +142,15 @@ but is impossible to separate out the parameters; hence, we construct an MH chai
  \begin{equation}
   \rho = \exp\left(\left(\frac{J\left(J+1\right)}{4}-\omega_{0}\right)\left(\gamma_{\text{cand}}-\gamma^{\left(t\right)}\right)-\frac{1}{2\tau^{2}}\sum_{j=1}^{J}\left(e^{j\gamma_{\text{cand}}}-e^{j\gamma^{\left(t\right)}}\right)\theta_{j}^{2}-\gamma^{\left(t\right)}+\gamma_{\text{cand}} \right)
  \end{equation}
+\subsection{Variational Inference}
+  Variational inference is an alternative to MCMC which aims for speed improvement at the expense of performance. There is a vast literature on the variational methods so we do not elaborate more on this topic. For those who are interested should be referred to Wand \& Ormerod (2010).
+\begin{itemize}
+  \item $q\left(u_{i}\right) = \mathrm{GIG}\left(\dfrac{1}{2}, a_{q}, b_{q}\right)$ where
+  \begin{itemize}
+    \item $a_{q}^{2}= \dfrac{1}{\tau_{p}^{2}}\left(\left(y_{i}-\bs{w}_{i}^{\top}\bs{\beta}-\bs{\varphi}_{i}^{\top}\bs{\mu}_{\theta}^{q}\right)^{2}+\Tr\left(\bs{w}_{i}\bs{w}_{i}^{\top}\bs{\Sigma}_{\beta}^{q}\right)+\Tr\left(\bs{\varphi}_{i}\bs{\varphi}_{i}^{\top}\bs{\Sigma}_{\theta}^{q}\right) \right) $
+    \item $b_{q}^{2}=2 + \dfrac{\nu_{p}^{2}}{\tau_{p}^{2}}$
+  \end{itemize}
+\end{itemize}
 \end{document}
 Single index
 Seongbae Jeon, 2015.2.4
