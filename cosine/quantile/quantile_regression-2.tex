@@ -94,7 +94,7 @@ For the time being, keep in mind some basic properties of the Bessel function of
 Using the mixture representation,
 \begin{align}
   L\left(u_{1}, \ldots , u_{n}, \bs{\beta}, \bs{\theta}_{J}, \gamma, \tau^{2}|\mathbf{y}\right) &\propto \prod_{i=1}^{n}u_{i}^{-1/2}\;\cdot \exp\left(-\sum_{i=1}^{n}\frac{\left(y_{i}-\bs{w}_{i}^{\top}\bs{\beta}-\bs{\varphi}_{i}^{\top}\bs{\theta}_{J}-\nu_{p}u_{i}\right)^{2}}{2\tau_{p}^{2}u_{i}} \right)\\
-  &\quad \prod_{i=1}^{n}\exp\left(-u_{i}\right)\;\cdot\exp\left(-\frac{1}{2}\left(\bs{\beta}-\bs{\mu}_{\beta}^{0}\right)^{\top}\bs{\Sigma}_{\beta}^{0}\left(\bs{\beta}-\bs{\mu}_{\beta}^{0}\right)\right)\\
+  &\quad \prod_{i=1}^{n}\exp\left(-u_{i}\right)\;\cdot\exp\left(-\frac{1}{2}\left(\bs{\beta}-\bs{\mu}_{\beta}^{0}\right)^{\top}{\bs{\Sigma}_{\beta}^{0}}^{-1}\left(\bs{\beta}-\bs{\mu}_{\beta}^{0}\right)\right)\\
   &\quad \prod_{j=1}^{J}\left(\tau^{2}e^{-j\gamma}\right)^{-1/2}\exp\left(-\frac{e^{j\gamma}}{2\tau^{2}}\theta_{j}^{2}\right)\;\cdot \exp\left(-\omega_{0}\gamma\right)\\
   &\quad {\tau^{2}}^{-\left(A+1\right)}\exp\left(-B/\tau^{2}\right).
 \end{align}
@@ -147,8 +147,23 @@ but is impossible to separate out the parameters; hence, we construct an MH chai
 \begin{itemize}
   \item $q\left(u_{i}\right) = \mathrm{GIG}\left(\dfrac{1}{2}, a_{q}, b_{q}\right)$ where
   \begin{itemize}
-    \item $a_{q}^{2}= \dfrac{1}{\tau_{p}^{2}}\left(\left(y_{i}-\bs{w}_{i}^{\top}\bs{\beta}-\bs{\varphi}_{i}^{\top}\bs{\mu}_{\theta}^{q}\right)^{2}+\Tr\left(\bs{w}_{i}\bs{w}_{i}^{\top}\bs{\Sigma}_{\beta}^{q}\right)+\Tr\left(\bs{\varphi}_{i}\bs{\varphi}_{i}^{\top}\bs{\Sigma}_{\theta}^{q}\right) \right) $
+    \item $a_{q}^{2}= \dfrac{1}{\tau_{p}^{2}}\left(\left(y_{i}-\bs{w}_{i}^{\top}\bs{\mu}_{\beta}^{q}-\bs{\varphi}_{i}^{\top}\bs{\mu}_{\theta}^{q}\right)^{2}+\Tr\left(\bs{w}_{i}\bs{w}_{i}^{\top}\bs{\Sigma}_{\beta}^{q}\right)+\Tr\left(\bs{\varphi}_{i}\bs{\varphi}_{i}^{\top}\bs{\Sigma}_{\theta}^{q}\right) \right) $
     \item $b_{q}^{2}=2 + \dfrac{\nu_{p}^{2}}{\tau_{p}^{2}}$
+  \end{itemize}
+  \item $q\left(\bs{\beta}\right)=\mathcal{N}\left(\bs{\mu}_{\beta}^{q},\bs{\Sigma}_{\beta}^{q}\right)$
+  \begin{itemize}
+    \item $\bs{\Sigma}_{\beta}^{q}= \left(\dfrac{1}{\tau_{p}^{2}}\displaystyle \sum_{i=1}^{n}\dfrac{1}{u_{i}}\bs{w}_{i}\bs{w}_{i}^{\top}+{\bs{\Sigma}_{\beta}^{0}}^{-1}\right)^{-1} $
+    \item $\bs{\mu}_{\beta}^{q} = \bs{\Sigma}_{\beta}^{q}\left(\dfrac{1}{\tau_{p}^{2}}\displaystyle \sum_{i=1}^{n}\bs{w}_{i}\left(\mathrm{E}\left(\dfrac{1}{u_{i}}\right)\left(y_{i}-\bs{\varphi_{i}^{\top}}\bs{\mu}_{\theta}^{q}\right)-\nu_{p}\right)+{\bs{\Sigma}_{\beta}^{0}}^{-1}\bs{\mu}_{\beta}^{0} \right) $
+  \end{itemize}
+  \item $q\left(\bs{\theta}_{J}\right)=\mathcal{N}\left(\bs{\mu}_{\theta}^{q},\bs{\Sigma}_{\theta}^{q}\right)$
+  \begin{itemize}
+    \item $\bs{\Sigma}_{\theta}^{q}=\left(\dfrac{1}{\tau_{p}^{2}}\displaystyle \sum_{i=1}^{n}\mathrm{E}\left(\dfrac{1}{u_{i}}\right)\bs{\varphi}_{i}\bs{\varphi}_{i}^{\top}+\bs{E} \right)^{-1}$ where $\bs{E}=\mathrm{E}\left(\dfrac{1}{\tau^{2}}\right)\mathrm{diag}\left(\mathrm{E}\left(e^{\gamma}\right), \mathrm{E}\left(e^{2\gamma}\right),\ldots, \mathrm{E}\left(e^{J\gamma}\right) \right) $
+    \item $\bs{\mu}_{\theta}^{q} = \bs{\Sigma}_{\theta}^{q}\left(\dfrac{1}{\tau_{p}^{2}}\displaystyle\sum_{i=1}^{n}\bs{\varphi}_{i}\left(\mathrm{E}\left(\dfrac{1}{u_{i}}\right)\left(y_{i}-\bs{w}_{i}^{\top}\bs{\mu}_{\beta}^{q}\right)-\nu_{p}\right)\right)$
+  \end{itemize}
+  \item $q\left(\tau^{2}\right) = \mathrm{InvGam}\left(A_{q},B_{q}\right)$
+  \begin{itemize}
+    \item $A_{q}=\dfrac{J}{2}+A$
+    \item $B_{q}=\dfrac{1}{2}\left({\bs{\mu}_{\theta}^{q}}^{\top}\bs{E}^{*}\bs{\mu}_{\theta}^{q}+\Tr\left(\bs{E}^{*}\bs{\Sigma}_{\theta}^{q}\right)\right)+B$ where $\bs{E}^{*}=\mathrm{diag}\left(\mathrm{E}\left(e^{\gamma}\right),\ldots,\mathrm{E}\left(e^{J\gamma}\right)\right)$.
   \end{itemize}
 \end{itemize}
 \end{document}
