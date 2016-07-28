@@ -143,7 +143,7 @@ but is impossible to separate out the parameters; hence, we construct an MH chai
   \rho = \exp\left(\left(\frac{J\left(J+1\right)}{4}-\omega_{0}\right)\left(\gamma_{\text{cand}}-\gamma^{\left(t\right)}\right)-\frac{1}{2\tau^{2}}\sum_{j=1}^{J}\left(e^{j\gamma_{\text{cand}}}-e^{j\gamma^{\left(t\right)}}\right)\theta_{j}^{2}-\gamma^{\left(t\right)}+\gamma_{\text{cand}} \right)
  \end{equation}
 \subsection{Variational Inference}
-  Variational inference is an alternative to MCMC which aims for speed improvement at the expense of performance. There is a vast literature on the variational methods so we do not elaborate more on this topic. For those who are interested should be referred to Wand \& Ormerod (2010).
+  Variational inference is an alternative to MCMC which aims for speed improvement at the expense of performance. There is a vast literature on the variational methods so we do not elaborate more on this topic. For those who are interested should be referred to Wand \& Ormerod (2010). The modelling of variational inference is different from the MCMC version in that the prior distribution of $\gamma$ is no more exponential but rather double exponential. 
 \begin{itemize}
   \item $q\left(u_{i}\right) = \mathrm{GIG}\left(\dfrac{1}{2}, a_{q}, b_{q}\right)$ where
   \begin{itemize}
@@ -165,7 +165,50 @@ but is impossible to separate out the parameters; hence, we construct an MH chai
     \item $A_{q}=\dfrac{J}{2}+A$
     \item $B_{q}=\dfrac{1}{2}\left({\bs{\mu}_{\theta}^{q}}^{\top}\bs{E}^{*}\bs{\mu}_{\theta}^{q}+\Tr\left(\bs{E}^{*}\bs{\Sigma}_{\theta}^{q}\right)\right)+B$ where $\bs{E}^{*}=\mathrm{diag}\left(\mathrm{E}\left(e^{\gamma}\right),\ldots,\mathrm{E}\left(e^{J\gamma}\right)\right)$.
   \end{itemize}
+  \item $q\left(\gamma\right) = \mathcal{N}\left(\mu_{\gamma},\sigma_{\gamma}^{2}\right)$
 \end{itemize}
+\subsubsection{Lower Bound}
+  As is with every optimization problem, variational inference also calls for an objective function to optimize. We will derive the lower bound for our quantile regression model in this section.
+  \begin{itemize}
+    \item $L_{1}=\mathrm{E}\left(\ln p\left(y_{i}\;|\;u_{i}, \bs{\beta},\bs{\theta}_{J}\right)\right)$
+    \begin{align}
+      L_{1} &= -\dfrac{1}{2}\left(\ln\left(2\pi\tau_{p}^{2}\right)+\mathrm{E}\left(\ln u_{i}\right)\right.\\
+      &\quad \left.+\dfrac{1}{\tau_{p}^{2}}\mathrm{E}\left(\dfrac{1}{u_{i}}\right)\left(\left(y_{i}-\bs{w}_{i}^{\top}\bs{\mu}_{\beta}^{q}-\bs{\varphi}_{i}^{\top}\bs{\mu}_{\theta}^{q}\right)^{2}+\Tr\left(\bs{w}_{i}\bs{w}_{i}^{\top}\bs{\Sigma}_{\beta}^{q}\right)+\Tr\left(\bs{\varphi}_{i}\bs{\varphi}_{i}^{\top}\bs{\Sigma}_{\theta}^{q}\right) \right)\right)
+    \end{align}
+    \item $L_{2}=\mathrm{E}\left(\ln p\left(u_{i}\right)\right)$
+    \begin{align}
+      L_{2} &= -\mathrm{E}\left(u_{i}\right)
+    \end{align}
+    \item $L_{3}=\mathrm{E}\left(\ln p\left(\bs{\beta}\right)\right)$
+    \begin{align}
+      L_{3} &= -\dfrac{p}{2}\ln\left(2\pi\right)-\dfrac{1}{2}\ln\left|\bs{\Sigma}_{\beta}^{0}\right| -\dfrac{1}{2}\left(\left(\bs{\mu}_{\beta}^{q}-\bs{\mu}_{\beta}^{0}\right)^{\top}{\bs{\Sigma}_{\beta}^{0}}^{-1}\left(\bs{\mu}_{\beta}^{q}-\bs{\mu}_{\beta}^{0}\right)+\Tr\left({\bs{\Sigma}_{\beta}^{0}}^{-1}\bs{\Sigma}_{\beta}^{q}\right) \right)
+    \end{align}
+    \item $L_{4}=\mathrm{E}\left(\ln p\left(\bs{\theta}_{J}\;|\;\tau^{2},\gamma\right)\right)$
+    \begin{align}
+      L_{4} &= -\dfrac{J}{2}\left(\ln\left(2\pi\right)+\ln\left(B_{q}\right)-\psi\left(A_{q}\right)\right)+\dfrac{J\left(J+1\right)}{4}\mathrm{E}\left(\left|\gamma\right|\right)+\dfrac{A_{q}}{B_{q}}{\bs{\mu}_{\theta}^{q}}'\mathbf{E}\bs{\mu}_{\theta}^{q}
+    \end{align}
+    where $\mathbf{E}=\mathrm{diag}\left(\mathrm{E}\left(e^{\left|\gamma\right|}\right),\ldots,\mathrm{E}\left(e^{J\left|\gamma\right|}\right)\right)$ and
+    \begin{align}
+      \mathrm{E}\left(\left|\gamma\right|\right) &= \sigma_{\gamma}\sqrt{\dfrac{2}{\pi}}\exp\left(-\dfrac{\mu_{\gamma}^{2}}{2\sigma_{\gamma}^{2}}\right)+\mu_{\gamma}\left(1-2\Phi\left(-\dfrac{\mu_{\gamma}}{\sigma_{\gamma}}\right)\right)\\
+      \mathrm{E}\left(e^{j\left|\gamma\right|}\right) &= \exp\left(\dfrac{\sigma_{\gamma}^{2}j^{2}}{2}+\mu_{\gamma}j\right)\left(1-\Phi\left(-\dfrac{\mu_{\gamma}}{\sigma_{\gamma}}-\sigma_{\gamma}j\right)\right)+\exp\left(\dfrac{\sigma_{\gamma}^{2}j^{2}}{2}-\mu_{\gamma}j\right)\left(1-\Phi\left(\dfrac{\mu_{\gamma}}{\sigma_{\gamma}}-\sigma_{\gamma}j\right)\right)
+    \end{align}
+    where $\Phi$ is the CDF of standard Gaussian. $\psi$ is the digamma function.
+    \item $L_{5} = \mathrm{E}\left(\ln p\left(\gamma\right)\right)$
+    \begin{equation}
+      L_{5} = \ln\left(\dfrac{\omega_{0}}{2}\right)-\omega_{0}\mathrm{E}\left(\left|\gamma\right|\right)
+    \end{equation}
+    \item $L_{6}=\mathrm{E}\left(\ln p\left(\tau^{2}\right)\right)$
+    \begin{align}
+      L_{6} = A\ln B -\ln\Gamma\left(A\right)-\left(A+1\right)\left(\ln B_{q}-\psi\left(A_{q}\right)\right)-B\dfrac{A_{q}}{B_{q}}
+    \end{align}
+  \end{itemize}
+  The variational lower bound also requires the entropy of each variational distribution.
+  \begin{itemize}
+    \item The entropy of $u_{i}$
+    \begin{equation}
+      \mathrm{H}\left(u_{i}\right) = \dfrac{1}{2}\ln\left(\dfrac{b_{q}^{2}}{a_{q}^{2}}\right)+\ln\left(2K_{0.5}\left(a_{q}b_{q}\right)\right)+\dfrac{\frac{d}{d\nu}K_{\nu}\left(a_{q}b_{q}\right)\Big|_{\nu=0.5}+a_{q}b_{q}\left(K_{1.5}\left(a_{q}b_{q}\right)+K_{-0.5}\left(a_{q}b_{q}\right)\right)}{2K_{0.5}\left(a_{q}b_{q}\right)}
+    \end{equation}
+  \end{itemize}
 \end{document}
 Single index
 Seongbae Jeon, 2015.2.4
