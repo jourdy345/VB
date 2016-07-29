@@ -379,7 +379,7 @@ Rcpp::List MCMCQuantile(arma::vec y, arma::vec x, arma::mat W, arma::mat varphi,
 
 		/* update gamma */
 		double gamma_cand = distribution(generator);
-		double rho = fRho(gamma_cand, gamma, const1, tau, theta, J);
+		double rho = std::min(1., fRho(gamma_cand, gamma, const1, tau, theta, J));
 
 		if (unif_rand(generator) < rho) {
 			gamma = gamma_cand;
@@ -399,7 +399,7 @@ Rcpp::List MCMCQuantile(arma::vec y, arma::vec x, arma::mat W, arma::mat varphi,
 	std::cout << "Thinning in..." << std::endl;
 	count = 1;
 	for (int j = 1; j < nSample; ++j) {
-		std::cout << count << " many samples collected..." << std::endl;
+		std::cout << count << " samples collected..." << std::endl;
 		++count;
 		for (int t = 0; t < thinIn; ++t) {
 			/* update u */
@@ -433,7 +433,7 @@ Rcpp::List MCMCQuantile(arma::vec y, arma::vec x, arma::mat W, arma::mat varphi,
 
 			/* update gamma */
 			double gamma_cand = distribution(generator);
-			double rho = fRho(gamma_cand, gamma, const1, tau, theta, J);
+			double rho = std::min(1., fRho(gamma_cand, gamma, const1, tau, theta, J));
 
 			if (unif_rand(generator) < rho) {
 				gamma = gamma_cand;

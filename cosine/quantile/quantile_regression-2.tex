@@ -185,9 +185,9 @@ but is impossible to separate out the parameters; hence, we construct an MH chai
     \end{align}
     \item $L_{4}=\mathrm{E}\left(\ln p\left(\bs{\theta}_{J}\;|\;\tau^{2},\gamma\right)\right)$
     \begin{align}
-      L_{4} &= -\dfrac{J}{2}\left(\ln\left(2\pi\right)+\ln\left(B_{q}\right)-\psi\left(A_{q}\right)\right)+\dfrac{J\left(J+1\right)}{4}\mathrm{E}\left(\left|\gamma\right|\right)+\dfrac{A_{q}}{B_{q}}{\bs{\mu}_{\theta}^{q}}'\mathbf{E}^{*}\bs{\mu}_{\theta}^{q}
+      L_{4} &= -\dfrac{J}{2}\left(\ln\left(2\pi\right)+\ln\left(B_{q}\right)-\psi\left(A_{q}\right)\right)+\dfrac{J\left(J+1\right)}{4}\mathrm{E}\left(\left|\gamma\right|\right)-\dfrac{1}{2}\dfrac{A_{q}}{B_{q}}\sum_{j=1}^{J}\mathrm{E}\left(e^{j\left|\gamma\right|}\right)\left({\mu_{\theta,j}^{q}}^{2}+\Sigma_{\theta,jj}^{q}\right)
     \end{align}
-    where $\mathbf{E}^{*}=\mathrm{diag}\left(\mathrm{E}\left(e^{\left|\gamma\right|}\right),\ldots,\mathrm{E}\left(e^{J\left|\gamma\right|}\right)\right)$ and
+    where
     \begin{align}
       \mathrm{E}\left(\left|\gamma\right|\right) &= \sigma_{\gamma}\sqrt{\dfrac{2}{\pi}}\exp\left(-\dfrac{\mu_{\gamma}^{2}}{2\sigma_{\gamma}^{2}}\right)+\mu_{\gamma}\left(1-2\Phi\left(-\dfrac{\mu_{\gamma}}{\sigma_{\gamma}}\right)\right)\\
       \mathrm{E}\left(e^{j\left|\gamma\right|}\right) &= \exp\left(\dfrac{\sigma_{\gamma}^{2}j^{2}}{2}+\mu_{\gamma}j\right)\left(1-\Phi\left(-\dfrac{\mu_{\gamma}}{\sigma_{\gamma}}-\sigma_{\gamma}j\right)\right)+\exp\left(\dfrac{\sigma_{\gamma}^{2}j^{2}}{2}-\mu_{\gamma}j\right)\left(1-\Phi\left(\dfrac{\mu_{\gamma}}{\sigma_{\gamma}}-\sigma_{\gamma}j\right)\right)
@@ -225,6 +225,23 @@ but is impossible to separate out the parameters; hence, we construct an MH chai
       \mathrm{H}\left(\tau^{2}\right) = A_{q}+\ln B_{q}+\ln\Gamma\left(A_{q}\right)-\left(1+A_{q}\right)\psi\left(A_{q}\right)
     \end{equation}
   \end{itemize}
+  For the \emph{nonconjugate variational message passing(NCVMP)} of the hyperparameter updates for $q\left(\gamma\,|\,\mu_{\gamma},\sigma_{\gamma}^{2}\right)$, we need to differentiate (21) and (22).
+  \begin{align}
+    \dfrac{\partial \mathrm{E}\left(\left|\gamma\right|\right)}{\partial \mu_{\gamma}} &= 1-2\Phi\left(-\dfrac{\mu_{\gamma}}{\sigma_{\gamma}}\right)\\
+    &= 2\Phi\left(\dfrac{\mu_{\gamma}}{\sigma_{\gamma}}\right)-1\\
+    \dfrac{\partial \mathrm{E}\left(\left|\gamma\right|\right)}{\partial \sigma_{\gamma}^{2}} &= \dfrac{1}{\sqrt{2\pi}\sigma_{\gamma}}\exp\left(-\dfrac{\mu_{\gamma}^{2}}{2\sigma_{\gamma}^{2}}\right)\\
+    &= \phi\left(\dfrac{\mu_{\gamma}}{\sigma_{\gamma}}\right)
+  \end{align}
+  The derivatives for the moment-generating function are
+  \begin{align}
+    \dfrac{\partial \mathrm{E}\left(e^{t\left|\gamma\right|}\right)}{\partial \mu_{\gamma}} &= -t\exp\left(\dfrac{t^{2}\sigma_{\gamma}^{2}}{2}-t\mu_{\gamma}\right)\left(\dfrac{1}{2}-\dfrac{1}{2}\mathrm{erf}\left(\dfrac{\mu_{\gamma}-t\sigma_{\gamma}^{2}}{\sqrt{2\sigma_{\gamma}^{2}}}\right)\right)\\
+    &\quad +t\exp\left(\dfrac{t^{2}\sigma_{\gamma}^{2}}{2}+t\mu_{\gamma}\right)\left(\dfrac{1}{2}+\dfrac{1}{2}\mathrm{erf}\left(\dfrac{\mu_{\gamma}+t\sigma_{\gamma}^{2}}{\sqrt{2\sigma_{\gamma}^{2}}}\right)\right)\\
+    &\quad -\dfrac{1}{\sqrt{2\pi\sigma_{\gamma}^{2}}}\left\{\exp\left(\dfrac{t^{2}\sigma_{\gamma}^{2}}{2}-\dfrac{1}{2}\left(\dfrac{\mu_{\gamma}}{\sigma_{\gamma}}-t\sigma_{\gamma}\right)^{2}-t\mu_{\gamma}\right)+\exp\left(\dfrac{t^{2}\sigma_{\gamma}^{2}}{2}-\dfrac{1}{2}\left(t\sigma_{\gamma}+\dfrac{\mu_{\gamma}}{\sigma_{\gamma}}\right)^{2}+t\mu_{\gamma}\right) \right\}\\
+    \dfrac{\partial \mathrm{E}\left(e^{t\left|\gamma\right|}\right)}{\partial \sigma^{2}_{\gamma}} &= \dfrac{t^{2}}{2}\exp\left(\dfrac{t^{2}\sigma_{\gamma}^{2}}{2}-t\mu_{\gamma}\right)\left(\dfrac{1}{2}-\dfrac{1}{2}\mathrm{erf}\left(\dfrac{\mu_{\gamma}-t\sigma_{\gamma}^{2}}{\sqrt{2\sigma_{\gamma}^{2}}}\right)\right)\\
+    &\quad +\dfrac{t^{2}}{2}\exp\left(\dfrac{t^{2}\sigma_{\gamma}^{2}}{2}+t\mu_{\gamma}\right)\left(\dfrac{1}{2}+\dfrac{1}{2}\mathrm{erf}\left(\dfrac{\mu_{\gamma}+t\sigma_{\gamma}^{2}}{\sqrt{2\sigma_{\gamma}^{2}}}\right)\right)\\
+    &\quad -\dfrac{1}{\sqrt{2\pi}}\exp\left(\dfrac{t^{2}\sigma_{\gamma}^{2}}{2}-\dfrac{1}{2}\left(\dfrac{\mu_{\gamma}}{\sigma_{\gamma}}-t\sigma_{\gamma}\right)^{2}-t\mu_{\gamma}\right)\left(-\dfrac{t}{2\sigma_{\gamma}}-\dfrac{\mu_{\gamma}}{2\sigma_{\gamma}^{3}}\right)\\
+    &\quad +\dfrac{1}{\sqrt{2\pi}}\exp\left(\dfrac{t^{2}\sigma_{\gamma}^{2}}{2}-\dfrac{1}{2}\left(\dfrac{\mu_{\gamma}}{\sigma_{\gamma}}+t\sigma_{\gamma}\right)^{2}+t\mu_{\gamma}\right)\left(\dfrac{t}{2\sigma_{\gamma}}-\dfrac{\mu_{\gamma}}{2\sigma_{\gamma}^{3}}\right)
+  \end{align}
 \end{document}
 Single index
 Seongbae Jeon, 2015.2.4

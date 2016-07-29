@@ -4,15 +4,15 @@ library(quantmod)
 sourceCpp('rgig.cpp')
 
 
-nasdaq <- new.env()
-status <- getSymbols('GOOGL', env = nasdaq, from = as.Date('2005-01-01'))
-status <- getSymbols('AAPL', env = nasdaq, from = as.Date('2005-01-01'))
+# nasdaq <- new.env()
+# status <- getSymbols('GOOGL', env = nasdaq, from = as.Date('2005-01-01'))
+# status <- getSymbols('AAPL', env = nasdaq, from = as.Date('2005-01-01'))
 
-apple  <- get('AAPL', envir = nasdaq)
-google <- get('GOOGL', envir = nasdaq)
+# apple  <- get('AAPL', envir = nasdaq)
+# google <- get('GOOGL', envir = nasdaq)
 
-x <- as.vector(apple[,4])
-y <- as.vector(google[,4])
+# x <- as.vector(apple[,4])
+# y <- as.vector(google[,4])
 
 wrapMCMC <- function(y, x, W, prior, J, p, nSample, burnIn, thinIn) {
   if (!is.matrix(W)) W <- as.matrix(W)
@@ -28,7 +28,7 @@ wrapMCMC <- function(y, x, W, prior, J, p, nSample, burnIn, thinIn) {
     x_adj <- (x - xmin) / (xmax - xmin)
     varphi <- sqrt(2/(xmax - xmin))*cos(outer(x_adj, pi*(1:J)))
   } else {
-    varphi <- sqrt(2) * cos(outer(x, pi(1:J)))
+    varphi <- sqrt(2) * cos(outer(x, pi*(1:J)))
   }
 
   # arma::vec y, arma::vec x, arma::mat W, arma::mat varphi, int J, double p, int nSample, int burnIn, int thinIn, double A, double B, arma::vec muBeta, arma::mat SigmaBeta, double w0
@@ -36,7 +36,7 @@ wrapMCMC <- function(y, x, W, prior, J, p, nSample, burnIn, thinIn) {
   res
 }
 
-n <- length(x)
+n <- 600
 W <- matrix(1, nr = n, nc = 1)
 A <- 0.01
 B <- 0.01
@@ -44,6 +44,8 @@ muBeta <- rep(0, ncol(W))
 SigmaBeta <- diag(1, ncol(W))
 w0 <- 1
 prior <- list(A = A, B = B, muBeta = muBeta, SigmaBeta = SigmaBeta, w0 = w0)
+x <- runif(n)
+y <- sin(2*(4*x -2)) + 2*exp((-16^2)*(x-0.5)^2)
 J <- 20
 p <- 0.3
-fit <- wrapMCMC(y, x, W, prior, J, p, 4000, 4000, 5)
+fit <- wrapMCMC(y, x, W, prior, J, p, 600, 500, 5)
