@@ -145,9 +145,9 @@ but is impossible to separate out the parameters; hence, we construct an MH chai
 \subsection{Variational Inference}
   Variational inference is an alternative to MCMC which aims for speed improvement at the expense of performance. There is a vast literature on the variational methods so we do not elaborate more on this topic. For those who are interested should be referred to Wand \& Ormerod (2010). The modelling of variational inference is different from the MCMC version in that the prior distribution of $\gamma$ is no more exponential but rather double exponential. 
 \begin{itemize}
-  \item $q\left(u_{i}\right) = \mathrm{GIG}\left(\dfrac{1}{2}, a_{q}, b_{q}\right)$ where
+  \item $q\left(u_{i}\right) = \mathrm{GIG}\left(\dfrac{1}{2}, a_{q,i}, b_{q}\right)$ where
   \begin{itemize}
-    \item $a_{q}^{2}= \dfrac{1}{\tau_{p}^{2}}\left(\left(y_{i}-\bs{w}_{i}^{\top}\bs{\mu}_{\beta}^{q}-\bs{\varphi}_{i}^{\top}\bs{\mu}_{\theta}^{q}\right)^{2}+\Tr\left(\bs{w}_{i}\bs{w}_{i}^{\top}\bs{\Sigma}_{\beta}^{q}\right)+\Tr\left(\bs{\varphi}_{i}\bs{\varphi}_{i}^{\top}\bs{\Sigma}_{\theta}^{q}\right) \right) $
+    \item $a_{q,i}^{2}= \dfrac{1}{\tau_{p}^{2}}\left(\left(y_{i}-\bs{w}_{i}^{\top}\bs{\mu}_{\beta}^{q}-\bs{\varphi}_{i}^{\top}\bs{\mu}_{\theta}^{q}\right)^{2}+\Tr\left(\bs{w}_{i}\bs{w}_{i}^{\top}\bs{\Sigma}_{\beta}^{q}\right)+\Tr\left(\bs{\varphi}_{i}\bs{\varphi}_{i}^{\top}\bs{\Sigma}_{\theta}^{q}\right) \right) $
     \item $b_{q}^{2}=2 + \dfrac{\nu_{p}^{2}}{\tau_{p}^{2}}$
   \end{itemize}
   \item $q\left(\bs{\beta}\right)=\mathcal{N}\left(\bs{\mu}_{\beta}^{q},\bs{\Sigma}_{\beta}^{q}\right)$
@@ -185,9 +185,9 @@ but is impossible to separate out the parameters; hence, we construct an MH chai
     \end{align}
     \item $L_{4}=\mathrm{E}\left(\ln p\left(\bs{\theta}_{J}\;|\;\tau^{2},\gamma\right)\right)$
     \begin{align}
-      L_{4} &= -\dfrac{J}{2}\left(\ln\left(2\pi\right)+\ln\left(B_{q}\right)-\psi\left(A_{q}\right)\right)+\dfrac{J\left(J+1\right)}{4}\mathrm{E}\left(\left|\gamma\right|\right)+\dfrac{A_{q}}{B_{q}}{\bs{\mu}_{\theta}^{q}}'\mathbf{E}\bs{\mu}_{\theta}^{q}
+      L_{4} &= -\dfrac{J}{2}\left(\ln\left(2\pi\right)+\ln\left(B_{q}\right)-\psi\left(A_{q}\right)\right)+\dfrac{J\left(J+1\right)}{4}\mathrm{E}\left(\left|\gamma\right|\right)+\dfrac{A_{q}}{B_{q}}{\bs{\mu}_{\theta}^{q}}'\mathbf{E}^{*}\bs{\mu}_{\theta}^{q}
     \end{align}
-    where $\mathbf{E}=\mathrm{diag}\left(\mathrm{E}\left(e^{\left|\gamma\right|}\right),\ldots,\mathrm{E}\left(e^{J\left|\gamma\right|}\right)\right)$ and
+    where $\mathbf{E}^{*}=\mathrm{diag}\left(\mathrm{E}\left(e^{\left|\gamma\right|}\right),\ldots,\mathrm{E}\left(e^{J\left|\gamma\right|}\right)\right)$ and
     \begin{align}
       \mathrm{E}\left(\left|\gamma\right|\right) &= \sigma_{\gamma}\sqrt{\dfrac{2}{\pi}}\exp\left(-\dfrac{\mu_{\gamma}^{2}}{2\sigma_{\gamma}^{2}}\right)+\mu_{\gamma}\left(1-2\Phi\left(-\dfrac{\mu_{\gamma}}{\sigma_{\gamma}}\right)\right)\\
       \mathrm{E}\left(e^{j\left|\gamma\right|}\right) &= \exp\left(\dfrac{\sigma_{\gamma}^{2}j^{2}}{2}+\mu_{\gamma}j\right)\left(1-\Phi\left(-\dfrac{\mu_{\gamma}}{\sigma_{\gamma}}-\sigma_{\gamma}j\right)\right)+\exp\left(\dfrac{\sigma_{\gamma}^{2}j^{2}}{2}-\mu_{\gamma}j\right)\left(1-\Phi\left(\dfrac{\mu_{\gamma}}{\sigma_{\gamma}}-\sigma_{\gamma}j\right)\right)
@@ -206,7 +206,23 @@ but is impossible to separate out the parameters; hence, we construct an MH chai
   \begin{itemize}
     \item The entropy of $u_{i}$
     \begin{equation}
-      \mathrm{H}\left(u_{i}\right) = \dfrac{1}{2}\ln\left(\dfrac{b_{q}^{2}}{a_{q}^{2}}\right)+\ln\left(2K_{0.5}\left(a_{q}b_{q}\right)\right)+\dfrac{\frac{d}{d\nu}K_{\nu}\left(a_{q}b_{q}\right)\Big|_{\nu=0.5}+a_{q}b_{q}\left(K_{1.5}\left(a_{q}b_{q}\right)+K_{-0.5}\left(a_{q}b_{q}\right)\right)}{2K_{0.5}\left(a_{q}b_{q}\right)}
+      \mathrm{H}\left(u_{i}\right) = \dfrac{1}{2}\ln\left(\dfrac{b_{q}^{2}}{a_{q,i}^{2}}\right)+\ln\left(2K_{0.5}\left(a_{q,i}b_{q}\right)\right)+\dfrac{\frac{d}{d\nu}K_{\nu}\left(a_{q,i}b_{q}\right)\Big|_{\nu=0.5}+a_{q,i}b_{q}\left(K_{1.5}\left(a_{q,i}b_{q}\right)+K_{-0.5}\left(a_{q,i}b_{q}\right)\right)}{2K_{0.5}\left(a_{q,i}b_{q}\right)}
+    \end{equation}
+    \item The entropy of $\bs{\beta}$
+    \begin{equation}
+      \mathrm{H}\left(\bs{\beta}\right) = \dfrac{p}{2}\left(1+\ln\left(2\pi\right)\right)+\dfrac{1}{2}\ln\left|\bs{\Sigma}_{\beta}^{q}\right|
+    \end{equation}
+    \item The entropy of $\bs{\theta}_{J}$
+    \begin{equation}
+      \mathrm{H}\left(\bs{\theta}_{J}\right) = \dfrac{J}{2}\left(1+\ln\left(2\pi\right)\right)+\dfrac{1}{2}\ln\left|\bs{\Sigma}_{\theta}^{q}\right|
+    \end{equation}
+    \item The entropy of $\gamma$
+    \begin{equation}
+      \mathrm{H}\left(\gamma\right) = \dfrac{1}{2}\left(1+\ln\left(2\pi\right)\right)+\dfrac{1}{2}\ln\sigma_{\gamma}^{2}
+    \end{equation}
+    \item The entropy of $\tau^{2}$
+    \begin{equation}
+      \mathrm{H}\left(\tau^{2}\right) = A_{q}+\ln B_{q}+\ln\Gamma\left(A_{q}\right)-\left(1+A_{q}\right)\psi\left(A_{q}\right)
     \end{equation}
   \end{itemize}
 \end{document}
