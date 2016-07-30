@@ -61,17 +61,17 @@ lowerBound <- function(y,W,varphi,quant,J,A,B,Aq,Bq,aq2,bq2,muBeta,SigmaBeta_inv
   t1    <- SigmaBeta_inv%*%SigmaBetaq
 
 
-  res <- -n/2*log(2*pi*taup2) - 0.5*sum(1/taup2*Egig(rep(0.5,n),aq2,rep(bq2,n),func='1/x')*(y-W%*%muBetaq-varphi%*%muThetaq)^2+diag(W%*%tcrossprod(SigmaBetaq,W))+diag(varphi%*%tcrossprod(SigmaThetaq,varphi)))-
-  sum(Egig(rep(0.5,n),aq2,rep(bq2,n),func='x')) - p/2*log(2*pi)+0.5*determinant(t1)$modulus[1]-0.5*sum((muBetaq-muBeta)*(SigmaBeta_inv%*%(muBetaq-muBeta)))-
+  res <- -n/2*log(2*pi*taup2) - 0.5*sum(1/taup2*Egig(0.5,aq2,bq2,func='1/x')*((y-W%*%muBetaq-varphi%*%muThetaq)^2+diag(W%*%tcrossprod(SigmaBetaq,W))+diag(varphi%*%tcrossprod(SigmaThetaq,varphi))))-
+  sum(Egig(0.5,aq2,bq2,func='x'))-p/2*log(2*pi)+0.5*determinant(t1)$modulus[1]-0.5*sum((muBetaq-muBeta)*(SigmaBeta_inv%*%(muBetaq-muBeta)))-
   J/2*(log(2*pi)+log(Bq)-digamma(Aq))+0.25*J*(J+1)*efnorm(mug,sigmag,sigmag2)-0.5*Aq/Bq*sum(mfnorm(mug,sigmag,sigmag2,1:J)*(muThetaq^2+diag(SigmaThetaq)))+
   log(w0/2)-w0*efnorm(mug,sigmag,sigmag2)+A*log(B)-lgamma(A)-(A+1)*(log(Bq)-digamma(Aq))-B*Aq/Bq+
-  0.5*log(sqrt(aq2/bq2))+log(2*besselK(sqrt(aq2*bq2),0.5,expon.scaled=FALSE))+0.5*(sum(aq2*Egig(rep(0.5,n),aq2,rep(bq2,n),func='1/x'))+bq2*sum(Egig(rep(0.5,n),aq2,rep(bq2,n),func='x')))+
+  sum(0.5*log(sqrt(aq2/bq2)))+sum(log(2*besselK(sqrt(aq2*bq2),0.5,expon.scaled=FALSE)))+0.5*(sum(aq2*Egig(0.5,aq2,bq2,func='1/x'))+bq2*sum(Egig(0.5,aq2,bq2,func='x')))+
   (p+J+1)/2*(1+log(2*pi))+0.5*determinant(SigmaThetaq)$modulus[1]+0.5*log(sigmag2)+Aq+log(Bq)+lgamma(Aq)-(1-Aq)*digamma(Aq)
 
   res
 }
 
-vbQuant <- function(y,x,W,priors,quant,mug.start,J=20,tol=1.0e-05) {
+vbQuant <- function(y,x,W,priors,quant,mug.start,J=20,tol=1.0e-05,maxiter=500) {
   if (is.matrix(W)==FALSE) W <- as.matrix(W)
   n             <- length(y)
   p             <- ncol(W)
@@ -91,7 +91,7 @@ vbQuant <- function(y,x,W,priors,quant,mug.start,J=20,tol=1.0e-05) {
 
   #---initialize variational parameters
   bq2     <- 2+nup^2/taup2
-  aq2     <- rep(1,n)
+  aq2     <- rep(2,n)
   Aq      <- J/2+A
   Bq      <- B
   mug     <- mug.start
@@ -99,7 +99,7 @@ vbQuant <- function(y,x,W,priors,quant,mug.start,J=20,tol=1.0e-05) {
   sigmag  <- sqrt(sigmag2)
   muBetaq <- muBeta
   SigmaBetaq <- SigmaBeta
-  muThetaq   <- rep(1,J)
+  muThetaq   <- rep(10,J)
   SigmaThetaq <- diag(1,J)
 
   #---create call objects---#
@@ -110,39 +110,35 @@ vbQuant <- function(y,x,W,priors,quant,mug.start,J=20,tol=1.0e-05) {
   lbold <- -Inf
   lbnew <- 0
   count <- 0
-  while (dif>tol | dif < 0) {
+  while (dif>tol | dif<0) {
     count       <- count+1
     Estar       <- mfnorm(mug,sigmag,sigmag2,1:J)
-    cat('Estar: ', Estar, '\n')
-    aq2         <- 1/taup2*sum((y-(as.vector(W%*%muBetaq+varphi%*%muThetaq)))^2+diag(W%*%tcrossprod(SigmaBetaq,W))+diag(varphi%*%tcrossprod(SigmaThetaq,varphi)))
-    e1overu     <- Egig(rep(0.5,n),aq2,rep(bq2,n),func='1/x')
+    aq2         <- 1/taup2*((y-(as.vector(W%*%muBetaq+varphi%*%muThetaq)))^2+diag(W%*%tcrossprod(SigmaBetaq,W))+diag(varphi%*%tcrossprod(SigmaThetaq,varphi)))
+    e1overu     <- Egig(0.5,aq2,bq2,func='1/x')
     re1overu    <- sqrt(e1overu) # root of e1overu
-    SigmaThetaq <- solve(crossprod(varphi*(re1overu%o%rep(1,ncol(varphi))))/taup2+Aq/Bq*diag(Estar))
-    muThetaq    <- as.vector(SigmaThetaq%*%colSums(varphi*((e1overu*(y-as.vector(W%*%muBetaq))-nup)%o%rep(1,ncol(varphi)))/taup2))
-    # e1overu     <- Egig(rep(0.5,n),aq2,rep(bq2,n),func='1/x')
-    # re1overu    <- sqrt(e1overu) # root of e1overu
-    SigmaBetaq  <- solve(crossprod(W*(re1overu%o%rep(1,ncol(W))))/taup2+SigmaBeta_inv)
-    muBetaq     <- as.vector(SigmaBetaq%*%(colSums(W*((e1overu*as.vector((y-varphi%*%muThetaq)-nup))%o%rep(1,ncol(W))))/taup2+SigmaBeta_inv_muBeta))
-    Bq          <- 0.5*(sum(muThetaq^2*Estar)+sum(Estar*diag(SigmaThetaq)))+B
+    SigmaThetaq <- solve(crossprod(varphi*re1overu)/taup2+diag(Aq/Bq*Estar))
+    muThetaq    <- as.vector(SigmaThetaq%*%colSums(varphi*(e1overu*((y-as.vector(W%*%muBetaq))-nup))/taup2))
+    SigmaBetaq  <- solve(crossprod(W*re1overu)/taup2+SigmaBeta_inv)
+    muBetaq     <- as.vector(SigmaBetaq%*%(colSums(W*(e1overu*as.vector((y-varphi%*%muThetaq)-nup))/taup2+SigmaBeta_inv_muBeta)))
+    Bq          <- 0.5*sum((muThetaq^2+diag(SigmaThetaq))*Estar)+B
     #---check lower bound---#
     lbtest      <- eval(clb)
     #---NCVMP for gamma---#
     sigmag2.old <- sigmag2
     sigmag2     <- -0.5/(const1*dsefnorm(mug,sigmag)-0.5*Aq/Bq*sum((muThetaq^2+diag(SigmaThetaq))*dsmfnorm(mug,sigmag,sigmag2,1:J)))
     sigmag      <- sqrt(sigmag2)
-    cat('sigmag2: ', sigmag2, '\n')
+    cat('sigma2: ',sigmag2,'\n')
     mug.old     <- mug
     mug         <- mug+sigmag2*(const1*dmefnorm(mug,sigmag)-0.5*Aq/Bq*sum((muThetaq^2+diag(SigmaThetaq))*dmmfnorm(mug,sigmag,sigmag2,1:J)))
     #---check lower bound---#
     lbnew       <- eval(clb)
-    cat('lbnew1: ',lbnew,'\n')
     dif         <- lbnew-lbtest
 
     if (dif<0) {
       step <- 1
       dif.try <- dif
       while (dif.try<0) {
-        step <- step*0.5
+        step        <- step*0.5
         sigmag2.try <- 1/(1/sigmag2.old+step*(1/sigmag2-1/sigmag2.old))
         sigmag.try  <- sqrt(sigmag2.try)
         mug.try     <- sigmag2.try*(mug.old/sigmag2.old+step*(mug/sigmag2-mug.old/sigmag2.old))
@@ -153,18 +149,19 @@ vbQuant <- function(y,x,W,priors,quant,mug.start,J=20,tol=1.0e-05) {
       sigmag2 <- sigmag2.try
       mug     <- mug.try
     }
-    dif <- (lbnew-lbold)/abs(lbnew)
+    dif <- lbnew-lbold
     lbold <- lbnew
     lb <- c(lb,lbnew)
-    cat('count: ', count, ', lbnew: ', lbnew, ', dif: ', dif, '\n')
+    cat('count: ',count,', lbnew: ',lbnew,', dif: ',dif,'\n')
+    if (count>maxiter) break
   }
-  list(lb=lb,muThetaq=muThetaq,SigmaThetaq=SigmaThetaq,Aq=Aq,Bq=Bq,muBetaq=muBetaq,SigmaBetaq=SigmaBetaq,mug=mug,sigmag2=sigmag2,aq2=aq2,bq2=bq2)
+  list(count=count,lb=lb,muThetaq=muThetaq,SigmaThetaq=SigmaThetaq,Aq=Aq,Bq=Bq,muBetaq=muBetaq,SigmaBetaq=SigmaBetaq,mug=mug,sigmag2=sigmag2,aq2=aq2,bq2=bq2)
 }
 
 
 # x <- runif(1000)
 # y <- sin(2*pi*x)-log(x)
-
+# y <- cos(2*pi*x)-sin(3*pi*x)
 london <- new.env()
 #-----------from google------------#
 status <- getSymbols('LON:HSBA',env=london,src="google",from=as.Date("2005-01-01"))
@@ -186,9 +183,9 @@ xmin <- min(x2)
 x    <- (x2-xmin)/(xmax-xmin)
 
 
-A           <- 1
-B           <- 1
-muBeta      <- 1
+A           <- 0.01
+B           <- 0.01
+muBeta      <- 0
 SigmaBeta   <- matrix(1)
 w0          <- 1
 W           <- matrix(1,nr=length(y),nc=1)
@@ -196,6 +193,11 @@ priors      <- list(A=A,B=B,muBeta=muBeta,SigmaBeta=SigmaBeta,w0=w0)
 res         <- NULL
 mug.start   <- 0.1
 while(is.null(res)) {
-  try(res   <- vbQuant(y,x,W,priors,0.5,mug.start,J=30))
+  try(res   <- vbQuant(y,x,W,priors,0.5,mug.start,J=30,maxiter=200))
   mug.start <- mug.start + 0.1
 }
+o <- order(x)
+varphi <- sqrt(2)*cos(outer(x,1:30))
+fit <- W%*%res$muBetaq+varphi%*%res$muThetaq
+plot(x[o],y[o],col=rgb(0,0,0,0.2),xlab='',ylab='',main='Median regression')
+lines(x[o],fit[o],col='darkorange')

@@ -3,7 +3,7 @@ source('vbgpspectral.R')
 # Test example
 
 set.seed(1)
-n<-500
+n<-1000
 x<-0.1+0.8*runif(n)
 #Z<-cbind(rep(1,times=n),runif(n))
 #y<-sin(x*pi)+Z%*%c(1,1)+0.1*rnorm(n)
