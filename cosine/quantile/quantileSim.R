@@ -36,16 +36,27 @@ wrapMCMC <- function(y, x, W, prior, J, p, nSample, burnIn, thinIn) {
   res
 }
 
-n <- 600
-W <- matrix(1, nr = n, nc = 1)
-A <- 0.01
-B <- 0.01
-muBeta <- rep(0, ncol(W))
-SigmaBeta <- diag(1, ncol(W))
-w0 <- 1
-prior <- list(A = A, B = B, muBeta = muBeta, SigmaBeta = SigmaBeta, w0 = w0)
-x <- runif(n)
-y <- sin(2*(4*x -2)) + 2*exp((-16^2)*(x-0.5)^2)
-J <- 20
-p <- 0.3
-fit <- wrapMCMC(y, x, W, prior, J, p, 600, 500, 5)
+# n <- 600
+# W <- matrix(1, nr = n, nc = 1)
+# A <- 0.01
+# B <- 0.01
+# muBeta <- rep(0, ncol(W))
+# SigmaBeta <- diag(1, ncol(W))
+# w0 <- 1
+# prior <- list(A = A, B = B, muBeta = muBeta, SigmaBeta = SigmaBeta, w0 = w0)
+# x <- runif(n)
+# y <- sin(2*(4*x -2)) + 2*exp((-16^2)*(x-0.5)^2)
+# J <- 20
+# p <- 0.3
+# fit <- wrapMCMC(y, x, W, prior, J, p, 600, 500, 5)
+n         <- 1000
+x         <- runif(n)
+y         <- sin(2*pi*x)-log(x)
+A         <- 0.01
+B         <- 0.01
+muBeta    <- 0
+SigmaBeta <- matrix(1)
+w0        <- 1
+W         <- matrix(1,nr=length(y),nc=1)
+priors    <- list(A=A,B=B,muBeta=muBeta,SigmaBeta=SigmaBeta,w0=w0)
+res       <- wrapMCMC(y,x,W,priors,30,0.5,1000,5000,30)

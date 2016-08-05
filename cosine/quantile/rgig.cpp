@@ -335,10 +335,11 @@ Rcpp::List MCMCQuantile(arma::vec y, arma::vec x, arma::mat W, arma::mat varphi,
 	arma::colvec beta(W.n_cols, arma::fill::randn);
 	arma::colvec theta(J, arma::fill::randn);
 	std::exponential_distribution<double> distribution(1.);
-	double gamma = distribution(generator);
+	// double gamma = distribution(generator);
+	double gamma = 0.001;
 	double tau   = 1./distribution(generator);
 	const double const2 = 0.25 * taup2;
-	arma::colvec u(n);
+	arma::colvec u(n, arma::fill::zeros);
 	std::uniform_real_distribution<double> unif_rand(0.0, 1.0);
 
 	int count = 1;
@@ -347,43 +348,53 @@ Rcpp::List MCMCQuantile(arma::vec y, arma::vec x, arma::mat W, arma::mat varphi,
 		std::cout << "Burn-in count: " << count << std::endl;
 		++count;
 		/* update u */
+		std::cout << ">" << std::endl;
 		arma::vec tmp = y - W * beta - varphi * theta;
 		tmp = (tmp % tmp) / taup2;
+		std::cout << ">>" << std::endl;
 		for (int i = 0; i < n; ++i) {
 			u(i) = arma::as_scalar(rgig(1, 0.5, tmp(i), const2));
 		}
+		std::cout << ">>>" << std::endl;
 
 		// u = rgig(n, 0.5, (tmp % tmp) / taup2, 0.25 *taup2);
 
 		/* update beta */
-		arma::mat W_halfu = arma::diagmat(arma::sqrt(u)) * W;
+		arma::mat W_halfu = arma::diagmat(1./arma::sqrt(u)) * W;
 		arma::mat E_prev(J, J, arma::fill::zeros);
+		std::cout << ">>>>" << count << std::endl;
 		for (int k = 0; k < J; ++k) {
-			E_prev(k, k) = (k+1) * gamma;
+			E_prev(k, k) = std::exp((k+1) * gamma);
 		}
+		std::cout << ">>>>>" << count << std::endl;
 
 		arma::mat E = E_prev / tau;
 		arma::mat sigma_temp = (W_halfu.t() * W_halfu / taup2 + SigmaBeta_inv).i();
 		arma::vec mu_temp    = sigma_temp * arma::vectorise(arma::sum((diagmat(((y - varphi * theta) - nup * u) / u) * W), 0) + SigmaBeta_inv_muBeta);
 		beta = arma::vectorise(mvrnormArma(1, mu_temp, sigma_temp));
+		std::cout << ">>>>>>" << count << std::endl;
 
 		/* update theta */
-		arma::mat varphi_halfu = arma::diagmat(arma::sqrt(u)) * varphi;
+		arma::mat varphi_halfu = arma::diagmat(1./arma::sqrt(u)) * varphi;
 		sigma_temp = ((varphi_halfu.t() * varphi_halfu) / taup2 + E).i();
 		mu_temp    = sigma_temp * arma::vectorise(arma::sum((arma::diagmat((y - W * beta - nup * u) / u) * varphi), 0));
 		theta = arma::vectorise(mvrnormArma(1, mu_temp, sigma_temp));
 
+		std::cout << ">>>>>>>" << count << std::endl;
 		/* update tau */
 		std::gamma_distribution<double> gam_dist(A + J/2., 1./(0.5 * arma::sum(arma::diagvec(E) % theta % theta) + B));
 		tau = 1 / gam_dist(generator);
 
+		std::cout << ">>>>>>>>" << count << std::endl;
 		/* update gamma */
 		double gamma_cand = distribution(generator);
 		double rho = std::min(1., fRho(gamma_cand, gamma, const1, tau, theta, J));
 
+		std::cout << ">>>>>>>>>" << count << std::endl;
 		if (unif_rand(generator) < rho) {
 			gamma = gamma_cand;
 		}
+		std::cout << ">>>>>>>>>>" << count << std::endl;
 	}
 	arma::mat uList(n, nSample+1);
 	arma::mat betaList(W.n_cols, nSample);
@@ -411,10 +422,10 @@ Rcpp::List MCMCQuantile(arma::vec y, arma::vec x, arma::mat W, arma::mat varphi,
 			// u = rgig(n, 0.5, (tmp % tmp) / taup2, 0.25 *taup2);
 
 			/* update beta */
-			arma::mat W_halfu = arma::diagmat(arma::sqrt(u)) * W;
+			arma::mat W_halfu = arma::diagmat(1./arma::sqrt(u)) * W;
 			arma::mat E_prev(J, J, arma::fill::zeros);
 			for (int k = 0; k < J; ++k) {
-				E_prev(k, k) = (k+1) * gamma;
+				E_prev(k, k) = std::exp((k+1) * gamma);
 			}
 			arma::mat E = E_prev / tau;
 			arma::mat sigma_temp = (W_halfu.t() * W_halfu / taup2 + SigmaBeta_inv).i();
@@ -422,7 +433,7 @@ Rcpp::List MCMCQuantile(arma::vec y, arma::vec x, arma::mat W, arma::mat varphi,
 			beta = arma::vectorise(mvrnormArma(1, mu_temp, sigma_temp));
 
 			/* update theta */
-			arma::mat varphi_halfu = arma::diagmat(arma::sqrt(u)) * varphi;
+			arma::mat varphi_halfu = arma::diagmat(1./arma::sqrt(u)) * varphi;
 			sigma_temp = ((varphi_halfu.t() * varphi_halfu) / taup2 + E).i();
 			mu_temp    = sigma_temp * arma::vectorise(arma::sum((arma::diagmat((y - W * beta - nup * u) / u) * varphi), 0));
 			theta = arma::vectorise(mvrnormArma(1, mu_temp, sigma_temp));
