@@ -159,28 +159,28 @@ vbQuant <- function(y,x,W,priors,quant,mug.start,J=20,tol=1.0e-05,maxiter=500) {
 }
 
 
-# x <- runif(1000)
-# y <- sin(2*pi*x)-log(x)
+x <- runif(1000)
+y <- sin(2*pi*x)-log(x)
 # y <- cos(2*pi*x)-sin(3*pi*x)
-london <- new.env()
-#-----------from google------------#
-status <- getSymbols('LON:HSBA',env=london,src="google",from=as.Date("2005-01-01"))
-status <- getSymbols('LON:BARC',env=london,src="google",from=as.Date('2005-01-01'))
-HSBC   <- get("LON:HSBA",envir=london)
-BARC   <- get("LON:BARC",envir=london)
+# london <- new.env()
+# #-----------from google------------#
+# status <- getSymbols('LON:HSBA',env=london,src="google",from=as.Date("2005-01-01"))
+# status <- getSymbols('LON:BARC',env=london,src="google",from=as.Date('2005-01-01'))
+# HSBC   <- get("LON:HSBA",envir=london)
+# BARC   <- get("LON:BARC",envir=london)
 
-y      <- as.vector(HSBC[,4])
-x2     <- as.vector(BARC[,4])
+# y      <- as.vector(HSBC[,4])
+# x2     <- as.vector(BARC[,4])
 
-if (length(y)>length(x2)) {
-  y  <- y[1:length(x2)]
-} else if (length(x2)>length(y)) {
-  x2 <- x2[1:length(y)]
-}
+# if (length(y)>length(x2)) {
+#   y  <- y[1:length(x2)]
+# } else if (length(x2)>length(y)) {
+#   x2 <- x2[1:length(y)]
+# }
 
-xmax <- max(x2)
-xmin <- min(x2)
-x    <- (x2-xmin)/(xmax-xmin)
+# xmax <- max(x2)
+# xmin <- min(x2)
+# x    <- (x2-xmin)/(xmax-xmin)
 
 
 A           <- 0.01
