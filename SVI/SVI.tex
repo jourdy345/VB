@@ -1,0 +1,168 @@
+\documentclass[12pt]{article}
+% \documentclass[12pt]{beamer}
+\usepackage{amsmath,amsfonts,amssymb,amsthm}
+\usepackage{color}
+\usepackage[T1]{fontenc}
+\usepackage{mathtools}
+\usepackage{graphicx}
+\usepackage{subcaption}
+\usepackage{kotex}
+\usepackage{bm}
+\usepackage[shortlabels]{enumitem}
+\usepackage{tcolorbox}
+\usepackage{mathrsfs}
+\usepackage{newtxtext}
+\usepackage[lite,nofontinfo,zswash,straightbraces]{mtpro2}
+\usepackage{setspace} %줄간격 package
+%-------------------------------------------------------------------------------------
+% Page layout
+\addtolength{\textwidth}{1.2in}
+\addtolength{\oddsidemargin}{-0.6in}
+\addtolength{\textheight}{2.0in}
+\addtolength{\topmargin}{-1.0in}
+\renewcommand \baselinestretch{1.2}
+\parskip = 6pt
+% New command
+\newcommand {\AND}{\quad\mbox{and}\quad}
+\newcommand {\for}{\quad\mbox{ for }}
+\newcommand {\half}{{\tfrac 12}}
+% \newcommand {\bm} [1] {\mbox{\boldmath{$#1$}}}
+\newcommand{\bs}{\boldsymbol}
+\DeclareMathOperator{\Tr}{Tr}
+\DeclareMathOperator{\Cov}{Cov}
+\DeclareMathOperator{\Var}{Var}
+\DeclareMathOperator{\E}{\mathbf{E}}
+\DeclareMathOperator{\vvv}{vec}
+\DeclareMathOperator{\vvvh}{vech}
+% \setmainfont{TEX Gyre Termes}
+% \setmathfont[bold-style=TeX]{TG Termes Math}
+\begin{document}
+\setstretch{1.4} %줄간격 조정
+\title{Stochastic Variational Inference}
+%------------------------------------------------------------------------------------%
+%------------------------------------------------------------------------------------%
+% \setcounter{section}{1}
+
+\section{Stochastic Variational Inference in Linear Regression}
+Model $y=\mathbf{X}\beta+\mathbf{e},\quad \mathbf{e}\sim\mathcal{N}(\mathbf{0},\sigma^{2}\mathbf{I}_{n})$.
+\begin{itemize}
+  \item $\beta\sim\mathcal{N}\left(\mu_{0},\Sigma_{0}\right)$
+  \item $\sigma^{2}\sim\mathrm{InvGam}(A,B)$
+\end{itemize}
+Variational distributions
+\begin{itemize}
+  \item $q(\beta)\sim\mathcal{N}\left(\mu_{q},\Sigma_{q}\right)$
+  \item $q\left(\sigma^{2}\right)\sim\mathrm{InvGam}\left(A_{q},B_{q}\right)$
+\end{itemize}
+Let $h(\theta)=p(y\,|\,\theta)p(\theta)$.
+\begin{align}
+  \log h(\theta) &= -\dfrac{n}{2}\log\left(2\pi\sigma^{2}\right)-\dfrac{1}{2\sigma^{2}}\left(y-X\beta\right)'\left(y-X\beta\right)-\dfrac{1}{2}\log\left|\Sigma_{0}\right|-\dfrac{p}{2}\log(2\pi)\\
+  &\quad -\dfrac{1}{2}\left(\beta-\mu_{0}\right)'\Sigma_{0}^{-1}\left(\beta-\mu_{0}\right)-(A+1)\log\sigma^{2}-\dfrac{B}{\sigma^{2}}+A\log B -\log\Gamma(A)\\
+  \log q_{\lambda}(\theta) &= -\dfrac{p}{2}\log(2\pi)-\dfrac{1}{2}\log\left|\Sigma_{q}\right|-\dfrac{1}{2}\left(\beta-\mu_{q}\right)'\Sigma_{q}^{-1}\left(\beta-\mu_{q}\right)-\left(A_{q}+1\right)\log\sigma^{2}\\
+  &\quad -\dfrac{B_{q}}{\sigma^{2}}+A_{q}\log B_{q}-\log\Gamma\left(A_{q}\right)
+\end{align}
+\subsection{Reparameterization}
+Let $\Sigma_{q}^{-1}=\Omega=CC'$ where $C$ is the Cholesky factor lower triangular matrix of $\Omega$. Then with $s\sim \mathscr{N}\left(\mathbf{0},\mathbf{I}_{p}\right)$, we can recast $\beta$ as
+\begin{equation}
+  \beta = {C'}^{-1}s+\mu_{q}
+\end{equation}
+Now, the log-joint density becomes
+\begin{align}
+  \log h(\theta) &= -\dfrac{n}{2}\log\left(2\pi\sigma^{2}\right)-\dfrac{1}{2\sigma^{2}}\left(y-X{C'}^{-1}s-X\mu_{q}\right)'\left(y-X{C'}^{-1}s-X\mu_{q}\right)-\dfrac{1}{2}\log\left|\Sigma_{0}\right|-\dfrac{p}{2}\log(2\pi)\\
+  &\quad -\dfrac{1}{2}\left({C'}^{-1}s+\mu_{q}-\mu_{0}\right)'\Sigma_{0}^{-1}\left({C'}^{-1}s+\mu_{q}-\mu_{0}\right)-(A+1)\log\sigma^{2}-\dfrac{B}{\sigma^{2}}\\
+  &\quad +A\log B-\log\Gamma(A)\\
+  \log q_{\lambda}(\theta) &= -\dfrac{p}{2}\log(2\pi)+\log|C|-\dfrac{1}{2}s's-(A_{q}+1)\log\sigma^{2}\\
+  &\quad -\dfrac{B_{q}}{\sigma^{2}}+A_{q}\log B_{q}-\log\Gamma \left(A_{q}\right)
+\end{align}
+
+\section{Multivariate Gaussian Distribution}
+We will assume that the variational posterior distribution $q_{\lambda}(\theta)$ is a multivariate Gaussian distribution where $\lambda$ denotes the natural parameters in the exponential family representation of the density given by
+\begin{equation}
+  \lambda = \begin{bmatrix} \lambda_{1} \\ \lambda_{2} \end{bmatrix} = \begin{bmatrix} \Sigma^{-1}\mu \\ -1/2 D_{d}'\vvv \left(\Sigma^{-1}\right) \end{bmatrix}
+\end{equation}
+$D_{d}$ is the duplication matrix of order $d$, which is the unique $d^{2}\times d(d+1)/2$ matrix of zeros and ones such that $D_{d}\vvvh(A)=\vvv(A)$ for symmetric $d\times d$ matrices $A$ and its Moore-Penrose inverse is
+\begin{equation}
+  D_{d}^{\dagger} = \left(D_{d}'D_{d}\right)^{-1}D_{d}'
+\end{equation}
+On the contrary, $L_{d}$ is the elimination matrix such that
+\begin{equation}
+  L_{d}\vvv(A)=\vvvh(A)
+\end{equation}
+With these notations and natural parameters, the original parameters $\mu,\Sigma$ can be expressed as
+\begin{equation}
+  \mu=-\dfrac{1}{2}\left\{\vvv^{-1}\left(D_{d}^{\dagger}\lambda_{2}\right) \right\}^{-1}\lambda_{1},\qquad \Sigma = -\dfrac{1}{2}\left\{\vvv^{-1}\left({D_{d}^{\dagger}}'\lambda_{2}\right)\right\}^{-1}
+\end{equation}
+Then, the exponential family representation becomes
+\begin{equation}
+  q_{\lambda}(\theta) = \exp\left(T(\theta)'\lambda-Z(\lambda)\right)
+\end{equation}
+where $T(\theta)$ is the sufficient statistic
+\begin{equation}
+  T(\theta) = \begin{bmatrix} \theta \\ \vvvh\left(\theta\theta'\right)\end{bmatrix}
+\end{equation}
+The Fisher's information matrix $I_{F}(\lambda)=\Cov_{\lambda}(T(\theta))$ has an inverse
+\begin{equation}
+  I_{F}(\lambda)^{-1} = \begin{bmatrix} \Sigma^{-1}+M'S^{-1}M & -M'S^{-1}\\ -S^{-1}M & S^{-1}\end{bmatrix}
+\end{equation}
+where $M=2D_{d}^{\dagger}(\mu\otimes I_{d})$ and $S=2D_{d}^{\dagger}(\Sigma\otimes \Sigma){D_{d}^{\dagger}}'$. Now
+\begin{equation}
+  \nabla_{\lambda}\log q_{\lambda}(\theta) = \begin{bmatrix} \theta - \mu \\ \vvvh\left(\theta\theta'-\Sigma-\mu\mu'\right)\end{bmatrix}
+\end{equation}
+\section{Gradients}
+\begin{align}
+  \nabla_{\mu_{q}}\log q_{\lambda}(\theta) &= -\Sigma_{q}^{-1}\left(\mu_{q}-\beta\right)\\
+  \nabla_{\Sigma_{q}}\log q_{\lambda}(\theta) &= -\dfrac{1}{2}\left(\Sigma_{q}^{-1}+\left(\beta-\mu_{q}\right)\left(\beta-\mu_{q}\right)'\right)\\
+  \nabla_{A_{q}}\log q_{\lambda}(\theta) &= -\log\sigma^{2}+\log B_{q}-\psi\left(A_{q}\right)\\
+  \nabla_{B_{q}} \log q_{\lambda}(\theta) &= -\dfrac{1}{\sigma^{2}}+\dfrac{A_{q}}{B_{q}}
+\end{align}
+Lower bound, log-derivative trick
+\begin{align}
+  \nabla_{\lambda}\mathcal{L}(\lambda) &= \nabla_{\lambda}\int \left(\log h(\theta)-\log q_{\lambda}(\theta)\right)q_{\lambda}(\theta)\,\theta\\
+  &= \int \log h(\theta)\nabla_{\lambda}\log q_{\lambda}(\theta)q_{\lambda}(\theta)\,d\theta -\int \log q_{\lambda}(\theta) \nabla_{\lambda}\log q_{\lambda})(\theta)q_{\lambda}(\theta)\,\theta\\
+  &= \int \nabla_{\lambda}\log q_{\lambda}(\theta)\left(\log h(\theta)-\log q_{\lambda}(\theta)\right)q_{\lambda}(\theta)\,d\theta\\
+  &\approx \dfrac{1}{S}\sum_{s=1}^{S}\nabla_{\lambda}\log q_{\lambda}\left(\theta^{(s)}\right)\left(\log h(\theta^{(s)})-\log q_{\lambda}(\theta^{(s)})\right)
+\end{align}
+where $\theta^{(s)}\sim q_{\lambda}(\theta),\; s=1,\ldots,S$.
+\section{Step Size}
+For the step size sequence $\rho_{t}$, the Robbins-Monro approximation states that it should satisfy two conditions
+\begin{itemize}
+  \item $\displaystyle\sum_{t=1}^{\infty}\rho_{t}=\infty$
+  \item $\displaystyle\sum_{t=1}^{\infty}\rho_{t}^{2} < \infty$
+  \end{itemize}
+  which the first indicates that the step size should be large enough that the stochastic search is able to sweep through all possible zones of the parameter space, and the second indicates that despite the first condition, the variation should not be so big that it is beyond control. The recommended Robbins-Monro sequence is
+  \begin{equation}
+  \rho = (t+\tau)^{-\kappa}
+  \end{equation}
+  where $\kappa\in (0.5,1]$, the forgetting rate, controls how quickly old information decays and $\tau \geq 0$, the delay, downweights early iterations. In many cases, $\tau$ is set to $1$.
+\section{Inverse Gamma Distribution}
+The log-density of an inverse-gamma distribution is
+\begin{equation}
+  A\log B -\log \Gamma(A)-(A+1)\log \theta - B/\theta
+\end{equation}
+Therefore for $A,B$, the gradient is given as
+\begin{equation}
+  \nabla_{\lambda}q_{\lambda}(\theta) = \begin{bmatrix}\log B -\psi(A)-\log\theta\\ A/B-1/\theta \end{bmatrix}
+\end{equation}
+Now to get the Fisher's information matrix, we need the following
+\begin{align}
+  \Var(-\log \theta) &= \psi_{1}(A)\\
+  \Var(-1/\theta) &= A/B^{2}\\
+  \Cov(-\log\theta,-1/\theta) &= \E\left(\dfrac{1}{\theta}\log\theta\right)-\E(\log\theta)\E\left(\dfrac{1}{\theta}\right)\\
+  &= -\E\left(\dfrac{1}{\theta}\log\dfrac{1}{\theta}\right)+\E\left(\log\dfrac{1}{\theta}\right)\E\left(\dfrac{1}{\theta}\right)\\
+  &= \dfrac{A}{B}\left(\psi(A)-\psi(A+1)\right)\\
+  G_{\theta} &= \begin{bmatrix}\psi_{1}(A) & -1/B \\ -1/B & A/B^{2} \end{bmatrix}
+\end{align}
+since $\psi(a+1)=\psi(a)+1/a$
+\section{Reparameterization}
+If $q(\beta)=\mathcal{N}\left(\mu_{q},\Sigma_{q}\right)$ and if we let $\Sigma_{q}^{-1}=CC'$ and $\phi(z)=\mathcal{N}(\mathbf{0},\mathbf{I}_{p})$,
+\begin{itemize}
+  \item $\beta={C^{-1}}'z+\mu_{q}$
+  \item $dz=|C|d\beta$
+  \item $q(\beta)=|C|\phi(z)$
+\end{itemize}
+are all true. Then
+\begin{align}
+  \int q(\beta)\log \dfrac{h(\theta)}{q(\beta)}\,d\beta &= \int \phi(z)\log \dfrac{h\left({C^{-1}}'z+\mu_{q} \right)}{\phi(z)|C|}\,dz\\
+  &= \E_{\phi(z)}\left[h\left({C^{-1}}'z+\mu_{q}\right) \right]-\log|C|-\mathcal{H}(z)
+\end{align}
+\end{document}

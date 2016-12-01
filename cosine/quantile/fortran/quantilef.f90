@@ -15,19 +15,17 @@ SUBROUTINE quantilef(y,vphi,W,A,B,muBeta,SigmaBeta,w0,nbasis,quant,nSample,burnI
   CHARACTER*20       :: process
   CHARACTER*28       :: process2
   ! CHARACTER*6        :: countm
-  CALL rndstart()
   CALL inverse(SigmaBeta,p,SigmaBetainv)
   SigmaBetainvmuBeta = MATMUL(SigmaBetainv,muBeta)
   const1 =  DBLE(nbasis)*(DBLE(nbasis)+1.d0)/4.d0 - w0
+  CALL rndstart()
   !---initialize---!
   DO i=1,p
     betatmp(i)  = rndnorm()
   END DO
   DO i=1,nbasis
     thetatmp(i) = rndnorm()
-  END DO
-  DO i=1,nbasis
-    Jvec(i)=DBLE(i)
+    Jvec(i)     = DBLE(i)
   END DO
   gammatmp      = 0.01d0
   tautmp        = 1.d0/exprnd(1.d0)
@@ -37,31 +35,41 @@ SUBROUTINE quantilef(y,vphi,W,A,B,muBeta,SigmaBeta,w0,nbasis,quant,nSample,burnI
   count         = 0
   const2        = 0.25d0*taup2
   DO t=1,burnIn
+    CALL rchkusr()
     count = count+1
     WRITE(process,fmt='(A,I6.6)') 'Burning in... ',count
     ! process = 'Burning in... '//countm//' round'
     CALL DBLEPR(process,-1,1.d0,0)
     ! PRINT *,count," iterations (Burn-in)"
     Estar = DEXP(Jvec*gammatmp)
+    CALL DBLEPR('>',-1,1.d0,0)
     E     = Estar/tautmp
     !---update u---!
+    CALL DBLEPR('>>',-1,1.d0,0)
     tmp = (y-matmul(W,betatmp)-matmul(vphi,thetatmp))**2.d0/taup2
+    CALL DBLEPR('>>>',-1,1.d0,0)
     DO j=1,n
       u(j) = gigrnd(0.5d0,const2,tmp(j))
     END DO
+    CALL DBLEPR('>>>>',-1,1.d0,0)
     !---update beta---!
     DO j=1,nbasis
       tmpb(:,j) = W(:,j)*DSQRT(1.d0/u)
     END DO
+    CALL DBLEPR('>>>>>',-1,1.d0,0)
     CALL inverse(MATMUL(transpose(tmpb),tmpb)/taup2+SigmaBetainv,p,sigb)
+    CALL DBLEPR('>>>>>>',-1,1.d0,0)
     DO j=1,p
       t2 = (y-MATMUL(vphi,thetatmp)-nup*u)/u
       tmpb(:,j) = W(:,j)*t
     END DO
+    CALL DBLEPR('>>>>>>>',-1,1.d0,0)
     tp = SUM(tmpb,2)/taup2+SigmaBetainvmuBeta
     mub  = MATMUL(sigb,tp)
+    CALL DBLEPR('>>>>>>>>',-1,1.d0,0)
     CALL mvnrnd(mub,sigb,p,betatmp)
     !---update tau---!
+    CALL DBLEPR('>>>>>>>>>',-1,1.d0,0)
     tautmp = 1.d0/gamrnd(Aq,1.d0/(0.5d0*SUM(Estar*thetatmp**2.d0)+B))
     !---update theta---!
     DO j=1,nbasis
@@ -77,13 +85,14 @@ SUBROUTINE quantilef(y,vphi,W,A,B,muBeta,SigmaBeta,w0,nbasis,quant,nSample,burnI
     CALL mvnrnd(mut,sigt,nbasis,thetatmp)
     gcan = exprnd(1.d0)
     rho = fRho(gcan,gammatmp,const1,tautmp,thetatmp,nbasis)
-    IF (rndunif().LE.rho) THEN
+    IF (rndunif().LT.rho) THEN
       gammatmp = gcan
     END IF
   END DO
-  count = 1
+  count = 0
   DO i=1,nSample
     count = count+1
+    CALL rchkusr()
     ! PRINT *,count,"samples collected..."
     WRITE(process2,fmt='(A,I6.6)') 'Collecting samples... ',count
     ! process = "Collecting samples... "//countm//' samples so far'
@@ -123,6 +132,7 @@ SUBROUTINE quantilef(y,vphi,W,A,B,muBeta,SigmaBeta,w0,nbasis,quant,nSample,burnI
       mut = MATMUL(sigt,tt)
       CALL mvnrnd(mut,sigt,nbasis,thetatmp)
       gcan = exprnd(1.d0)
+      CALL SPRINT(gcan)
       rho = fRho(gcan,gammatmp,const1,tautmp,thetatmp,nbasis)
       IF (rndunif().LE.rho) THEN
         gammatmp = gcan
