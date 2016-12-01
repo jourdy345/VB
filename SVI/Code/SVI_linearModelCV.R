@@ -61,7 +61,8 @@ kappa <- 0.8
 lbold <- -Inf
 lb <- 0
 lbc <- c()
-S <- 1000
+S <- 40 # number of Monte-Carlo samples
+T <- 4000 # number of iterations
 
 # natural parameters
 gauss_lambda1 <- c(solve(sigq,muq))
@@ -69,11 +70,11 @@ gauss_lambda2 <- -0.5*crossprod(D,as.vector(invsigq))
 gauss_lambda <- c(gauss_lambda1,gauss_lambda2)
 invgam_lambda <- c(Aq,Bq)
 
-muq_storage <- matrix(0,4,2000)
-sigma2_storage <- matrix(0,2,2000)
+muq_storage <- matrix(0,4,T)
+sigma2_storage <- matrix(0,2,T)
 
 # start inference
-for (i in 1:2000) {
+for (i in 1:T) {
   gauss_lambda_old  <- gauss_lambda
   muq_old           <- muq
   sigq_old          <- sigq

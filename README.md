@@ -1,6 +1,8 @@
 # Variational Bayes
 
-Welcome to my repository for variational inference! The repository you've just stumbled upon is not for public use/exhibit; it has been created entirely for personal purpose. I don't mind people using my code or reading my summary notes but please not that there is no manual. This README file has also been written to inform MYSELF and not to forget. So you're seeing my notebook basically.
+You have visited my repository for variational inference! I am currently working on stochastic variational inference(SVI). The SVI codes are toy examples of Bayesian linear regression, one of which is stochastic gradient with no variance reduction and the other with variance reduction via control variate. There is a vast literature on variational inference out there so grab one paper and try to read it through. You can use my codes as examples of those models. Feel free to ask me if you have any question. I will try my best to reply.
+
+<!-- Welcome to my repository for variational inference! The repository you've just stumbled upon is not for public use/exhibit; it has been created entirely for personal purpose. I don't mind people using my code or reading my summary notes but please not that there is no manual. This README file has also been written to inform MYSELF and not to forget. So you're seeing my notebook basically.
 
 ### GP mixed C++ code compiling & linking
 ```bash
@@ -39,4 +41,4 @@ There are three simulation codes:
 
 ### Note
 ----
-If a user-defined function is provided, `sim_GPnormal` and `sim_GPprobit` both generate data according to the model `f(x) + Zu + ε` where `ε ~ N(0,2)` and `u ~ N(0,3)`. `f(x)` is approximated by `Σ( a*sin(2πsx) + b*cos(2πsx) )`.
+If a user-defined function is provided, `sim_GPnormal` and `sim_GPprobit` both generate data according to the model `f(x) + Zu + ε` where `ε ~ N(0,2)` and `u ~ N(0,3)`. `f(x)` is approximated by `Σ( a*sin(2πsx) + b*cos(2πsx) )`. -->

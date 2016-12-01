@@ -1,0 +1,77 @@
+\documentclass[12pt]{article}
+% \documentclass[12pt]{beamer}
+\usepackage{amsmath,amsfonts,amssymb,amsthm}
+\usepackage{color}
+\usepackage[T1]{fontenc}
+\usepackage{mathtools}
+\usepackage{graphicx}
+\usepackage{subcaption}
+\usepackage{kotex}
+\usepackage{bm}
+\usepackage[shortlabels]{enumitem}
+\usepackage{tcolorbox}
+\usepackage{mathrsfs}
+\usepackage{newtxtext}
+\usepackage[lite,nofontinfo,zswash,straightbraces]{mtpro2}
+\usepackage{setspace} %줄간격 package
+%-------------------------------------------------------------------------------------
+% Page layout
+\addtolength{\textwidth}{1.2in}
+\addtolength{\oddsidemargin}{-0.6in}
+\addtolength{\textheight}{2.0in}
+\addtolength{\topmargin}{-1.0in}
+\renewcommand \baselinestretch{1.2}
+\parskip = 6pt
+% New command
+\newcommand {\AND}{\quad\mbox{and}\quad}
+\newcommand {\for}{\quad\mbox{ for }}
+\newcommand {\half}{{\tfrac 12}}
+% \newcommand {\bm} [1] {\mbox{\boldmath{$#1$}}}
+\newcommand{\bs}{\boldsymbol}
+\DeclareMathOperator{\Tr}{Tr}
+\DeclareMathOperator{\Cov}{Cov}
+\DeclareMathOperator{\Var}{Var}
+\DeclareMathOperator{\E}{\mathbf{E}}
+\DeclareMathOperator{\vvv}{vec}
+\DeclareMathOperator{\vvvh}{vech}
+% \setmainfont{TEX Gyre Termes}
+% \setmathfont[bold-style=TeX]{TG Termes Math}
+\begin{document}
+\setstretch{1.4} %줄간격 조정
+\title{SVI for SUR}
+%------------------------------------------------------------------------------------%
+%------------------------------------------------------------------------------------%
+% \setcounter{section}{1}
+
+\section{Wishart Distribution}
+  a $p\times p$ Wishart random variate has a density of the form
+  \begin{align}
+    \mathcal{W}\left(\Omega\,|\,V,k\right) &= C(k,V)|\Omega|^{(k-p-1)/2}\exp\left(-\dfrac{1}{2}\Tr\left(V^{-1}\Omega\right)\right)\\
+    C(k,V) &= |V|^{-k/2}\left(2^{kp/2}\pi^{p(p-1)/4}\prod_{i=1}^{p}\Gamma\left(\dfrac{k+1-i}{2}\right)\right)^{-1}
+  \end{align}
+  The log-density is
+  \begin{align}
+    \log\mathcal{W}\left(\Omega\,|\,k,V\right) &= \dfrac{k-p-1}{2}\log|\Omega|-\dfrac{1}{2}\Tr\left(V^{-1}\Omega\right)-\dfrac{k}{2}\log|V|\\
+    &\quad -\dfrac{kp}{2}\log 2-\dfrac{p(p-1)}{4}\log \pi -\sum_{i=1}^{p}\log\Gamma\left(\dfrac{k+1-i}{2}\right)
+  \end{align}
+  Before jumping into the derivative of the log-density, let's do it by parts.
+  \begin{itemize}
+    \item $\ell=\Tr\left(V^{-1}\Omega\right)=\vvv(\Omega)'\vvv\left(V^{-1}\right)$
+    \begin{align}
+      d\ell &= \vvv(\Omega)'\vvv\left(dV^{-1}\right)\\
+            &= \vvv(\Omega)'\vvv\left(-V^{-1}\,dV\,V^{-1}\right)\\
+            &= -\vvv(\Omega)'\left(V^{-1}\otimes V^{-1}\right)D_{p}\,d\vvvh\left(V\right)\\
+      \dfrac{d \Tr\left(V^{-1}\Omega\right)}{d\vvvh(V)'} &= -D_{p}'\left(V^{-1}\otimes V^{-1}\right)D_{p}\vvvh(\Omega)
+    \end{align}
+    where $D_{p}$ is the unique duplication matrix such that $D_{p}\vvvh(A)=\vvv(A)$.
+    \item $\ell=\log|V|$
+    \begin{align}
+      \dfrac{d\log|V|}{d\vvvh(V)'} &= D_{p}\vvvh\left(V^{-1}\right)
+    \end{align}
+  \end{itemize}
+  Therefore,
+  \begin{align}
+    \nabla_{\vvvh(V)}\log\mathcal{W}(\Omega\,|\,k,V) &= \dfrac{1}{2}D_{p}'\left(V^{-1}\otimes V^{-1}\right)D_{p}\vvvh(\Omega)-\dfrac{k}{2}D_{p}\vvvh\left(V^{-1}\right)\\
+    \nabla_{k}\log\mathcal{W}(\Omega\,|\,k,V) &= \dfrac{1}{2}\log|\Omega|-\dfrac{1}{2}\log|V|-\dfrac{p}{2}\log 2-\dfrac{1}{2}\sum_{i=1}^{p}\psi\left(\dfrac{k+1-i}{2}\right)
+  \end{align}
+\end{document}
