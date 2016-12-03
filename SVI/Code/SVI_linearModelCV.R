@@ -52,7 +52,7 @@ Aq <- 1
 Bq <- 1
 
 
-L <- elimination.matrix(p)
+# L <- elimination.matrix(p)
 D <- duplication.matrix(p)
 D_plus <- ginv(D) # Moore-Penrose inverse
 count <- 0

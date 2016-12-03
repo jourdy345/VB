@@ -1,0 +1,142 @@
+\documentclass[12pt]{article}
+% \documentclass[12pt]{beamer}
+\usepackage{amsmath,amsfonts,amssymb,amsthm}
+\usepackage{color}
+\usepackage[square,sort,comma,numbers]{natbib}
+\usepackage[T1]{fontenc}
+\usepackage{mathtools}
+\usepackage{graphicx}
+\usepackage{subcaption}
+\usepackage{kotex}
+\usepackage{bm}
+\usepackage[shortlabels]{enumitem}
+\usepackage{tcolorbox}
+\usepackage{mathrsfs}
+\usepackage{newtxtext}
+\usepackage[lite,nofontinfo,zswash,straightbraces]{mtpro2}
+\usepackage{setspace} %줄간격 package
+%-------------------------------------------------------------------------------------
+% Page layout
+\addtolength{\textwidth}{1.2in}
+\addtolength{\oddsidemargin}{-0.6in}
+\addtolength{\textheight}{2.0in}
+\addtolength{\topmargin}{-1.0in}
+\renewcommand \baselinestretch{1.2}
+\parskip = 6pt
+% New command
+\newcommand {\AND}{\quad\mbox{and}\quad}
+\newcommand {\for}{\quad\mbox{ for }}
+\newcommand {\half}{{\tfrac 12}}
+% \newcommand {\bm} [1] {\mbox{\boldmath{$#1$}}}
+\newcommand{\bs}{\boldsymbol}
+\DeclareMathOperator{\Tr}{Tr}
+\DeclareMathOperator{\Cov}{Cov}
+\DeclareMathOperator{\Var}{Var}
+\DeclareMathOperator{\E}{\mathbf{E}}
+\DeclareMathOperator{\vvv}{vec}
+\DeclareMathOperator{\vvvh}{vech}
+% \setmainfont{TEX Gyre Termes}
+% \setmathfont[bold-style=TeX]{TG Termes Math}
+\begin{document}
+\setstretch{1.4} %줄간격 조정
+\title{SVI for SUR}
+%------------------------------------------------------------------------------------%
+%------------------------------------------------------------------------------------%
+% \setcounter{section}{1}
+
+\section{Wishart Distribution}
+  a $p\times p$ Wishart random variate has a density of the form
+  \begin{align}
+    \mathcal{W}\left(\Omega\,|\,V,k\right) &= C(k,V)|\Omega|^{(k-p-1)/2}\exp\left(-\dfrac{1}{2}\Tr\left(V^{-1}\Omega\right)\right)\\
+    C(k,V) &= |V|^{-k/2}\left(2^{kp/2}\pi^{p(p-1)/4}\prod_{i=1}^{p}\Gamma\left(\dfrac{k+1-i}{2}\right)\right)^{-1}
+  \end{align}
+  The log-density is
+  \begin{align}
+    \log\mathcal{W}\left(\Omega\,|\,k,V\right) &= \dfrac{k-p-1}{2}\log|\Omega|-\dfrac{1}{2}\Tr\left(V^{-1}\Omega\right)-\dfrac{k}{2}\log|V|\\
+    &\quad -\dfrac{kp}{2}\log 2-\dfrac{p(p-1)}{4}\log \pi -\sum_{i=1}^{p}\log\Gamma\left(\dfrac{k+1-i}{2}\right)
+  \end{align}
+  Before jumping into the derivative of the log-density, let's do it by parts.
+  \begin{itemize}
+    \item $\ell=\Tr\left(V^{-1}\Omega\right)=\vvv(\Omega)'\vvv\left(V^{-1}\right)$
+    \begin{align}
+      d\ell &= \vvv(\Omega)'\vvv\left(dV^{-1}\right)\\
+            &= \vvv(\Omega)'\vvv\left(-V^{-1}\,dV\,V^{-1}\right)\\
+            &= -\vvv(\Omega)'\left(V^{-1}\otimes V^{-1}\right)D_{p}\,d\vvvh\left(V\right)\\
+      \dfrac{d \Tr\left(V^{-1}\Omega\right)}{d\vvvh(V)'} &= -D_{p}'\left(V^{-1}\otimes V^{-1}\right)D_{p}\vvvh(\Omega)
+    \end{align}
+    where $D_{p}$ is the unique duplication matrix such that $D_{p}\vvvh(A)=\vvv(A)$.
+    \item $\ell=\log|V|$
+    \begin{align}
+      \dfrac{d\log|V|}{d\vvvh(V)'} &= D_{p}\vvvh\left(V^{-1}\right)
+    \end{align}
+  \end{itemize}
+  Therefore,
+  \begin{align}
+    \nabla_{\vvvh(V)}\log\mathcal{W}(\Omega\,|\,k,V) &= \dfrac{1}{2}D_{p}'\left(V^{-1}\otimes V^{-1}\right)D_{p}\vvvh(\Omega)-\dfrac{k}{2}\vvvh\left(V^{-1}\right)\\
+    \nabla_{k}\log\mathcal{W}(\Omega\,|\,k,V) &= \dfrac{1}{2}\log|\Omega|-\dfrac{1}{2}\log|V|-\dfrac{p}{2}\log 2-\dfrac{1}{2}\sum_{i=1}^{p}\psi\left(\dfrac{k+1-i}{2}\right)
+  \end{align}
+\subsection{Fisher Information of Wishart}
+To get the Fisher information matrix, we need to go through quite a few steps. First, according to \cite{MultivariateStat}, 
+\begin{itemize}
+  \item ($\Var(\vvv(\Omega))$)
+  \begin{align}
+    \Var(\vvv(\Omega)) &= k\left(\mathbf{I}_{p^{2}}+K_{pp}\right)(V\otimes V)
+  \end{align}
+  where $K_{pp}$ is a $p^{2}\times p^{2}$ commutation matrix such that
+  \begin{equation}
+    K_{pp}\vvv(C) = \vvv(C')
+  \end{equation}
+  for a $p\times p$ matrix $C$.
+  \item ($\Var(\log|\Omega|)$)
+  To get the variance of the log-determinant, we will rely on the following relation.
+  \begin{equation}
+    \dfrac{|\Omega|}{|V|} = \chi_{k}^{2}\chi_{k-1}^{2}\cdots\chi_{k-p+1}^{2}
+  \end{equation}
+  where every chi-squared random variables are independent of each other. We need to do variable transformation to get the density of log chi-squared random variate. If we say $X\sim \log\chi_{\nu}^{2}$, the density is
+  \begin{equation}
+    p(x) = \left(2^{\nu/2}\Gamma(\nu/2)\right)^{-1}\exp\left(\dfrac{1}{2}\nu x-\dfrac{1}{2}\exp(x)\right),\qquad -\infty<x<\infty
+  \end{equation}
+  Then, performing the integration, we obtain the following central moments
+  \begin{align}
+    \E(X) &= \log 2+\psi(\nu/2)\\
+    \Var(X) &= \psi_{1}(\nu/2)
+  \end{align}
+  where $\psi_{1}$ is the tri-gamma function. Thus, since $\log|\Omega|-\log|V|=\sum_{i=1}^{p}\log \chi_{k-i+1}^{2}$,
+  \begin{equation}
+    \Var(\log|\Omega|) = \sum_{i=1}^{p}\psi_{1}\left(\dfrac{k-i+1}{2}\right)
+  \end{equation}
+  \item The block-diagonal matrices of the Fisher information have been obtained in the above items. However, it is quite difficult to compute the following off-diagonal covariance term:
+  \begin{equation}
+    \Cov(\vvv(\Omega),\log|\Omega|)
+  \end{equation}
+\end{itemize}
+\section{SUR}
+Seemingly Unrelated Regression model is constructed as follows.
+\begin{equation}
+  \mathbf{y}_{t} = X_{i}'\beta+\mathbf{e}_{t},\quad \mathbf{e}_{t}\sim\mathcal{N}\left(\mathbf{0},\Omega^{-1}\right)
+\end{equation}
+\begin{itemize}
+\item $\beta\sim\mathcal{N}\left(\mu_{\beta}^{0},\Sigma_{\beta}^{0}\right),\quad (m\times 1)$
+\item $\Omega\sim\mathcal{W}(k,V),\quad (p\times p)$
+\end{itemize}
+The varational posteriors are
+\begin{itemize}
+  \item $q(\beta) = \mathcal{N}\left(\mu_{\beta}^{q},\Sigma_{\beta}^{q}\right)$
+  \item $q(\Omega) = \mathcal{W}\left(k_{q},V_{q}\right)$
+\end{itemize}
+Therefore,
+\begin{align}
+  \log h(\theta) &= \dfrac{T}{2}\log\det\Omega-\dfrac{1}{2}\sum_{t=1}^{T}\left(\mathbf{y}_{t}-X_{t}'\beta\right)'\Omega\left(\mathbf{y}_{t}-X_{t}'\beta\right)-\dfrac{Tp}{2}\log(2\pi)\\
+  &\quad -\dfrac{1}{2}\log\det\Sigma_{\beta}^{0}-\dfrac{1}{2}\left(\beta-\mu_{\beta}^{0}\right)'{\Sigma_{\beta}^{0}}^{-1}\left(\beta-\mu_{\beta}^{0}\right)\\
+  &\quad +\dfrac{k-p-1}{2}\log\det\Omega-\dfrac{1}{2}\Tr\left(V^{-1}\Omega\right)-\dfrac{k}{2}\log\det V-\dfrac{kp}{2}\log 2\\
+  &\quad -\sum_{i=1}^{p}\log\Gamma\left(\dfrac{k+1-i}{2}\right)\\
+  \log q_{\lambda}(\theta) &= -\dfrac{1}{2}\log\det \Sigma_{\beta}^{q}-\dfrac{1}{2}\left(\beta-\mu_{\beta}^{q}\right)'{\Sigma_{\beta}^{q}}^{-1}\left(\beta-\mu_{\beta}^{q}\right)\\
+  &\quad + \dfrac{k_{q}-p-1}{2}\log\det\Omega-\dfrac{1}{2}\Tr\left(V_{q}^{-1}\Omega\right)-\dfrac{k_{q}}{2}\log\det V_{q}-\dfrac{k_{q}p}{2}\log 2\\
+  &\quad -\sum_{i=1}^{p}\log\Gamma\left(\dfrac{k_{q}+1-i}{2}\right)
+\end{align}
+where $\theta=(\beta,\Omega)$ and $\lambda=\left(\mu_{\beta}^{q},\Sigma_{\beta}^{q},k_{q},V_{q}\right)$.
+\newpage
+\nocite{*}
+\bibliographystyle{acm}
+\bibliography{SVI_SUR}
+\end{document}
