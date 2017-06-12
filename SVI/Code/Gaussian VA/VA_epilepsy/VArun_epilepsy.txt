@@ -1,0 +1,466 @@
+
+# Set working directory
+cd("C:\\Users\\Starbreeze\\Dropbox\\Gaussian VA revised")
+pwd()
+
+include("VAcode3.jl")
+
+
+using PyPlot             # load this before KernelDensity, otherwise "KernelDensity.PyPlot_init()"
+using Distributions
+using DataFrames
+using KernelDensity 
+using JLD                # saving files e.g. save("simDPpop_output.jld", "output", output)
+                         # load("simulatedDPpop_output.jld")
+
+########################
+# epilepsy data (n=59) #
+########################
+
+df = readtable("VA_epilepsy\\data_epilepsy.txt", header=true, separator=' ');
+epilepsy = convert(Array, df);   
+n = size(df,1)                  # no. of subjects
+vni = round(Int,4*ones(n));
+lb4 = log(df[:Base4]);
+trt = [zeros(28); ones(31)];
+lage = log(df[:Age]);
+clage = lage - mean(lage);
+V4 = [0,0,0,1];
+visit = [-3,-1,1,3]/10;
+lb4trt = lb4.*trt;
+X = Array(Array{Float64,2},n);
+Z = Array(Array{Float64,2},n);
+y = Array(Array{Float64,1},n);
+sum(vni)                                 # total no. of observations
+rho = 0.95;
+F = 2500;
+tol = 4;
+
+
+##########################
+# random intercept model #
+##########################
+for i in 1:n
+    y[i] = [df[:Y1][i], df[:Y2][i], df[:Y3][i], df[:Y4][i]]
+    Z[i] = cat(2, ones(4))
+    X[i] = cat(2, ones(4), repeat([lb4[i]],outer=4),
+               repeat([trt[i]],outer=4), repeat([lb4trt[i]],outer=4),
+               repeat([clage[i]],outer=4), V4)
+end
+k = size(X[1],2)                         # length of beta
+p = size(Z[1],2)                         # length of b_i
+d = Int(n*p + k + 0.5p*(p+1))            # length of theta = [b_1, ...,b_n, beta, zeta]
+id = find(tril(ones(p,p)).==1);          # indices of lower-triangle elements
+Idiag = diagm(ones(p))[id];              # p*(p+1)/2 x 1 vector, 1 if diagonal element
+Idiag = round(Int, Idiag);
+Idiag = round(Bool, Idiag);
+mcmc = readtable("VA_epilepsy\\mcmc_epilepsy_intercept.txt", header=false, separator=' ');
+mcmc = convert(Array, mcmc);
+
+
+# save
+# save("VA_epilepsy\\VA_epilepsy_intercept.jld", "VA2a", VA2a, 
+"VA1diagb", VA1diagb, "VA1b", VA1b)
+# VAall = load("VA_epilepsy\\VA_epilepsy_intercept.jld")
+VA2a = VAall["VA2a"]
+VA1b = VAall["VA1b"]
+VA1diagb = VAall["VA1diagb"]
+
+
+
+# Algorithm 2a (diagonal positive, approx) #
+@time VA = GLMMAlg2a("log", y, X, Z, rho, F, tol);
+VAmean = VA["mu"][n*p+1:end];
+invT = lufact(VA["T"])\diagm(ones(d));
+VAsd = sqrt(diag(invT'*invT)[n*p+1:end]);
+meansd = cat(2, VAmean, VAsd)
+VA2a = copy(VA);
+writedlm("VA_epilepsy\\VA2apar_intercept.txt", VA2a["par"])
+writedlm("VA_epilepsy\\VA2ameansd_intercept.txt", meansd)
+
+Iteration:2500 LB=-3.6927896122e7 maxLB=-3.6927896122e7 cnt=0
+Iteration:5000 LB=1043.718 maxLB=1043.718 cnt=0
+Iteration:7500 LB=2946.452 maxLB=2946.452 cnt=0
+Iteration:10000 LB=3138.042 maxLB=3138.042 cnt=0
+[0.41,0.79,-0.56,0.19,0.28,-0.16,-0.63,22.0,72.83,14.96,53.96,3.39,18.65,9.45]
+Iteration:12500 LB=3153.71 maxLB=3153.71 cnt=0
+Iteration:15000 LB=3155.262 maxLB=3155.262 cnt=0
+Iteration:17500 LB=3156.168 maxLB=3156.168 cnt=0
+Iteration:20000 LB=3156.669 maxLB=3156.669 cnt=0
+[0.2,0.91,-0.84,0.28,0.47,-0.17,-0.65,14.93,51.74,6.85,30.49,2.89,18.48,9.06]
+Iteration:22500 LB=3156.979 maxLB=3156.979 cnt=0
+Iteration:25000 LB=3157.327 maxLB=3157.327 cnt=0
+Iteration:27500 LB=3158.266 maxLB=3158.266 cnt=0
+Iteration:30000 LB=3158.748 maxLB=3158.748 cnt=0
+[0.23,0.9,-0.91,0.33,0.48,-0.16,-0.63,11.48,26.25,7.85,5.5,2.74,18.33,9.18]
+Iteration:32500 LB=3159.152 maxLB=3159.152 cnt=0
+Iteration:35000 LB=3159.199 maxLB=3159.199 cnt=0
+Iteration:37500 LB=3159.358 maxLB=3159.358 cnt=0
+Iteration:40000 LB=3159.644 maxLB=3159.644 cnt=0
+[0.26,0.88,-0.94,0.33,0.49,-0.17,-0.64,12.13,20.98,7.64,5.08,2.77,18.21,9.06]
+Iteration:42500 LB=3159.771 maxLB=3159.771 cnt=0
+Iteration:45000 LB=3159.53 maxLB=3159.771 cnt=1
+Iteration:47500 LB=3160.151 maxLB=3160.151 cnt=0
+Iteration:50000 LB=3159.858 maxLB=3160.151 cnt=1
+[0.26,0.88,-0.94,0.34,0.47,-0.16,-0.63,12.76,16.3,7.28,5.21,2.81,18.29,9.11]
+Iteration:52500 LB=3160.183 maxLB=3160.183 cnt=0
+Iteration:55000 LB=3160.32 maxLB=3160.32 cnt=0
+Iteration:57500 LB=3159.857 maxLB=3160.32 cnt=1
+Iteration:60000 LB=3160.06 maxLB=3160.32 cnt=2
+[0.26,0.89,-0.94,0.34,0.48,-0.16,-0.64,13.57,14.07,7.7,4.9,2.82,18.52,9.16]
+Iteration:62500 LB=3160.326 maxLB=3160.326 cnt=0
+Iteration:65000 LB=3160.271 maxLB=3160.326 cnt=1
+Iteration:67500 LB=3160.246 maxLB=3160.326 cnt=2
+Iteration:70000 LB=3160.199 maxLB=3160.326 cnt=3
+[0.26,0.89,-0.94,0.34,0.48,-0.16,-0.63,13.94,13.14,7.75,5.09,2.79,18.15,9.14]
+Iteration:72500 LB=3160.086 maxLB=3160.326 cnt=4
+ 19.714500 seconds (288.77 M allocations: 23.005 GB, 15.23% gc time)
+
+  0.26118   0.253389
+  0.885973  0.136056
+ -0.941047  0.41014
+  0.34055   0.203568
+  0.480213  0.363679
+ -0.161946  0.0544407
+ -0.622391  0.108842
+
+
+
+# Algorithm 1diagb #
+@time VA = GLMMAlg1diagb("log", y, X, Z, rho, F, tol);
+VBmean = VA["mu"][n*p+1:end];
+VBsd = VA["L"][n*p+1:end];
+meansd = cat(2, VBmean, VBsd)
+VA1diagb = copy(VA);
+writedlm("VA_epilepsy\\VA1diagbpar_intercept.txt", VA1diagb["par"])
+writedlm("VA_epilepsy\\VA1diagbmeansd_intercept.txt", meansd)
+
+Iteration:2500 LB=-5.879013475e7 maxLB=-5.879013475e7 cnt=0
+Iteration:5000 LB=-3641.273 maxLB=-3641.273 cnt=0
+Iteration:7500 LB=2267.747 maxLB=2267.747 cnt=0
+Iteration:10000 LB=3224.862 maxLB=3224.862 cnt=0
+[0.36,0.6,-0.19,0.25,0.04,-0.17,-0.38,0.03,0.01,0.05,0.02,0.11,0.06,0.09]
+Iteration:12500 LB=3294.41 maxLB=3294.41 cnt=0
+Iteration:15000 LB=3301.122 maxLB=3301.122 cnt=0
+Iteration:17500 LB=3301.764 maxLB=3301.764 cnt=0
+Iteration:20000 LB=3301.578 maxLB=3301.764 cnt=1
+[0.22,0.89,-0.87,0.3,0.46,-0.15,-0.68,0.02,0.01,0.03,0.01,0.1,0.05,0.1]
+Iteration:22500 LB=3301.663 maxLB=3301.764 cnt=2
+Iteration:25000 LB=3301.887 maxLB=3301.887 cnt=0
+Iteration:27500 LB=3301.77 maxLB=3301.887 cnt=1
+Iteration:30000 LB=3301.83 maxLB=3301.887 cnt=2
+[0.24,0.88,-0.92,0.33,0.45,-0.16,-0.67,0.02,0.01,0.03,0.01,0.1,0.05,0.1]
+Iteration:32500 LB=3301.763 maxLB=3301.887 cnt=3
+Iteration:35000 LB=3301.749 maxLB=3301.887 cnt=4
+ 7.325309 seconds (137.03 M allocations: 7.841 GB, 13.65% gc time)
+
+  0.244614  0.0237983
+  0.881778  0.00915967
+ -0.927954  0.0324467
+  0.335808  0.0120845
+  0.47359   0.106006
+ -0.165608  0.053227
+ -0.657456  0.0995907
+
+
+
+# Algorithm 1b #
+@time VA = GLMMAlg1b("log", y, X, Z, rho, F, tol);
+VCmean = VA["mu"][n*p+1:end];
+VCsd = sqrt(sum(VA["L"].^2,2)[n*p+1:end]);
+meansd = cat(2, VCmean, VCsd)
+VA1b = copy(VA);
+writedlm("VA_epilepsy\\VA1bpar_intercept.txt", VA1b["par"])
+writedlm("VA_epilepsy\\VA1bmeansd_intercept.txt", meansd)
+
+Iteration:2500 LB=-2.25863904575e8 maxLB=-2.25863904575e8 cnt=0
+Iteration:5000 LB=554.232 maxLB=554.232 cnt=0
+Iteration:7500 LB=2790.116 maxLB=2790.116 cnt=0
+Iteration:10000 LB=2974.604 maxLB=2974.604 cnt=0
+[0.32,0.57,-0.15,0.22,0.11,-0.19,-0.3,0.36,0.05,0.37,0.03,0.12,0.06,0.1]
+Iteration:12500 LB=2997.469 maxLB=2997.469 cnt=0
+Iteration:15000 LB=3006.332 maxLB=3006.332 cnt=0
+Iteration:17500 LB=3020.793 maxLB=3020.793 cnt=0
+Iteration:20000 LB=3019.251 maxLB=3020.793 cnt=1
+[0.36,0.76,-0.5,0.15,0.3,-0.18,-0.56,0.22,0.02,0.19,0.02,0.11,0.05,0.1]
+Iteration:22500 LB=3008.463 maxLB=3020.793 cnt=2
+Iteration:25000 LB=3021.249 maxLB=3021.249 cnt=0
+Iteration:27500 LB=3013.44 maxLB=3021.249 cnt=1
+Iteration:30000 LB=3022.877 maxLB=3022.877 cnt=0
+[0.31,0.83,-0.64,0.16,0.38,-0.19,-0.56,0.18,0.02,0.15,0.02,0.11,0.05,0.09]
+Iteration:32500 LB=3019.033 maxLB=3022.877 cnt=1
+Iteration:35000 LB=3022.364 maxLB=3022.877 cnt=2
+Iteration:37500 LB=3022.546 maxLB=3022.877 cnt=3
+Iteration:40000 LB=3016.213 maxLB=3022.877 cnt=4
+[0.27,0.86,-0.7,0.18,0.42,-0.19,-0.56,0.15,0.02,0.13,0.02,0.11,0.05,0.1]
+ 17.568718 seconds (158.64 M allocations: 23.369 GB, 20.06% gc time)
+
+  0.266177  0.246856
+  0.860885  0.112873
+ -0.703083  0.337194
+  0.183628  0.168805
+  0.415409  0.406246
+ -0.186859  0.0794253
+ -0.564768  0.163269
+
+
+
+
+# check convergence
+nrows, ncols = 2,7;
+fig, axes = subplots(nrows, ncols, figsize=(20,5));
+subplot_num = 0;
+for i in 1:14
+    subplot_num += 1;
+    subplot(nrows, ncols, subplot_num); 
+    plot(VA["par"][:,i])
+end
+tight_layout()
+
+
+nrows, ncols = 2,4;
+fig, axes = subplots(nrows, ncols, figsize=(20,5));
+subplot_num = 0;
+for i in 1:7
+    ax = gca()
+    #ax[:set_ylim]([0,yr[i]])
+    subplot_num += 1;
+    subplot(nrows, ncols, subplot_num); 
+    densmcmc = kde(mcmc[:,i])                          # range = dens.x, density = dens.density
+    plot(densmcmc.x, densmcmc.density, linewidth=2);
+    # title(labs[i])
+    densVA = pdf(Normal(VAmean[i],VAsd[i]), densmcmc.x)
+    plot(densmcmc.x, densVA, linestyle="--", linewidth=2)
+    densVB = pdf(Normal(VBmean[i],VBsd[i]), densmcmc.x)
+    plot(densmcmc.x, densVB, linestyle=":", linewidth=2)
+    densVC = pdf(Normal(VCmean[i],VCsd[i]), densmcmc.x)
+    plot(densmcmc.x, densVC, linestyle="-.", linewidth=2)   
+end
+tight_layout()
+
+savefig("VA_epilepsy\\plot_epilepsy_slope.pdf")
+
+
+
+
+
+
+######################
+# random slope model #
+######################
+for i in 1:n
+    y[i] = [df[:Y1][i], df[:Y2][i], df[:Y3][i], df[:Y4][i]]
+    Z[i] = cat(2, ones(4), visit)
+    X[i] = cat(2, ones(4), repeat([lb4[i]],outer=4), repeat([trt[i]],outer=4), 
+             repeat([lb4trt[i]],outer=4), repeat([clage[i]],outer=4), visit)
+end
+k = size(X[1],2)                         # length of beta
+p = size(Z[1],2)                         # length of b_i
+d = Int(n*p + k + 0.5p*(p+1))            # length of theta = [b_1, ...,b_n, beta, zeta]
+id = find(tril(ones(p,p)).==1);          # indices of lower-triangle elements
+Idiag = diagm(ones(p))[id];              # p*(p+1)/2 x 1 vector, 1 if diagonal element
+Idiag = round(Int, Idiag);
+Idiag = round(Bool, Idiag);
+mcmc = readtable("VA_epilepsy\\mcmc_epilepsy_slope.txt", header=false, separator=' ');
+mcmc = convert(Array, mcmc);
+
+# save
+# save("VA_epilepsy\\VA_epilepsy_slope.jld", "VA2a", VA2a, "VA1diagb", VA1diagb, "VA1b", VA1b)
+# VAall = load("VA_epilepsy\\VA_epilepsy_slope.jld")
+
+VA2a = VAall["VA2a"]
+VA1b = VAall["VA1b"]
+VA1diagb = VAall["VA1diagb"]
+
+
+# Algorithm 2a (diagonal positive, approx) #
+@time VA = GLMMAlg2a("log", y, X, Z, rho, F, tol);
+VAmean = VA["mu"][n*p+1:end];
+invT = lufact(VA["T"])\diagm(ones(d));
+VAsd = sqrt(diag(invT'*invT)[n*p+1:end]);
+meansd = cat(2, VAmean, VAsd)
+VA2a = copy(VA);
+writedlm("VA_epilepsy\\VA2apar_slope.txt", VA2a["par"])
+writedlm("VA_epilepsy\\VA2ameansd_slope.txt", meansd)
+
+Iteration:2500 LB=-3452.164 maxLB=-3452.164 cnt=0
+Iteration:5000 LB=2522.503 maxLB=2522.503 cnt=0
+Iteration:7500 LB=3143.945 maxLB=3143.945 cnt=0
+Iteration:10000 LB=3194.108 maxLB=3194.108 cnt=0
+[0.27,0.85,-0.74,0.23,0.39,-0.25,-0.65,-0.02,-0.29,22.24,74.81,13.45,53.34,3.09,6.51,9.04,7.16,8.43]
+Iteration:12500 LB=3197.286 maxLB=3197.286 cnt=0
+Iteration:15000 LB=3198.845 maxLB=3198.845 cnt=0
+Iteration:17500 LB=3199.075 maxLB=3199.075 cnt=0
+Iteration:20000 LB=3199.464 maxLB=3199.464 cnt=0
+[0.24,0.86,-0.94,0.35,0.46,-0.26,-0.64,0.01,-0.25,14.17,49.88,6.8,28.24,2.91,6.41,9.22,6.96,9.06]
+Iteration:22500 LB=3200.178 maxLB=3200.178 cnt=0
+Iteration:25000 LB=3200.709 maxLB=3200.709 cnt=0
+Iteration:27500 LB=3201.523 maxLB=3201.523 cnt=0
+Iteration:30000 LB=3201.714 maxLB=3201.714 cnt=0
+[0.22,0.87,-0.94,0.33,0.48,-0.27,-0.62,0.0,-0.28,11.6,23.68,7.74,5.39,2.93,6.27,9.3,7.13,8.46]
+Iteration:32500 LB=3202.216 maxLB=3202.216 cnt=0
+Iteration:35000 LB=3202.641 maxLB=3202.641 cnt=0
+Iteration:37500 LB=3202.331 maxLB=3202.641 cnt=1
+Iteration:40000 LB=3202.438 maxLB=3202.641 cnt=2
+[0.2,0.89,-0.94,0.34,0.47,-0.26,-0.62,0.0,-0.26,12.46,19.32,7.49,5.09,2.88,6.44,9.07,7.07,8.65]
+Iteration:42500 LB=3202.623 maxLB=3202.641 cnt=3
+Iteration:45000 LB=3202.854 maxLB=3202.854 cnt=0
+Iteration:47500 LB=3202.737 maxLB=3202.854 cnt=1
+Iteration:50000 LB=3203.124 maxLB=3203.124 cnt=0
+[0.21,0.89,-0.93,0.34,0.46,-0.26,-0.62,-0.02,-0.26,12.98,15.73,7.34,5.1,2.81,6.26,8.89,6.51,8.56]
+Iteration:52500 LB=3202.612 maxLB=3203.124 cnt=1
+Iteration:55000 LB=3203.218 maxLB=3203.218 cnt=0
+Iteration:57500 LB=3203.28 maxLB=3203.28 cnt=0
+Iteration:60000 LB=3203.023 maxLB=3203.28 cnt=1
+[0.2,0.88,-0.93,0.34,0.46,-0.26,-0.62,0.01,-0.28,13.78,13.7,7.39,5.23,2.8,6.31,9.16,7.14,8.5]
+Iteration:62500 LB=3203.178 maxLB=3203.28 cnt=2
+Iteration:65000 LB=3203.326 maxLB=3203.326 cnt=0
+Iteration:67500 LB=3203.437 maxLB=3203.437 cnt=0
+Iteration:70000 LB=3203.244 maxLB=3203.437 cnt=1
+[0.2,0.89,-0.93,0.34,0.47,-0.27,-0.62,0.01,-0.25,14.12,13.68,7.75,5.01,2.83,6.25,9.13,6.79,8.4]
+Iteration:72500 LB=3203.268 maxLB=3203.437 cnt=2
+Iteration:75000 LB=3203.532 maxLB=3203.532 cnt=0
+Iteration:77500 LB=3203.282 maxLB=3203.532 cnt=1
+Iteration:80000 LB=3203.375 maxLB=3203.532 cnt=2
+[0.2,0.88,-0.94,0.34,0.48,-0.27,-0.64,0.01,-0.25,14.22,12.76,7.97,4.97,2.7,6.28,9.13,6.93,8.64]
+Iteration:82500 LB=3203.298 maxLB=3203.532 cnt=3
+Iteration:85000 LB=3203.329 maxLB=3203.532 cnt=4
+ 31.718721 seconds (277.20 M allocations: 38.181 GB, 14.47% gc time)
+
+  0.198277    0.251707
+  0.887816    0.134307
+ -0.931911    0.411113
+  0.344287    0.205646
+  0.470934    0.362222
+ -0.259889    0.162463
+ -0.617307    0.109319
+  0.00590429  0.140132
+ -0.259307    0.119361
+
+
+
+# Algorithm 1diagb #
+@time VA = GLMMAlg1diagb("log", y, X, Z, rho, F, tol);
+VBmean = VA["mu"][n*p+1:end];
+VBsd = VA["L"][n*p+1:end];
+meansd = cat(2, VBmean, VBsd)
+VA1diagb = copy(VA);
+writedlm("VA_epilepsy\\VA1diagbpar_slope.txt", VA1diagb["par"])
+writedlm("VA_epilepsy\\VA1diagbmeansd_slope.txt", meansd)
+
+
+Iteration:2500 LB=-9911.422 maxLB=-9911.422 cnt=0
+Iteration:5000 LB=526.376 maxLB=526.376 cnt=0
+Iteration:7500 LB=3077.923 maxLB=3077.923 cnt=0
+Iteration:10000 LB=3370.45 maxLB=3370.45 cnt=0
+[0.32,0.71,-0.46,0.19,0.17,-0.24,-0.55,-0.07,-0.18,0.03,0.01,0.04,0.01,0.1,0.1,0.1,0.12,0.09]
+Iteration:12500 LB=3392.585 maxLB=3392.585 cnt=0
+Iteration:15000 LB=3395.225 maxLB=3395.225 cnt=0
+Iteration:17500 LB=3395.284 maxLB=3395.284 cnt=0
+Iteration:20000 LB=3395.252 maxLB=3395.284 cnt=1
+[0.17,0.9,-0.87,0.32,0.46,-0.25,-0.67,-0.02,-0.17,0.02,0.01,0.03,0.01,0.1,0.1,0.1,0.11,0.09]
+Iteration:22500 LB=3395.307 maxLB=3395.307 cnt=0
+Iteration:25000 LB=3395.38 maxLB=3395.38 cnt=0
+Iteration:27500 LB=3395.167 maxLB=3395.38 cnt=1
+Iteration:30000 LB=3395.307 maxLB=3395.38 cnt=2
+[0.18,0.88,-0.91,0.33,0.45,-0.23,-0.66,-0.01,-0.18,0.02,0.01,0.03,0.01,0.11,0.11,0.1,0.11,0.09]
+Iteration:32500 LB=3395.237 maxLB=3395.38 cnt=3
+Iteration:35000 LB=3395.262 maxLB=3395.38 cnt=4
+  8.544502 seconds (111.76 M allocations: 7.492 GB, 11.28% gc time)
+
+  0.183582   0.023567
+  0.881821   0.00961091
+ -0.921203   0.0321764
+  0.336299   0.0126276
+  0.46056    0.110677
+ -0.262828   0.10418
+ -0.670419   0.0973889
+ -0.0106216  0.112535
+ -0.163774   0.0976698
+
+
+# Algorithm 1b #
+@time VA = GLMMAlg1b("log", y, X, Z, rho, F, tol);
+VCmean = VA["mu"][n*p+1:end];
+VCsd = sqrt(sum(VA["L"].^2,2)[n*p+1:end]);
+meansd = cat(2, VCmean, VCsd)
+VA1b = copy(VA);
+writedlm("VA_epilepsy\\VA1bpar_slope.txt", VA1b["par"])
+writedlm("VA_epilepsy\\VA1bmeansd_slope.txt", meansd)
+
+Iteration:2500 LB=-29222.652 maxLB=-29222.652 cnt=0
+Iteration:5000 LB=583.267 maxLB=583.267 cnt=0
+Iteration:7500 LB=2362.475 maxLB=2362.475 cnt=0
+Iteration:10000 LB=2648.889 maxLB=2648.889 cnt=0
+[0.22,0.42,-0.01,0.27,0.02,-0.19,-0.14,-0.04,0.04,0.45,0.08,0.51,0.07,0.15,0.11,0.09,0.15,0.09]
+Iteration:12500 LB=2640.854 maxLB=2648.889 cnt=1
+Iteration:15000 LB=2642.763 maxLB=2648.889 cnt=2
+Iteration:17500 LB=2684.708 maxLB=2684.708 cnt=0
+Iteration:20000 LB=2676.108 maxLB=2684.708 cnt=1
+[0.23,0.48,-0.22,0.2,0.08,-0.2,-0.22,-0.02,0.06,0.29,0.03,0.31,0.02,0.11,0.11,0.1,0.13,0.1]
+Iteration:22500 LB=2689.838 maxLB=2689.838 cnt=0
+Iteration:25000 LB=2718.864 maxLB=2718.864 cnt=0
+Iteration:27500 LB=2694.483 maxLB=2718.864 cnt=1
+Iteration:30000 LB=2692.632 maxLB=2718.864 cnt=2
+[0.31,0.58,-0.36,0.17,0.16,-0.21,-0.33,-0.03,0.03,0.24,0.02,0.23,0.01,0.12,0.11,0.1,0.14,0.09]
+Iteration:32500 LB=2723.127 maxLB=2723.127 cnt=0
+Iteration:35000 LB=2729.16 maxLB=2729.16 cnt=0
+Iteration:37500 LB=2759.83 maxLB=2759.83 cnt=0
+Iteration:40000 LB=2719.934 maxLB=2759.83 cnt=1
+[0.3,0.62,-0.52,0.1,0.28,-0.18,-0.43,0.0,0.04,0.2,0.02,0.19,0.01,0.12,0.11,0.1,0.15,0.1]
+Iteration:42500 LB=2711.942 maxLB=2759.83 cnt=2
+Iteration:45000 LB=2765.639 maxLB=2765.639 cnt=0
+Iteration:47500 LB=2715.08 maxLB=2765.639 cnt=1
+Iteration:50000 LB=2704.857 maxLB=2765.639 cnt=2
+[0.33,0.69,-0.58,0.11,0.3,-0.2,-0.45,-0.01,0.03,0.18,0.02,0.16,0.02,0.1,0.12,0.1,0.14,0.1]
+Iteration:52500 LB=2691.241 maxLB=2765.639 cnt=3
+Iteration:55000 LB=2737.551 maxLB=2765.639 cnt=4
+ 45.068454 seconds (178.42 M allocations: 84.627 GB, 18.39% gc time)
+
+  0.335879   0.271008
+  0.719983   0.175289
+ -0.589772   0.354209
+  0.134242   0.197541
+  0.284002   0.427093
+ -0.213663   0.24107
+ -0.445084   0.203226
+ -0.0122205  0.237745
+  0.0488183  0.210706
+
+
+
+nrows, ncols = 2,9;
+fig, axes = subplots(nrows, ncols, figsize=(20,5));
+subplot_num = 0;
+for i in 1:18
+    subplot_num += 1;
+    subplot(nrows, ncols, subplot_num); 
+    plot(VA["par"][:,i])
+end
+tight_layout()
+
+nrows, ncols = 2,5;
+fig, axes = subplots(nrows, ncols, figsize=(20,5));
+subplot_num = 0;
+for i in 1:9
+    ax = gca()
+    #ax[:set_ylim]([0,yr[i]])
+    subplot_num += 1;
+    subplot(nrows, ncols, subplot_num); 
+    densmcmc = kde(mcmc[:,i])                          # range = dens.x, density = dens.density
+    plot(densmcmc.x, densmcmc.density, linewidth=2);
+    #title(labs[i])
+    densVA = pdf(Normal(VAmean[i],VAsd[i]), densmcmc.x)
+    plot(densmcmc.x, densVA, linestyle="--", linewidth=2)
+    densVB = pdf(Normal(VBmean[i],VBsd[i]), densmcmc.x)
+    plot(densmcmc.x, densVB, linestyle=":", linewidth=2)
+    densVC = pdf(Normal(VCmean[i],VCsd[i]), densmcmc.x)
+    plot(densmcmc.x, densVC, linestyle="-.", linewidth=2)   
+end
+tight_layout()
+
+savefig("VA_epilepsy\\plot_epilepsy_slope.pdf")
+
+
+
+

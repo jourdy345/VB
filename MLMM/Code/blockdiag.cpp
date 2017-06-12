@@ -5,13 +5,13 @@
 using namespace Rcpp; using namespace arma;
 
 // [[Rcpp::export]]
-arma::mat blockdiag( arma::field<mat> x ) {
+mat blockdiag( field<mat> x ) {
 
   //x: list of matrices 
 
   unsigned int n = x.n_rows;
   int dimen = 0;
-  arma::ivec dimvec(n);
+  ivec dimvec(n);
 
   for(unsigned int i=0; i<n; i++) {
       dimvec(i) = x(i,0).n_rows; 

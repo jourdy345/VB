@@ -1,0 +1,62 @@
+\documentclass[review]{elsarticle}
+% \documentclass[12pt]{beamer}
+\usepackage[utf8]{inputenc}
+\usepackage{lineno,hyperref}
+\modulolinenumbers[5]
+\journal{Journal of CSDA}
+\usepackage{amsmath,amsfonts,amssymb,amsthm}
+\usepackage{color}
+\usepackage{natbib}
+\usepackage[T1]{fontenc}
+\usepackage{mathtools}
+\usepackage{graphicx}
+\usepackage{subcaption}
+\usepackage{bm}
+\usepackage[shortlabels]{enumitem}
+\usepackage{tcolorbox}
+\usepackage[linesnumbered,ruled]{algorithm2e}
+\usepackage{newtxtext}
+\usepackage[lite,nofontinfo,zswash,straightbraces]{mtpro2}
+\usepackage{setspace} %줄간격 package
+%-------------------------------------------------------------------------------------
+% Page layout
+\addtolength{\textwidth}{1.2in}
+\addtolength{\oddsidemargin}{-0.6in}
+\addtolength{\textheight}{2.0in}
+\addtolength{\topmargin}{-1.0in}
+\renewcommand \baselinestretch{1.2}
+\parskip = 6pt
+% New command
+\newcommand {\AND}{\quad\mbox{and}\quad}
+\newcommand {\for}{\quad\mbox{ for }}
+\newcommand {\half}{{\tfrac 12}}
+% \newcommand {\bm} [1] {\mbox{\boldmath{$#1$}}}
+\DeclareMathOperator{\tr}{tr}
+\DeclareMathOperator{\Prob}{P}
+\DeclareMathOperator{\vech}{vech}
+% \setmainfont{TEX Gyre Termes}
+% \setmathfont[bold-style=TeX]{TG Termes Math}
+
+\begin{document}
+\begin{frontmatter}
+
+\title{VB Nonparametric Random Utility}
+%% Group authors per affiliation:
+\author{Daeyoung Lim\fnref{koreauni}}
+
+\cortext[mycorrespondingauthor]{Corresponding author}
+
+\fntext[koreauni]{Department of Statistics, Korea University}
+\end{frontmatter}
+
+\linenumbers
+\section{Derivation}
+% % \vspace{0.3cm}
+\begin{itemize}
+  \item Likelihood:
+  \begin{equation}
+    \Pr\left(y_{ht}\,|\,\mathbf{x},\mathbf{w},\bm{\beta}\right) = \prod_{j=1}^{J}\left\{e^{\mathbf{w}_{htj}'\beta_{h}+f\left(x_{htj}\right)}\middle/\sum_{j'=1}^{J}e^{\mathbf{w}_{htj'}'\beta_{h}+f\left(x_{htj'}\right)} \right\}^{y_{ht}^{j}}
+  \end{equation}
+  \item $f\left(x_{htj}\right)=\displaystyle\sum_{\ell=0}^{L}\theta_{\ell}\varphi_{\ell}\left(x_{htj}\right)$
+\end{itemize}
+\end{document}

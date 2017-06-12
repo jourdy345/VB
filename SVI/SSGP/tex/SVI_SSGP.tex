@@ -1,0 +1,96 @@
+\documentclass[12pt]{article}
+% \documentclass[12pt]{beamer}
+\usepackage{amsmath,amsfonts,amssymb,amsthm}
+\usepackage{color}
+\usepackage[T1]{fontenc}
+\usepackage{mathtools}
+\usepackage{graphicx}
+\usepackage{subcaption}
+\usepackage{kotex}
+\usepackage{bm}
+\usepackage[shortlabels]{enumitem}
+\usepackage{tcolorbox}
+\usepackage{mathrsfs}
+\usepackage{newtxtext}
+\usepackage[lite,nofontinfo,zswash,straightbraces]{mtpro2}
+\usepackage{setspace} %줄간격 package
+%-------------------------------------------------------------------------------------
+% Page layout
+\addtolength{\textwidth}{1.2in}
+\addtolength{\oddsidemargin}{-0.6in}
+\addtolength{\textheight}{2.0in}
+\addtolength{\topmargin}{-1.0in}
+\renewcommand \baselinestretch{1.2}
+\parskip = 6pt
+% New command
+\newcommand {\AND}{\quad\mbox{and}\quad}
+\newcommand {\for}{\quad\mbox{ for }}
+\newcommand {\half}{{\tfrac 12}}
+% \newcommand {\bm} [1] {\mbox{\boldmath{$#1$}}}
+\newcommand{\bs}{\boldsymbol}
+\DeclareMathOperator{\Tr}{Tr}
+\DeclareMathOperator{\Cov}{Cov}
+\DeclareMathOperator{\Var}{Var}
+\DeclareMathOperator{\E}{\mathbf{E}}
+\DeclareMathOperator{\vvv}{vec}
+\DeclareMathOperator{\vvvh}{vech}
+% \setmainfont{TEX Gyre Termes}
+% \setmathfont[bold-style=TeX]{TG Termes Math}
+\begin{document}
+\setstretch{1.4} %줄간격 조정
+\title{Stochastic Variational Inference for SSGP}
+%------------------------------------------------------------------------------------%
+%------------------------------------------------------------------------------------%
+% \setcounter{section}{1}
+
+\section{Stochastic Variational Inference in Gaussian Regression}
+  For the sprectral decomposition of the Gaussian process, we use the following expansion:
+  \begin{equation}
+    f(x) \approx \sum_{r=1}^{m}\left[a_{r}\cos\left\{\left(s_{r}\odot x\right)'\lambda\right\}+b_{r}\sin\left\{\left(s_{r}\odot x\right)'\lambda\right\}\right]
+  \end{equation}
+  where $\lambda=(\lambda_{1},\ldots,\lambda_{d})'$ ad $\odot$ denots the Hadamard product.
+  \begin{itemize}
+    \item $\alpha=(a_{1},\ldots,a_{m},b_{1},\ldots,b_{m})'$
+    \item $y = (y_{1},\ldots,y_{n})'$
+    \item $Z = (Z_{1},\ldots,Z_{n})'$
+    \item $Z_{i} = (\cos((s_{1}\odot x_{i})'\lambda),\ldots, \cos((s_{m}\odot x_{i})'\lambda),\sin((s_{1}\odot x_{i})'\lambda),\ldots,\sin((s_{m}\odot x_{i})'\lambda)$
+    \item $\epsilon = (\epsilon_{1},\ldots,\epsilon_{n})'$
+  \end{itemize}
+  Then,
+  \begin{equation}
+    y = Z\alpha+\epsilon, \quad \epsilon\sim\mathcal{N}\left(0,\gamma^{2}I_{n}\right)
+  \end{equation}
+  with the following priors
+  \begin{itemize}
+    \item $\alpha\sim\mathcal{N}\left(0,\dfrac{\sigma^{2}}{m}I_{2m}\right)$
+    \item $\lambda \sim \mathcal{N}\left(\mu_{\lambda}^{0},\Sigma_{\lambda}^{0}\right)$
+    \item $\sigma \sim \mathrm{HF}\left(A_{\sigma}\right)$
+    \item $\gamma \sim \mathrm{HF}\left(A_{\gamma}\right)$
+  \end{itemize}
+  where the density of half-Cauchy distribution is as follows:
+\begin{equation}
+  \pi(\sigma) = \dfrac{2A_{\sigma}}{\pi\left(A_{\sigma}^{2}+\sigma^{2}\right)}.
+\end{equation}
+  The fixed variational posteriors are
+  \begin{itemize}
+    \item $q(\alpha)=\mathcal{N}\left(\mu_{\alpha}^{q},\Sigma_{\alpha}^{q}\right)$
+    \item $q(\lambda)=\mathcal{N}\left(\mu_{\lambda}^{q},\Sigma_{\lambda}^{q}\right)$
+    \item $q(\sigma) = b_{\sigma}^{a_{\sigma}}/\Gamma\left(a_{\sigma}\right) \left(\sigma^{2}\right)^{-(a_{\sigma}+1)}e^{-b_{\sigma}/\sigma}$
+    \item $q(\gamma) = b_{\gamma}^{a_{\gamma}}/\Gamma\left(a_{\gamma}\right) \left(\gamma^{2}\right)^{-(a_{\gamma}+1)}e^{-b_{\gamma}/\gamma}$
+  \end{itemize}
+\subsection{Lower bound}
+Let $h(\theta) = p(y\,|\,\theta)\pi(\theta)$ where $\theta = (\alpha,\lambda,\sigma,\gamma)$.
+\begin{align}
+  \log h(\theta) &= -\dfrac{n}{2}\log \gamma^{2}-\dfrac{1}{2\gamma^{2}}\left(y-Z\alpha\right)'\left(y-Z\alpha\right)\\
+  &\quad -m\log\dfrac{\sigma^{2}}{m}-\dfrac{m}{2\sigma^{2}}\alpha'\alpha\\
+  &\quad +\log(2A_{\sigma})-\log\left(\pi\left(A_{\sigma}^{2}+\sigma^{2}\right)\right)+\log\left(2A_{\gamma}\right)-\log\left(\pi\left(A_{\gamma}^{2}+\gamma^{2}\right)\right)\\
+  &\quad +\dfrac{1}{2}\log\left|{\Sigma_{\lambda}^{0}}^{-1}\right|-\dfrac{1}{2}\left(\lambda-\mu_{\lambda}^{0}\right)'{\Sigma_{\lambda}^{0}}^{-1}\left(\lambda-\mu_{\lambda}^{0}\right)
+\end{align}
+The variational posterior is denoted by $q_{\lambda}(\theta)$.
+\begin{align}
+  \log q_{\lambda}(\theta) &= -m\log\left|\Sigma_{\alpha}^{q}\right|-\dfrac{1}{2}\left(\alpha-\mu_{\alpha}^{q}\right)'{\Sigma_{\alpha}^{q}}^{-1}\left(\alpha-\mu_{\alpha}^{q}\right)\\
+  &\quad -\dfrac{d}{2}\log\left|\Sigma_{\lambda}^{q}\right|-\dfrac{1}{2}\left(\lambda-\mu_{\lambda}^{q}\right)'{\Sigma_{\lambda}^{q}}^{-1}\left(\lambda-\mu_{\lambda}^{q}\right)\\
+  &\quad +a_{\sigma}\log b_{\sigma}-\log\Gamma\left(a_{\sigma}\right)-\left(a_{\sigma}+1\right)\log \sigma^{2}-\dfrac{b_{\sigma}}{\sigma^{2}}\\
+  &\quad +a_{\gamma}\log b_{\gamma}-\log\Gamma\left(a_{\gamma}\right)-\left(a_{\gamma}+1\right)\log \gamma^{2}-\dfrac{b_{\gamma}}{\gamma^{2}}
+\end{align}
+\end{document}

@@ -1,0 +1,92 @@
+\documentclass[review]{elsarticle}
+% \documentclass[12pt]{beamer}
+\usepackage[utf8]{inputenc}
+\usepackage{lineno,hyperref}
+\modulolinenumbers[5]
+% \journal{Journal of CSDA}
+\usepackage{amsmath,amsfonts,amssymb,amsthm}
+\usepackage{color}
+\usepackage{natbib}
+\usepackage[T1]{fontenc}
+\usepackage{mathtools}
+\usepackage{graphicx}
+\usepackage{subcaption}
+\usepackage[shortlabels]{enumitem}
+\usepackage{tcolorbox}
+\usepackage[linesnumbered,ruled]{algorithm2e}
+\usepackage{newtxtext}
+\usepackage[lite,nofontinfo,zswash,straightbraces]{mtpro2}
+\usepackage{bm}
+\usepackage{setspace} %줄간격 package
+%-------------------------------------------------------------------------------------
+% Page layout
+\addtolength{\textwidth}{1.2in}
+\addtolength{\oddsidemargin}{-0.6in}
+\addtolength{\textheight}{2.0in}
+\addtolength{\topmargin}{-1.0in}
+\renewcommand \baselinestretch{1.2}
+\parskip = 6pt
+% New command
+\newcommand {\AND}{\quad\mbox{and}\quad}
+\newcommand {\for}{\quad\mbox{ for }}
+\newcommand {\half}{{\tfrac 12}}
+% \newcommand {\bm} [1] {\mbox{\boldmath{$#1$}}}
+\DeclareMathOperator{\tr}{tr}
+\DeclareMathOperator{\Prob}{P}
+\DeclareMathOperator{\vech}{vech}
+% \setmainfont{TEX Gyre Termes}
+% \setmathfont[bold-style=TeX]{TG Termes Math}
+
+\begin{document}
+\begin{frontmatter}
+
+\title{VB nonparametric Poisson Regression with Cosine Basis Expansion}
+%% Group authors per affiliation:
+\author{Daeyoung Lim\fnref{koreauni}}
+
+% \cortext[mycorrespondingauthor]{Corresponding author}
+
+\fntext[koreauni]{Department of Statistics, Korea University}
+\end{frontmatter}
+
+\linenumbers
+\section{Derivation}
+% % \vspace{0.3cm}
+\begin{itemize}
+  \item Likelihood:
+  \begin{align}
+    \ell\left(\bm{\theta}\,|\,\mathbf{y}\right) &= \mathbf{y}'\bm{\varphi\theta}-\mathbf{1}_{n}'\exp\left(\bm{\varphi\theta}\right)-\mathbf{1}_{n}'\log\Gamma\left(\mathbf{y}+\mathbf{1}_{n}\right)
+  \end{align}
+  \item $f(\mathbf{x})=\displaystyle \sum_{\ell=0}^{\infty} \theta_{\ell}\varphi_{\ell}\left(x_{i}\right)$
+  \item Priors
+  \begin{itemize}
+    % \item $\bm{\beta}\,|\,\sigma^{2}\sim\mathcal{N}\left(\bm{\mu}_{\beta}^{0},\sigma^{2}\bm{\Sigma}_{\beta}^{0}\right)$
+    \item $\theta_{j}\,|\,\sigma,\tau,\gamma \sim \mathcal{N}\left(0,\sigma^{2}\tau^{2}e^{-j\gamma}\right)$
+    \item $\sigma^{2} \sim \mathrm{InvGam}\left(\dfrac{r_{0,\sigma}}{2},\dfrac{s_{0,\sigma}}{2}\right)$
+    \item $\tau^{2} \sim \mathrm{InvGam}\left(\dfrac{r_{0,\tau}}{2},\dfrac{s_{0,\tau}}{2}\right)$
+    \item $\psi \sim \mathrm{InvGam}(a,b)$
+    \item $\gamma\sim\mathrm{Exp}\left(w_{0}\right)$
+  \end{itemize}
+  \item Transformations:
+  \begin{itemize}
+    \item $\zeta = \log(\exp(\psi)-1)$
+    \item $\alpha=\log(\exp(\sigma^{2})-1)$
+    \item $\eta = \log(\exp(\tau^{2})-1)$
+    \item $\xi = \log(\exp(\gamma)-1)$
+  \end{itemize}
+  \item Parameters: $\Theta = \left(\bm{\beta}',\bm{\theta}'_{J},\zeta,\alpha,\eta,\xi\right)$
+  \item Variational distribution: $q(\Theta)=\mathcal{N}(\bm{\mu},LL')$
+  \item Derivative of the transformation (Jacobian):
+  \begin{equation}
+    \dfrac{d}{dx}\log(\exp(x)+1) = \dfrac{e^{x}}{1+e^{x}}
+  \end{equation}
+  \item Derivative of the log-Jacobian:
+  \begin{equation}
+  \dfrac{d}{dx}\left(\log\dfrac{e^{x}}{1+e^{x}}\right)=\dfrac{1}{1+e^{x}}
+  \end{equation}
+  \item Generating synthetic data
+  \begin{equation}
+    y_{i} = \begin{cases}1, & \text{if $\mathbf{w}_{i}'\bm{\beta}+\bm{\varphi}_{i}'\bm{\theta}+\epsilon_{i} > 0$ where $\epsilon\sim\mathrm{Logistic}(0,1)$}\\ 0, & \text{otherwise}\end{cases}
+  \end{equation}
+\end{itemize}
+\end{document}

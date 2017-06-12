@@ -1,0 +1,204 @@
+
+# Set working directory
+cd("C:\\Users\\Li\\Dropbox\\Gaussian VA revised")
+pwd()
+
+include("VAcode3.jl")
+
+using PyPlot             # load this before KernelDensity, otherwise "KernelDensity.PyPlot_init()"
+using Distributions
+using DataFrames
+using KernelDensity 
+using JLD                # saving files e.g. save("simDPpop_output.jld", "output", output)
+                         # load("simulatedDPpop_output.jld")
+
+
+#############################
+# polypharmacy data (n=500) #
+#############################
+
+df = readtable("VA_polypharm\\data_polypharm.txt", header=true, separator=' ');   
+ID = unique(df[:ID]);
+n = length(ID)                   # no. of subjects
+vni = Array(Int64,n);
+N = size(df,1)
+X = Array(Array{Float64,2},n);
+Z = Array(Array{Float64,2},n);
+y = Array(Array{Float64,1},n);
+AGEFP1 = log(df[:AGE]/10);
+MHV4 = df[:MHV4];
+RACE = df[:RACE];
+INPTMHV3 = df[:INPTMHV3];
+MHV4_1 = zeros(N);
+MHV4_2 = zeros(N);
+MHV4_3 = zeros(N);
+RACE2_1 = zeros(N);
+INPTMHV2_1 = zeros(N);
+MHV4_1[MHV4.==1] = 1;
+MHV4_2[MHV4.==2] = 1;
+MHV4_3[MHV4.==3] = 1;
+RACE2_1[RACE.>0] = 1;
+INPTMHV2_1[INPTMHV3.>0] = 1;
+for i in 1:n
+    rows = findin(df[:ID],ID[i])
+    vni[i] = length(rows)
+    y[i] = (df[:POLYPHARMACY])[rows]
+    Z[i] = cat(2, ones(vni[i]))
+    X[i] = cat(2, ones(vni[i]), (df[:GENDER])[rows], RACE2_1[rows], AGEFP1[rows],
+           MHV4_1[rows], MHV4_2[rows], MHV4_3[rows], INPTMHV2_1[rows])
+end
+sum(vni)                                 # total no. of observations
+n = length(y)                            # no. of subjects
+k = size(X[1],2)                         # length of beta
+p = size(Z[1],2)                         # length of b_i
+d = Int(n*p + k + 0.5p*(p+1))            # length of theta = [b_1, ...,b_n, beta, zeta]
+id = find(tril(ones(p,p)).==1);          # indices of lower-triangle elements
+Idiag = diagm(ones(p))[id];              # p*(p+1)/2 x 1 vector, 1 if diagonal element
+Idiag = round(Int, Idiag);
+Idiag = round(Bool, Idiag);
+
+rho = 0.95;
+F = 2500;
+tol = 4;
+mcmc = readtable("VA_polypharm\\mcmc_polypharm.txt", header=true, separator=' ');
+mcmc = convert(Array, mcmc);
+
+
+# save
+# save("VA_polypharm\\VA_polypharm_intercept.jld", "VA2a", VA2a, "VA1diagb", VA1diagb, "VA1b", VA1b)
+# VAall = load("VA_polypharm\\VA_polypharm_intercept.jld")
+VA2a = VAall["VA2a"]
+VA1b = VAall["VA1b"]
+VA1diagb = VAall["VA1diagb"]
+
+
+# Algorithm 2a (diagonal positive, approx) #
+@time VA = GLMMAlg2a("logit", y, X, Z, rho, F, tol);
+VAmean = VA["mu"][n*p+1:end];
+invT = lufact(VA["T"])\diagm(ones(d));
+VAsd = sqrt(diag(invT'*invT)[n*p+1:end]);
+meansd = cat(2, VAmean, VAsd)
+VA2a = copy(VA);
+writedlm("VA_polypharm\\VA2apar_intercept.txt", VA2a["par"])
+writedlm("VA_polypharm\\VA2ameansd_intercept.txt", meansd)
+
+Iteration:2500 LB=-1561.747 maxLB=-1561.747 cnt=0
+Iteration:5000 LB=-834.38 maxLB=-834.38 cnt=0
+Iteration:7500 LB=-731.447 maxLB=-731.447 cnt=0
+Iteration:10000 LB=-703.996 maxLB=-703.996 cnt=0
+[-4.38,0.77,-0.7,2.62,0.38,1.3,1.85,0.91,0.88,7.34,3.32,2.87,3.62,5.7,6.63,3.63,4.03,25.88]
+Iteration:12500 LB=-700.986 maxLB=-700.986 cnt=0
+Iteration:15000 LB=-702.666 maxLB=-700.986 cnt=1
+Iteration:17500 LB=-702.806 maxLB=-700.986 cnt=2
+Iteration:20000 LB=-702.916 maxLB=-700.986 cnt=3
+[-4.39,0.77,-0.73,2.59,0.36,1.27,1.82,0.91,0.89,7.91,3.19,2.87,3.54,5.71,6.63,3.62,4.01,24.58]
+Iteration:22500 LB=-702.134 maxLB=-700.986 cnt=4
+ 56.322265 seconds (803.98 M allocations: 72.923 GB, 13.58% gc time)
+
+ -4.38089   0.34643
+  0.76771   0.300987
+ -0.694241  0.353944
+  2.5932    0.284691
+  0.368083  0.270049
+  1.27707   0.270831
+  1.83983   0.277188
+  0.900487  0.242889
+  0.884409  0.0405479
+
+
+# Algorithm 1diagb #
+@time VA = GLMMAlg1diagb("logit", y, X, Z, rho, F, tol);
+VBmean = VA["mu"][n*p+1:end];
+VBsd = VA["L"][n*p+1:end];
+meansd = cat(2, VBmean, VBsd)
+VA1diagb = copy(VA);
+writedlm("VA_polypharm\\VA1diagbpar_intercept.txt", VA1diagb["par"])
+writedlm("VA_polypharm\\VA1diagbmeansd_intercept.txt", meansd)
+
+Iteration:2500 LB=-1438.306 maxLB=-1438.306 cnt=0
+Iteration:5000 LB=-935.459 maxLB=-935.459 cnt=0
+Iteration:7500 LB=-985.716 maxLB=-935.459 cnt=1
+Iteration:10000 LB=-1011.643 maxLB=-935.459 cnt=2
+[-4.2,0.61,-0.77,2.61,0.32,1.24,1.82,0.93,0.88,0.06,0.06,0.15,0.2,0.13,0.1,0.09,0.22,0.03]
+Iteration:12500 LB=-1025.69 maxLB=-935.459 cnt=3
+Iteration:15000 LB=-1033.371 maxLB=-935.459 cnt=4
+29.888345 seconds (534.57 M allocations: 34.939 GB, 12.68% gc time)
+
+ -4.48517   0.0582411
+  0.740117  0.0692492
+ -0.756545  0.150045
+  2.66043   0.20588
+  0.314065  0.143611
+  1.27522   0.109747
+  1.85694   0.0897493
+  0.950472  0.221793
+  0.923026  0.0334925
+
+
+# Algorithm 1b #
+@time VA = GLMMAlg1b("logit", y, X, Z, rho, F, tol);
+VCmean = VA["mu"][n*p+1:end];
+VCsd = sqrt(sum(VA["L"].^2,2)[n*p+1:end]);
+meansd = cat(2, VCmean, VCsd)
+VA1b = copy(VA);
+writedlm("VA_polypharm\\VA1bpar_intercept.txt", VA1b["par"])
+writedlm("VA_polypharm\\VA1bmeansd_intercept.txt", meansd)
+
+Iteration:2500 LB=-2963.184 maxLB=-2963.184 cnt=0
+Iteration:5000 LB=-1947.044 maxLB=-1947.044 cnt=0
+Iteration:7500 LB=-1705.704 maxLB=-1705.704 cnt=0
+Iteration:10000 LB=-1626.664 maxLB=-1626.664 cnt=0
+[-2.47,-0.56,-1.45,2.86,-1.01,0.11,0.93,1.47,1.33,0.45,0.26,0.21,0.25,0.16,0.14,0.14,0.3,0.06]
+Iteration:12500 LB=-1637.869 maxLB=-1626.664 cnt=1
+Iteration:15000 LB=-1599.446 maxLB=-1599.446 cnt=0
+Iteration:17500 LB=-1604.182 maxLB=-1599.446 cnt=1
+Iteration:20000 LB=-1614.099 maxLB=-1599.446 cnt=2
+[-3.48,-0.62,-1.69,3.76,-0.77,0.39,1.17,1.46,1.52,0.37,0.2,0.2,0.27,0.18,0.16,0.13,0.29,0.03]
+Iteration:22500 LB=-1610.976 maxLB=-1599.446 cnt=3
+Iteration:25000 LB=-1613.037 maxLB=-1599.446 cnt=4
+262.185156 seconds (892.25 M allocations: 589.302 GB, 14.63% gc time)
+
+ -3.8086    0.737198
+ -0.547336  0.648687
+ -1.70257   0.77409
+  3.97876   0.708248
+ -0.626077  0.697454
+  0.550278  0.697514
+  1.34195   0.712739
+  1.4654    0.751826
+  1.61418   0.484148
+
+nrows, ncols = 2,5;
+fig, axes = subplots(nrows, ncols, figsize=(20,5));
+subplot_num = 0;
+for i in 1:10
+    subplot_num += 1;
+    subplot(nrows, ncols, subplot_num); 
+    plot(VA["par"][:,i])
+end
+tight_layout()
+
+
+
+nrows, ncols = 2,5;
+fig, axes = subplots(nrows, ncols, figsize=(20,5));
+subplot_num = 0;
+for i in 1:9
+    ax = gca()
+    subplot_num += 1;
+    subplot(nrows, ncols, subplot_num); 
+    densmcmc = kde(mcmc[:,i])                          # range = dens.x, density = dens.density
+    plot(densmcmc.x, densmcmc.density);
+    densVA = pdf(Normal(VAmean[i],VAsd[i]), densmcmc.x)
+    plot(densmcmc.x, densVA, linestyle="--",color="red", linewidth=2)
+    densVB = pdf(Normal(VBmean[i],VBsd[i]), densmcmc.x)
+    plot(densmcmc.x, densVB, linestyle=":",color="green", linewidth=2)
+    densVC = pdf(Normal(VCmean[i],VCsd[i]), densmcmc.x)
+    plot(densmcmc.x, densVC, linestyle=":",color="green", linewidth=2)
+end
+tight_layout()
+
+savefig("VA_polypharm\\plot_polypharm.pdf")
+
+
+

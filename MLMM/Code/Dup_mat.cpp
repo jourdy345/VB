@@ -27,5 +27,6 @@ arma::mat duplicate_matrix (int n) {
       else result(k, u) = 0;
     }
   }
+  std::cout << mat1 << std::endl;
   return result;
 }

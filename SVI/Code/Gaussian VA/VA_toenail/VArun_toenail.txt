@@ -1,0 +1,249 @@
+
+# Set working directory
+cd("C:\\Users\\statsll\\Dropbox\\Gaussian VA revised")
+pwd()
+
+include("VAcode3.jl")
+
+using PyPlot             # load this before KernelDensity, otherwise "KernelDensity.PyPlot_init()"
+using Distributions
+using DataFrames
+using KernelDensity 
+using JLD                # saving files e.g. save("simDPpop_output.jld", "output", output)
+                         # load("simulatedDPpop_output.jld")
+
+
+
+########################
+# toenail data (n=294) #
+########################
+
+df = readtable("VA_toenail\\data_toenail.txt", header=true, separator=' ');
+toe = convert(Array, df);   
+ID = unique(df[:ID]);
+n = length(ID)                   # no. of subjects
+vni = Array(Int64,n);
+X = Array(Array{Float64,2},n);
+Z = Array(Array{Float64,2},n);
+y = Array(Array{Float64,1},n);
+for i in 1:n
+    rows = findin(df[:ID],ID[i])
+    vni[i] = length(rows)
+    y[i] = (df[:Response])[rows]
+    Z[i] = cat(2, ones(vni[i]))
+    X[i] = cat(2, ones(vni[i]), (df[:Treatment])[rows], (df[:Month])[rows], (df[:Treatment])[rows].*(df[:Month])[rows])
+end
+sum(vni)                                 # total no. of observations
+n = length(y)                            # no. of subjects
+k = size(X[1],2)                         # length of beta
+p = size(Z[1],2)                         # length of b_i
+d = Int(n*p + k + 0.5p*(p+1))            # length of theta = [b_1, ...,b_n, beta, zeta]
+id = find(tril(ones(p,p)).==1);          # indices of lower-triangle elements
+Idiag = diagm(ones(p))[id];              # p*(p+1)/2 x 1 vector, 1 if diagonal element
+Idiag = round(Int, Idiag);
+Idiag = round(Bool, Idiag);
+labs = ["intercept", "trt", "time", "trt x time", "zeta"];
+
+rho = 0.95
+F = 2500;
+tol=4;
+mcmc = readtable("VA_toenail\\mcmc_toenail.txt", header=true, separator=' ');
+mcmc = convert(Array, mcmc);
+
+
+# save
+# save("VA_toenail\\VA_toenail_intercept.jld", "VA2a", VA2a, "VA1diagb", VA1diagb, "VA1b", VA1b)
+# VAall = load("VA_toenail\\VA_toenail_intercept.jld")
+VA2a = VAall["VA2a"]
+VA1b = VAall["VA1b"]
+VA1diagb = VAall["VA1diagb"]
+
+
+# Algorithm 2a (diagonal positive, approx) #
+@time VA = GLMMAlg2a("logit", y, X, Z, rho, F, tol);
+VAmean = VA["mu"][n*p+1:end];
+invT = lufact(VA["T"])\diagm(ones(d));
+VAsd = sqrt(diag(invT'*invT)[n*p+1:end]);
+meansd = cat(2, VAmean, VAsd)
+VA2a = copy(VA);
+writedlm("VA_toenail\\VA2apar_intercept.txt", VA2a["par"])
+writedlm("VA_toenail\\VA2ameansd_intercept.txt", meansd)
+
+Iteration:2500 LB=-1212.408 maxLB=-1212.408 cnt=0
+Iteration:5000 LB=-217.152 maxLB=-217.152 cnt=0
+Iteration:7500 LB=-55.408 maxLB=-55.408 cnt=0
+Iteration:10000 LB=8.164 maxLB=8.164 cnt=0
+[-1.74,-0.17,-0.38,-0.13,1.32,3.94,2.05,31.34,17.54,20.24]
+Iteration:12500 LB=39.459 maxLB=39.459 cnt=0
+Iteration:15000 LB=59.557 maxLB=59.557 cnt=0
+Iteration:17500 LB=76.525 maxLB=76.525 cnt=0
+Iteration:20000 LB=82.118 maxLB=82.118 cnt=0
+[-1.89,-0.16,-0.4,-0.14,1.38,3.79,2.05,30.7,15.75,20.35]
+Iteration:22500 LB=83.638 maxLB=83.638 cnt=0
+Iteration:25000 LB=84.884 maxLB=84.884 cnt=0
+Iteration:27500 LB=84.081 maxLB=84.884 cnt=1
+Iteration:30000 LB=82.496 maxLB=84.884 cnt=2
+[-1.89,-0.15,-0.4,-0.13,1.37,3.84,1.99,31.47,15.4,20.22]
+Iteration:32500 LB=86.292 maxLB=86.292 cnt=0
+Iteration:35000 LB=85.58 maxLB=86.292 cnt=1
+Iteration:37500 LB=87.249 maxLB=87.249 cnt=0
+Iteration:40000 LB=86.038 maxLB=87.249 cnt=1
+[-1.89,-0.18,-0.39,-0.14,1.38,3.88,1.98,31.59,15.78,20.17]
+Iteration:42500 LB=84.811 maxLB=87.249 cnt=2
+Iteration:45000 LB=87.401 maxLB=87.401 cnt=0
+Iteration:47500 LB=87.099 maxLB=87.401 cnt=1
+Iteration:50000 LB=87.168 maxLB=87.401 cnt=2
+[-1.89,-0.18,-0.39,-0.13,1.37,3.97,2.0,31.51,15.29,19.52]
+Iteration:52500 LB=88.594 maxLB=88.594 cnt=0
+Iteration:55000 LB=91.721 maxLB=91.721 cnt=0
+Iteration:57500 LB=91.65 maxLB=91.721 cnt=1
+Iteration:60000 LB=88.477 maxLB=91.721 cnt=2
+[-1.89,-0.17,-0.4,-0.15,1.37,4.0,2.04,31.23,15.52,19.61]
+Iteration:62500 LB=90.39 maxLB=91.721 cnt=3
+Iteration:65000 LB=86.169 maxLB=91.721 cnt=4
+ 88.411797 seconds (1.43 G allocations: 108.306 GB, 15.71% gc time)
+
+ -1.88842   0.367215
+ -0.209126  0.526521
+ -0.399548  0.0402237
+ -0.139676  0.0636146
+  1.38659   0.0497306
+
+
+# Algorithm 1diagb #
+@time VA = GLMMAlg1diagb("logit", y, X, Z, rho, F, tol);
+VBmean = VA["mu"][n*p+1:end];
+VBsd = VA["L"][n*p+1:end];
+meansd = cat(2, VBmean, VBsd)
+VA1diagb = copy(VA);
+writedlm("VA_toenail\\VA1diagbpar_intercept.txt", VA1diagb["par"])
+writedlm("VA_toenail\\VA1diagbmeansd_intercept.txt", meansd)
+
+Iteration:2500 LB=-1273.167 maxLB=-1273.167 cnt=0
+Iteration:5000 LB=-462.313 maxLB=-462.313 cnt=0
+Iteration:7500 LB=-474.537 maxLB=-462.313 cnt=1
+Iteration:10000 LB=-496.031 maxLB=-462.313 cnt=2
+[-1.56,-0.23,-0.37,-0.13,1.25,0.09,0.14,0.02,0.03,0.04]
+Iteration:12500 LB=-510.616 maxLB=-462.313 cnt=3
+Iteration:15000 LB=-520.297 maxLB=-462.313 cnt=4
+18.152792 seconds (328.76 M allocations: 20.241 GB, 15.58% gc time)
+
+ -1.81265   0.0975741
+ -0.203429  0.136218
+ -0.396733  0.0217908
+ -0.147706  0.0331974
+  1.3381    0.0412837
+
+
+# Algorithm 1b #
+@time VA = GLMMAlg1b("logit", y, X, Z, rho, F, tol);
+VCmean = VA["mu"][n*p+1:end];
+VCsd = sqrt(sum(VA["L"].^2,2)[n*p+1:end]);
+meansd = cat(2, VCmean, VCsd)
+VA1b = copy(VA);
+writedlm("VA_toenail\\VA1bpar_intercept.txt", VA1b["par"])
+writedlm("VA_toenail\\VA1bmeansd_intercept.txt", meansd)
+
+Iteration:2500 LB=-2097.547 maxLB=-2097.547 cnt=0
+Iteration:5000 LB=-888.443 maxLB=-888.443 cnt=0
+Iteration:7500 LB=-708.149 maxLB=-708.149 cnt=0
+Iteration:10000 LB=-660.222 maxLB=-660.222 cnt=0
+[-0.86,-0.16,-0.62,-0.48,1.61,0.26,0.25,0.06,0.07,0.05]
+Iteration:12500 LB=-638.414 maxLB=-638.414 cnt=0
+Iteration:15000 LB=-637.286 maxLB=-637.286 cnt=0
+Iteration:17500 LB=-639.254 maxLB=-637.286 cnt=1
+Iteration:20000 LB=-631.795 maxLB=-631.795 cnt=0
+[-1.59,-0.36,-0.7,-0.57,1.85,0.22,0.25,0.04,0.05,0.05]
+Iteration:22500 LB=-628.085 maxLB=-628.085 cnt=0
+Iteration:25000 LB=-635.839 maxLB=-628.085 cnt=1
+Iteration:27500 LB=-637.461 maxLB=-628.085 cnt=2
+Iteration:30000 LB=-633.349 maxLB=-628.085 cnt=3
+[-2.15,-0.45,-0.7,-0.57,1.99,0.21,0.26,0.04,0.05,0.04]
+Iteration:32500 LB=-628.965 maxLB=-628.085 cnt=4
+135.161386 seconds (713.75 M allocations: 282.173 GB, 15.20% gc time)
+
+ -2.2687    0.547387
+ -0.46085   0.727299
+ -0.688364  0.310836
+ -0.561621  0.307937
+  1.98597   0.338693
+
+
+
+nrows, ncols = 2,5;
+fig, axes = subplots(nrows, ncols, figsize=(20,5));
+subplot_num = 0;
+for i in 1:10
+    subplot_num += 1;
+    subplot(nrows, ncols, subplot_num); 
+    plot(VA["par"][:,i])
+end
+tight_layout()
+
+
+
+nrows, ncols = 1,5;
+fig, axes = subplots(nrows, ncols, figsize=(20,3.5));
+subplot_num = 0;
+for i in 1:5
+    ax = gca()
+    subplot_num += 1;
+    subplot(nrows, ncols, subplot_num); 
+    densmcmc = kde(mcmc[:,i])                          # range = dens.x, density = dens.density
+    plot(densmcmc.x, densmcmc.density);
+    title(labs[i])
+    densVA = pdf(Normal(VAmean[i],VAsd[i]), densmcmc.x)
+    plot(densmcmc.x, densVA, linestyle="--",color="red", linewidth=2)
+    densVB = pdf(Normal(VBmean[i],VBsd[i]), densmcmc.x)
+    plot(densmcmc.x, densVB, linestyle="--",color="green", linewidth=2)
+    densVC = pdf(Normal(VCmean[i],VCsd[i]), densmcmc.x)
+    plot(densmcmc.x, densVC, linestyle="--",color="orange", linewidth=2)
+end
+tight_layout()
+
+savefig("VA_toenail\\plot_toenail.pdf")
+
+
+
+
+
+# gradient test for algorithm 2
+function gradtest2(link::String, y::Array{Array{Float64,1},1}, X::Array{Array{Float64,2},1}, 
+    Z::Array{Array{Float64,2},1}, N::Int64, VA::Dict{String,Any})
+
+    n = length(y)                            # no. of subjects
+    k = size(X[1],2)                         # length of beta
+    p = size(Z[1],2)                         # length of b_i
+    d = Int(n*p + k + 0.5p*(p+1))            # length of theta = [b_1, ...,b_n, beta, zeta]
+    id = find(tril(ones(p,p)).==1)           # indices of lower-triangle elements
+    Idiag = diagm(ones(p))[id]               # p*(p+1)/2 x 1 vector, 1 if diagonal element
+    Idiag = round(Int, Idiag)
+    Idiag = round(Bool, Idiag)
+    vbeta0 = 100.0
+    vzeta0 = 100.0
+    gclosed = zeros(N, Int(k+0.5p*(p+1)))
+    gapprox = zeros(N, Int(k+0.5p*(p+1)))
+    mu = VA["mu"]
+    T = VA["T"]
+    for it=1:N
+        s = randn(d)
+        g = T*s
+        Ts =  A_ldiv_B!(factorize(T'), s)
+        gshared = gradlogh_GLMM(link, mu + Ts, y, X, Z, id, Idiag, vbeta0, vzeta0) 
+        g += gshared 
+        gclosed[it,:] = gshared[n*p+1:end]
+        gapprox[it,:] = g[n*p+1:end]
+    end
+    return gclosed, gapprox
+end
+  
+gclosed, gapprox = gradtest2("logit", y, X, Z, 1000, VA2a);
+# writedlm("VA_toenail\\VA2agclosed.txt", gclosed)
+# writedlm("VA_toenail\\VA2agapprox.txt", gapprox)
+
+
+
+
+    
+
+

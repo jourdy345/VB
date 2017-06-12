@@ -1,0 +1,383 @@
+
+# Set working directory
+cd("C:\\Users\\Starbreeze\\Dropbox\\Gaussian VA revised")
+pwd()
+
+include("VAcode3.jl")
+
+
+using PyPlot             # load this before KernelDensity, otherwise "KernelDensity.PyPlot_init()"
+using Distributions
+using DataFrames
+using KernelDensity 
+using JLD                # saving files e.g. save("simDPpop_output.jld", "output", output)
+                         # load("simulatedDPpop_output.jld")
+
+
+
+#################
+# exchange data #
+#################
+
+df = readtable("VA_svm\\exchange.txt", header=false);
+y = collect(convert(Array, df));
+n = length(y)
+plot(y);
+y = log(y.^2);
+plot(y);
+d = n+3;
+y=y[:,1]
+# mcmc = readtable("VA_svm\\mcmc_svm5.txt", header=true, separator=' ');
+# mcmc = convert(Array, mcmc);
+# mean(mcmc,1)
+# std(mcmc,1)
+
+rho = 0.95;
+
+F = 2500;
+tol= 4;
+
+
+# save
+# save("VA_svm\\VA_exchange.jld", "VA2a", VA2a, "VA1diagb", VA1diagb, "VA1b", VA1b)
+# VAall = load("VA_svm\\VA_exchange.jld")
+VA2a = VAall["VA2a"]
+VA1b = VAall["VA1b"]
+VA1diagb = VAall["VA1diagb"]
+
+
+
+# Algorithm 2a (diagonal positive, approx) #
+@time VA = SSMAlg2a(y, rho, F, tol);
+VAmean = VA["mu"];
+invT = lufact(VA["T"])\diagm(ones(d));
+VAsd = sqrt(diag(invT'*invT));
+meansd = cat(2, VAmean, VAsd)
+VA2a = copy(VA);
+writedlm("VA_svm\\VA2apar_exchange.txt", VA2a["par"])
+writedlm("VA_svm\\VA2ameansd_exchange.txt", meansd)
+
+Iteration:2500 LB=-5.923685056309309e22 maxLB=-5.923685056309309e22 cnt=0
+Iteration:5000 LB=-3.828432268054845e16 maxLB=-3.828432268054845e16 cnt=0
+Iteration:7500 LB=-2.2348441640504153e26 maxLB=-3.828432268054845e16 cnt=1
+Iteration:10000 LB=-1.4993852261433376e34 maxLB=-3.828432268054845e16 cnt=2
+[-0.16,0.15,-3.01,1.13,1.02,1.04]
+Iteration:12500 LB=-3.611323111288135e39 maxLB=-3.828432268054845e16 cnt=3
+Iteration:15000 LB=-2.29430410601633e11 maxLB=-2.29430410601633e11 cnt=0
+Iteration:17500 LB=-8.952225215684803e24 maxLB=-2.29430410601633e11 cnt=1
+Iteration:20000 LB=-1.1400572648145582e13 maxLB=-2.29430410601633e11 cnt=2
+[-0.26,0.25,-1.81,1.25,1.04,1.07]
+Iteration:22500 LB=-5.118919570429196e17 maxLB=-2.29430410601633e11 cnt=3
+Iteration:25000 LB=-1.459573410257e10 maxLB=-1.459573410257e10 cnt=0
+Iteration:27500 LB=-340630.585 maxLB=-340630.585 cnt=0
+Iteration:30000 LB=-453.368 maxLB=-453.368 cnt=0
+[-0.76,-0.81,1.06,3.68,14.29,6.34]
+Iteration:32500 LB=-82.718 maxLB=-82.718 cnt=0
+Iteration:35000 LB=334.962 maxLB=334.962 cnt=0
+Iteration:37500 LB=733.179 maxLB=733.179 cnt=0
+Iteration:40000 LB=1028.15 maxLB=1028.15 cnt=0
+[-1.63,-0.76,3.21,11.1,6.56,3.5]
+Iteration:42500 LB=1284.408 maxLB=1284.408 cnt=0
+Iteration:45000 LB=1501.035 maxLB=1501.035 cnt=0
+Iteration:47500 LB=1663.223 maxLB=1663.223 cnt=0
+Iteration:50000 LB=1822.27 maxLB=1822.27 cnt=0
+[-1.84,-0.73,3.66,9.69,5.75,2.88]
+Iteration:52500 LB=1914.755 maxLB=1914.755 cnt=0
+Iteration:55000 LB=2006.872 maxLB=2006.872 cnt=0
+Iteration:57500 LB=2048.916 maxLB=2048.916 cnt=0
+Iteration:60000 LB=2098.595 maxLB=2098.595 cnt=0
+[-1.9,-0.72,3.82,9.78,5.52,2.85]
+Iteration:62500 LB=2181.219 maxLB=2181.219 cnt=0
+Iteration:65000 LB=2253.477 maxLB=2253.477 cnt=0
+Iteration:67500 LB=2166.407 maxLB=2253.477 cnt=1
+Iteration:70000 LB=2219.058 maxLB=2253.477 cnt=2
+[-1.94,-0.7,3.87,9.88,5.5,2.83]
+Iteration:72500 LB=2227.621 maxLB=2253.477 cnt=3
+Iteration:75000 LB=2240.943 maxLB=2253.477 cnt=4
+43.174212 seconds (82.07 M allocations: 99.277 GB, 10.19% gc time)
+
+ -1.94655   0.106874
+ -0.684224  0.190215
+  3.85202   0.357088
+
+
+# Algorithm 1diagb #
+@time VA = SSMAlg1diagb(y, rho, F, tol);
+VBmean = VA["mu"];
+VBsd = VA["L"];
+meansd = cat(2, VBmean, VBsd)
+VA1diagb = copy(VA);
+writedlm("VA_svm\\VA1diagbpar_exchange.txt", VA1diagb["par"])
+writedlm("VA_svm\\VA1diagbmeansd_exchange.txt", meansd)
+
+Iteration:2500 LB=-1.6912549299594929e22 maxLB=-1.6912549299594929e22 cnt=0
+Iteration:5000 LB=-1.615123940275671e16 maxLB=-1.615123940275671e16 cnt=0
+Iteration:7500 LB=-4.359985932209956e25 maxLB=-1.615123940275671e16 cnt=1
+Iteration:10000 LB=-1.2485411304444782e31 maxLB=-1.615123940275671e16 cnt=2
+[-0.16,0.15,-4.29,0.88,1.0,1.17]
+Iteration:12500 LB=-2.132944133038036e34 maxLB=-1.615123940275671e16 cnt=3
+Iteration:15000 LB=-2.17271009493897e11 maxLB=-2.17271009493897e11 cnt=0
+Iteration:17500 LB=-1.010016323697725e18 maxLB=-2.17271009493897e11 cnt=1
+Iteration:20000 LB=-1.393754940562e9 maxLB=-1.393754940562e9 cnt=0
+[-0.32,0.29,-3.99,0.76,0.88,1.03]
+Iteration:22500 LB=-2.121367390092793e12 maxLB=-1.393754940562e9 cnt=1
+Iteration:25000 LB=-264996.561 maxLB=-264996.561 cnt=0
+Iteration:27500 LB=-989.07 maxLB=-989.07 cnt=0
+Iteration:30000 LB=-838.058 maxLB=-838.058 cnt=0
+[-0.34,-0.83,-3.87,0.07,0.05,0.95]
+Iteration:32500 LB=-815.993 maxLB=-815.993 cnt=0
+Iteration:35000 LB=-812.291 maxLB=-812.291 cnt=0
+Iteration:37500 LB=-811.094 maxLB=-811.094 cnt=0
+Iteration:40000 LB=-808.564 maxLB=-808.564 cnt=0
+[-0.33,-0.8,-3.78,0.06,0.05,0.85]
+Iteration:42500 LB=-810.77 maxLB=-808.564 cnt=1
+Iteration:45000 LB=-809.124 maxLB=-808.564 cnt=2
+Iteration:47500 LB=-810.278 maxLB=-808.564 cnt=3
+Iteration:50000 LB=-807.671 maxLB=-807.671 cnt=0
+[-0.34,-0.83,-3.73,0.06,0.05,0.86]
+Iteration:52500 LB=-808.891 maxLB=-807.671 cnt=1
+Iteration:55000 LB=-808.976 maxLB=-807.671 cnt=2
+Iteration:57500 LB=-808.054 maxLB=-807.671 cnt=3
+Iteration:60000 LB=-808.193 maxLB=-807.671 cnt=4
+[-0.33,-0.85,-3.7,0.06,0.05,0.83]
+ 10.350617 seconds (6.72 M allocations: 28.984 GB, 9.37% gc time)
+
+ -0.325819   0.0615858
+ -0.845909   0.0467449
+ -3.70389    0.828462
+
+
+# Algorithm 1b (1a, 1c fail)#
+@time VA = SSMAlg1b(y, rho, F, tol);
+VCmean = VA["mu"];
+VCsd = sqrt(sum(VA["L"].^2,2));
+meansd = cat(2, VCmean, VCsd)
+VA1b = copy(VA);
+writedlm("VA_svm\\VA1bpar_exchange.txt", VA1b["par"])
+writedlm("VA_svm\\VA1bmeansd_exchange.txt", meansd)
+
+Iteration:2500 LB=-6.573485002995675e202 maxLB=-6.573485002995675e202 cnt=0
+Iteration:5000 LB=-1.6937720716737605e185 maxLB=-1.6937720716737605e185 cnt=0
+Iteration:7500 LB=-4.898957038304251e165 maxLB=-4.898957038304251e165 cnt=0
+Iteration:10000 LB=-1.1164361460078842e94 maxLB=-1.1164361460078842e94 cnt=0
+[-0.06,0.03,-4.89,0.98,1.0,0.91]
+Iteration:12500 LB=-5.37327747789727e105 maxLB=-1.1164361460078842e94 cnt=1
+Iteration:15000 LB=-5.418905291502214e67 maxLB=-5.418905291502214e67 cnt=0
+Iteration:17500 LB=-2.2254980943542548e162 maxLB=-5.418905291502214e67 cnt=1
+Iteration:20000 LB=-2.278182937813071e123 maxLB=-5.418905291502214e67 cnt=2
+[-0.06,0.03,-5.03,0.98,1.0,1.04]
+Iteration:22500 LB=-1.114323507009398e282 maxLB=-5.418905291502214e67 cnt=3
+Iteration:25000 LB=-1.7250583173149165e105 maxLB=-5.418905291502214e67 cnt=4
+1658.510275 seconds (26.24 M allocations: 1.811 TB, 35.25% gc time)
+ -0.0630121   1.26044
+  0.0341846   1.22557
+ -5.02969     2.04439
+
+
+nrows, ncols = 2,4;
+fig, axes = subplots(nrows, ncols, figsize=(15,5));
+subplot_num = 0;
+for i in 1:7
+    subplot_num += 1;
+    subplot(nrows, ncols, subplot_num); 
+    plot(VA["par"][:,i])
+end
+tight_layout()
+
+
+###########
+# dm data #
+###########
+
+rho = 0.95;
+F = 2500;
+tol = 4;
+
+df = readtable("VA_svm\\dm.txt", header=false);
+y = collect(convert(Array, df));
+n = length(y)
+plot(y);
+y = log(y.^2);
+plot(y);
+d = n+3;
+y = y[:,1];
+# mcmc = readtable("VA_svm\\mcmc_svm5.txt", header=true, separator=' ');
+# mcmc = convert(Array, mcmc);
+# mean(mcmc,1)
+# std(mcmc,1)
+
+# save
+# save("VA_svm\\VA_dm.jld", "VA2a", VA2a, "VA1diagb", VA1diagb, "VA1b", VA1b)  
+# VAall = load("VA_svm\\VA_dm.jld")
+VA2a = VAall["VA2a"]
+VA1b = VAall["VA1b"]
+VA1diagb = VAall["VA1diagb"]
+
+
+
+# Algorithm 2a (diagonal positive, approx) #
+@time VA = SSMAlg2a(y, rho, F, tol);
+VAmean = VA["mu"];
+invT = lufact(VA["T"])\diagm(ones(d));
+VAsd = sqrt(diag(invT'*invT));
+meansd = cat(2, VAmean, VAsd)
+VA2a = copy(VA);
+writedlm("VA_svm\\VA2apar_dm.txt", VA2a["par"])
+writedlm("VA_svm\\VA2ameansd_dm.txt", meansd)
+
+Iteration:2500 LB=-7.943422408014983e51 maxLB=-7.943422408014983e51 cnt=0
+Iteration:5000 LB=-2.34815182346421e36 maxLB=-2.34815182346421e36 cnt=0
+Iteration:7500 LB=-5.29569270339271e34 maxLB=-5.29569270339271e34 cnt=0
+Iteration:10000 LB=-8.417799996200565e24 maxLB=-8.417799996200565e24 cnt=0
+[-0.07,0.08,-3.57,1.08,1.01,0.99]
+Iteration:12500 LB=-6.5028418800738e27 maxLB=-8.417799996200565e24 cnt=1
+Iteration:15000 LB=-1.0471373963439842e24 maxLB=-1.0471373963439842e24 cnt=0
+Iteration:17500 LB=-3.896293163909605e31 maxLB=-1.0471373963439842e24 cnt=1
+Iteration:20000 LB=-7.160601189531841e20 maxLB=-7.160601189531841e20 cnt=0
+[-0.15,0.16,-2.51,1.16,1.04,0.96]
+Iteration:22500 LB=-1.01490490807886e12 maxLB=-1.01490490807886e12 cnt=0
+Iteration:25000 LB=-4.1864217130450734e21 maxLB=-1.01490490807886e12 cnt=1
+Iteration:27500 LB=-4.96182419744e8 maxLB=-4.96182419744e8 cnt=0
+Iteration:30000 LB=-3.140407885305568e12 maxLB=-4.96182419744e8 cnt=1
+[-0.38,0.29,-2.12,1.44,1.64,1.0]
+Iteration:32500 LB=-2.6269685150103e10 maxLB=-4.96182419744e8 cnt=2
+Iteration:35000 LB=-2072.693 maxLB=-2072.693 cnt=0
+Iteration:37500 LB=-1502.066 maxLB=-1502.066 cnt=0
+Iteration:40000 LB=-567.984 maxLB=-567.984 cnt=0
+[-1.04,-0.74,1.97,20.23,14.77,7.45]
+Iteration:42500 LB=842.802 maxLB=842.802 cnt=0
+Iteration:45000 LB=1722.79 maxLB=1722.79 cnt=0
+Iteration:47500 LB=2144.125 maxLB=2144.125 cnt=0
+Iteration:50000 LB=2291.385 maxLB=2291.385 cnt=0
+[-1.66,-0.72,3.37,15.65,8.04,4.62]
+Iteration:52500 LB=2429.164 maxLB=2429.164 cnt=0
+Iteration:55000 LB=2450.423 maxLB=2450.423 cnt=0
+Iteration:57500 LB=2472.087 maxLB=2472.087 cnt=0
+Iteration:60000 LB=2482.04 maxLB=2482.04 cnt=0
+[-1.69,-0.72,3.41,15.91,7.88,4.44]
+Iteration:62500 LB=2472.815 maxLB=2482.04 cnt=1
+Iteration:65000 LB=2447.598 maxLB=2482.04 cnt=2
+Iteration:67500 LB=2453.404 maxLB=2482.04 cnt=3
+Iteration:70000 LB=2444.257 maxLB=2482.04 cnt=4
+[-1.71,-0.71,3.41,15.4,7.95,4.56]
+77.072777 seconds (205.58 M allocations: 182.935 GB, 9.49% gc time)
+
+ -1.70655   0.0702695
+ -0.714151  0.126102
+  3.40784   0.219327
+
+
+# Algorithm 1diagb #
+@time VA = SSMAlg1diagb(y, rho, F, tol);
+VBmean = VA["mu"];
+VBsd = VA["L"];
+meansd = cat(2, VBmean, VBsd)
+VA1diagb = copy(VA);
+writedlm("VA_svm\\VA1diagbpar_dm.txt", VA1diagb["par"])
+writedlm("VA_svm\\VA1diagbmeansd_dm.txt", meansd)
+
+Iteration:2500 LB=-8.147469171760072e51 maxLB=-8.147469171760072e51 cnt=0
+Iteration:5000 LB=-8.496423678070615e31 maxLB=-8.496423678070615e31 cnt=0
+Iteration:7500 LB=-3.9616709408200127e33 maxLB=-8.496423678070615e31 cnt=1
+Iteration:10000 LB=-2.8649212657454726e23 maxLB=-2.8649212657454726e23 cnt=0
+[-0.09,0.09,-4.54,0.91,0.96,1.09]
+Iteration:12500 LB=-5.443236814537198e23 maxLB=-2.8649212657454726e23 cnt=1
+Iteration:15000 LB=-1.768725660904821e21 maxLB=-1.768725660904821e21 cnt=0
+Iteration:17500 LB=-5.144141179781046e29 maxLB=-1.768725660904821e21 cnt=1
+Iteration:20000 LB=-4.431818233787797e17 maxLB=-4.431818233787797e17 cnt=0
+[-0.19,0.21,-4.41,0.83,0.95,1.04]
+Iteration:22500 LB=-1.4297875709521e10 maxLB=-1.4297875709521e10 cnt=0
+Iteration:25000 LB=-5.152630938567784e15 maxLB=-1.4297875709521e10 cnt=1
+Iteration:27500 LB=-10548.683 maxLB=-10548.683 cnt=0
+Iteration:30000 LB=-5981.962 maxLB=-5981.962 cnt=0
+[-0.79,-0.64,-4.39,0.24,0.06,0.93]
+Iteration:32500 LB=-1655.599 maxLB=-1655.599 cnt=0
+Iteration:35000 LB=-1629.298 maxLB=-1629.298 cnt=0
+Iteration:37500 LB=-1628.901 maxLB=-1628.901 cnt=0
+Iteration:40000 LB=-1625.973 maxLB=-1625.973 cnt=0
+[-0.55,-0.69,-4.43,0.06,0.03,0.94]
+Iteration:42500 LB=-1626.277 maxLB=-1625.973 cnt=1
+Iteration:45000 LB=-1626.436 maxLB=-1625.973 cnt=2
+Iteration:47500 LB=-1627.325 maxLB=-1625.973 cnt=3
+Iteration:50000 LB=-1625.06 maxLB=-1625.06 cnt=0
+[-0.57,-0.69,-4.38,0.06,0.03,1.01]
+Iteration:52500 LB=-1625.62 maxLB=-1625.06 cnt=1
+Iteration:55000 LB=-1627.878 maxLB=-1625.06 cnt=2
+Iteration:57500 LB=-1627.618 maxLB=-1625.06 cnt=3
+Iteration:60000 LB=-1624.96 maxLB=-1624.96 cnt=0
+[-0.58,-0.68,-4.43,0.06,0.03,1.0]
+Iteration:62500 LB=-1629.447 maxLB=-1624.96 cnt=1
+Iteration:65000 LB=-1625.652 maxLB=-1624.96 cnt=2
+Iteration:67500 LB=-1628.067 maxLB=-1624.96 cnt=3
+Iteration:70000 LB=-1626.964 maxLB=-1624.96 cnt=4
+[-0.56,-0.7,-4.42,0.06,0.03,0.99]
+23.025379 seconds (7.84 M allocations: 66.029 GB, 7.52% gc time)
+-0.563861     0.0577178
+ -0.69533      0.0317665
+ -4.41551      0.986489
+
+
+# Algorithm 1b (1a, 1c fail)#
+@time VA = SSMAlg1b(y, rho, F, tol);
+VCmean = VA["mu"];
+VCsd = sqrt(sum(VA["L"].^2,2));
+meansd = cat(2, VCmean, VCsd)
+VA1b = copy(VA);
+writedlm("VA_svm\\VA1bpar_dm.txt", VA1b["par"])
+writedlm("VA_svm\\VA1bmeansd_dm.txt", meansd)
+
+Iteration:2500 LB=-1.2366862618082148e104 maxLB=-1.2366862618082148e104 cnt=0
+Iteration:5000 LB=-3.4494273191902716e172 maxLB=-1.2366862618082148e104 cnt=1
+Iteration:7500 LB=-6.231807921969601e150 maxLB=-1.2366862618082148e104 cnt=2
+Iteration:10000 LB=-2.452190711259048e84 maxLB=-2.452190711259048e84 cnt=0
+[-0.04,0.04,-6.08,0.96,1.01,0.73]
+Iteration:12500 LB=-5.332733785984869e67 maxLB=-5.332733785984869e67 cnt=0
+Iteration:15000 LB=-6.451586687467418e105 maxLB=-5.332733785984869e67 cnt=1
+Iteration:17500 LB=-6.60746349738308e86 maxLB=-5.332733785984869e67 cnt=2
+Iteration:20000 LB=-5.551677013194221e117 maxLB=-5.332733785984869e67 cnt=3
+[-0.04,0.04,-6.84,0.96,1.01,0.9]
+Iteration:22500 LB=-3.0154879984019034e119 maxLB=-5.332733785984869e67 cnt=4
+11598.202067 seconds (65.05 M allocations: 6.313 TB, 67.11% gc time)
+
+-0.0432893   1.12174
+  0.0433692   1.1755
+ -6.84546     2.81383
+
+
+nrows, ncols = 2,3;
+fig, axes = subplots(nrows, ncols, figsize=(15,5));
+subplot_num = 0;
+for i in 1:6
+    subplot_num += 1;
+    subplot(nrows, ncols, subplot_num); 
+    plot(VA["par"][:,i])
+end
+tight_layout()
+
+
+
+nrows, ncols = 1,3;
+fig, axes = subplots(nrows, ncols, figsize=(15,3.5));
+subplot_num = 0;
+for i in 1:3
+    ax = gca()
+    subplot_num += 1;
+    subplot(nrows, ncols, subplot_num); 
+    densmcmc = kde(mcmc[:,i])                          # range = dens.x, density = dens.density
+    plot(densmcmc);
+    densVA = pdf(Normal(VAmean[i],VAsd[i]), densmcmc.x)
+    plot(densmcmc.x, densVA, linestyle="--",color="red", linewidth=2)
+    #densVB = pdf(Normal(VBmean[i],VBsd[i]), densmcmc.x)
+    #plot(densmcmc.x, densVB, linestyle=":",color="green", linewidth=2)
+    if i==3
+        ax = gca()
+        Mx = matplotlib[:ticker][:MultipleLocator](0.1) 
+        ax[:xaxis][:set_major_locator](Mx) 
+    end
+end
+tight_layout()
+
+
+
+
+
